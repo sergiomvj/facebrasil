@@ -1,0 +1,33 @@
+{
+    "name": "wordpress-migration",
+    "version": "1.0.0",
+    "description": "Migrate WordPress articles to Supabase",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "migrate": "node src/index.js",
+        "dry-run": "node src/index.js --dry-run",
+        "validate": "node src/validate.js",
+        "export-csv": "node src/export-csv.js",
+        "export-categories": "node src/export-categories.js",
+        "update-categories": "node src/update-categories.js",
+        "consolidate": "node src/consolidate-categories.js",
+        "update-images": "node src/update-images.js",
+        "update-images-dry": "node src/update-images.js --dry-run",
+        "scrape-images": "node src/scrape-images.js",
+        "scrape-dry": "node src/scrape-images.js --dry-run"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.0",
+        "chalk": "^5.3.0",
+        "cli-progress": "^3.12.0",
+        "dotenv": "^16.3.1",
+        "p-limit": "^5.0.0",
+        "puppeteer": "^24.37.1",
+        "turndown": "^7.1.2",
+        "xml2js": "^0.6.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0"
+    }
+}
