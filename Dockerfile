@@ -35,6 +35,35 @@ RUN \
 FROM base AS builder
 WORKDIR /app
 
+# Build Arguments (Easypanel passes these with --build-arg)
+# NEXT_PUBLIC_ variables MUST be available at build time
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG NEXT_OPENAI_KEY
+ARG STRIPE_PUBLISHABLE_KEY
+ARG N8N_API_KEY
+ARG CLERK_SECRET_KEY
+ARG SUPABASE_TOKEN
+ARG SUPABASE_PASSWORD
+ARG SUPABASE_CONNECTION
+ARG GIT_SHA
+
+# Set them as ENV so Next.js build can access them
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=$NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_OPENAI_KEY=$NEXT_OPENAI_KEY
+ENV STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY
+ENV N8N_API_KEY=$N8N_API_KEY
+ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
+ENV SUPABASE_TOKEN=$SUPABASE_TOKEN
+ENV SUPABASE_PASSWORD=$SUPABASE_PASSWORD
+ENV SUPABASE_CONNECTION=$SUPABASE_CONNECTION
+ENV GIT_SHA=$GIT_SHA
+
 # Copy dependencies from the 'deps' stage
 COPY --from=deps /app/node_modules ./node_modules
 # Copy the rest of the application source code
@@ -67,8 +96,8 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 
 # Set permissions for the .next folder (required for Next.js cache writing)
-mkdir .next
-chown nextjs:nodejs .next
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
 # Copy the built application from the builder stage
 # We only copy the standalone folder and static assets to keep image small
