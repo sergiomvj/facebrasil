@@ -70,7 +70,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Disable Next.js telemetry during build for privacy/speed
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the application
 # Note: This relies on 'output: "standalone"' in next.config.js/ts
@@ -84,8 +84,8 @@ FROM base AS runner
 WORKDIR /app
 
 # Set environment to production
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create a non-root user for security best practices
 RUN addgroup --system --gid 1001 nodejs
@@ -112,10 +112,10 @@ USER nextjs
 EXPOSE 3000
 
 # Set PORT environment variable
-ENV PORT 3000
+ENV PORT=3000
 
 # Optionally, you can override hostname if needed, but 0.0.0.0 is best for Docker
-ENV HOSTNAME "0.0.0.0"
+ENV HOSTNAME="0.0.0.0"
 
 # Start the application
 CMD ["node", "server.js"]
