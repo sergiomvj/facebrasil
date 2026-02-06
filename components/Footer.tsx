@@ -45,11 +45,12 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="dark:text-white text-gray-900 font-bold mb-6">Support</h4>
+            <h4 className="dark:text-white text-gray-900 font-bold mb-6">Suporte</h4>
             <ul className="space-y-3 text-sm text-slate-400">
-              {['Contact Us', 'Privacy Policy', 'Terms of Service', 'Careers'].map((link) => (
-                <li key={link}><Link className="hover:text-primary transition-colors" href="#">{link}</Link></li>
-              ))}
+              <li><Link className="hover:text-primary transition-colors" href="/about">Sobre Nós</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/contact">Contato</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/privacy">Política de Privacidade</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/terms">Termos de Uso</Link></li>
             </ul>
           </div>
         </div>
