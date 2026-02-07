@@ -37,9 +37,10 @@ export async function fetchPosts(params?: FetchPostsParams): Promise<PaginatedRe
         query = query.neq('category.slug', params.excludeCategory);
     }
 
-    if (params?.language) {
-        query = query.eq('language', params.language);
-    }
+    // Language column missing in DB, disabling filter
+    // if (params?.language) {
+    //     query = query.eq('language', params.language);
+    // }
 
     // Sort
     if (params?.sort === 'popular') {
@@ -102,9 +103,9 @@ export async function fetchMainHero(language?: string): Promise<BlogPost | null>
                 .eq('status', 'PUBLISHED')
                 .order('hero_set_at', { ascending: false }); // Latest set wins
 
-            if (language) {
-                heroQuery = heroQuery.eq('language', language);
-            }
+            // if (language) {
+            //     heroQuery = heroQuery.eq('language', language);
+            // }
 
             const { data: heroData, error: heroError } = await heroQuery.limit(1).single();
 
@@ -127,9 +128,9 @@ export async function fetchMainHero(language?: string): Promise<BlogPost | null>
             .eq('status', 'PUBLISHED')
             .order('published_at', { ascending: false });
 
-        if (language) {
-            latestQuery = latestQuery.eq('language', language);
-        }
+        // if (language) {
+        //     latestQuery = latestQuery.eq('language', language);
+        // }
 
         const { data: latestData, error: latestError } = await latestQuery.limit(1).single();
 
@@ -156,9 +157,9 @@ export async function fetchFeaturedPosts(limit: number = 5, language?: string): 
         .eq('status', 'PUBLISHED')
         .eq('destaque_hero', true);
 
-    if (language) {
-        query = query.eq('language', language);
-    }
+    // if (language) {
+    //     query = query.eq('language', language);
+    // }
 
     const { data } = await query.limit(limit);
 
@@ -186,9 +187,9 @@ export async function fetchPost(slug: string, language?: string): Promise<BlogPo
         `)
         .eq('slug', slug);
 
-    if (language) {
-        query = query.eq('language', language);
-    }
+    // if (language) {
+    //     query = query.eq('language', language);
+    // }
 
     const { data, error } = await query.single();
 
