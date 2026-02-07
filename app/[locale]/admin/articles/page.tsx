@@ -49,11 +49,35 @@ export default function ArticlesListPage() {
         ]);
 
         if (articlesRes.data) {
-            const mappedArticles = (articlesRes.data as any[]).map((item) => ({
-                ...item,
+            // Create a type that matches the raw structure returned by the query
+            interface RawArticle {
+                id: string;
+                title: string;
+                slug: string;
+                status: string;
+                published_at: string;
+                views: number;
+                created_at: string;
+                language: string;
+                author: { name: string } | { name: string }[] | null;
+                category: { name: string; color: string; slug: string } | { name: string; color: string; slug: string }[] | null;
+            }
+
+            const rawArticles = articlesRes.data as unknown as RawArticle[];
+
+            const mappedArticles: ArticleListItem[] = rawArticles.map((item) => ({
+                id: item.id,
+                title: item.title,
+                slug: item.slug,
+                status: item.status,
+                published_at: item.published_at,
+                views: item.views,
+                created_at: item.created_at,
+                language: item.language,
                 author: Array.isArray(item.author) ? item.author[0] : item.author,
                 category: Array.isArray(item.category) ? item.category[0] : item.category
-            })) as ArticleListItem[];
+            }));
+
             setArticles(mappedArticles);
         }
         if (categoriesRes.data) setCategories(categoriesRes.data);
