@@ -23,14 +23,16 @@ export default function AdminDashboard() {
         pendingVideos: 0,
         activeCategories: 0,
     });
-    const [recentArticles, setRecentArticles] = useState<{
+    interface RecentArticle {
         id: string;
         title: string;
         slug: string;
         status: string;
         created_at: string;
-        author?: { name: string };
-    }[]>([]);
+        author?: { name: string } | null;
+    }
+
+    const [recentArticles, setRecentArticles] = useState<RecentArticle[]>([]);
     const [loading, setLoading] = useState(true);
 
     async function fetchDashboardData() {
@@ -80,7 +82,7 @@ export default function AdminDashboard() {
             activeCategories,
         });
 
-        setRecentArticles(recent as any[] || []); // Keeping as any[] for now but with better local type
+        setRecentArticles((recent as unknown as RecentArticle[]) || []);
         setLoading(false);
     }
 
