@@ -1,8 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
 
-const isAdminRoute = createRouteMatcher(['/admin(.*)']);
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/gamification(.*)', '/eu-reporter/videos/submit(.*)']);
+const intlMiddleware = createMiddleware(routing);
+
+const isAdminRoute = createRouteMatcher(['/admin(.*)', '/:locale/admin(.*)']);
+const isProtectedRoute = createRouteMatcher([
+    '/dashboard(.*)', '/:locale/dashboard(.*)',
+    '/gamification(.*)', '/:locale/gamification(.*)',
+    '/eu-reporter/videos/submit(.*)', '/:locale/eu-reporter/videos/submit(.*)'
+]);
 
 export default clerkMiddleware(async (auth, req) => {
     const { userId } = await auth();
@@ -20,6 +27,8 @@ export default clerkMiddleware(async (auth, req) => {
             return (await auth()).redirectToSignIn();
         }
     }
+
+    return intlMiddleware(req);
 });
 
 export const config = {

@@ -1,0 +1,91 @@
+{
+    "Navbar": {
+        "news": "Noticias",
+        "categories": {
+            "health": "Salud",
+            "wellbeing": "Bienestar",
+            "lifestyle": "Estilo de Vida",
+            "business": "Negocios",
+            "faceBrasilInAmerica": "Face Brasil en América",
+            "immigration": "Inmigración"
+        },
+        "community": "Comunidad",
+        "events": "Eventos",
+        "search": "Buscar...",
+        "dashboard": "Panel",
+        "admin": "Admin"
+    },
+    "Common": {
+        "readMore": "Leer Más",
+        "loading": "Cargando...",
+        "error": "Ocurreu un error",
+        "back": "Volver"
+    },
+    "Footer": {
+        "about": "La voz digital líder de la comunidad brasileña en los EE. UU., celebrando la cultura, o éxito y o estilo de vida desde 2010.",
+        "categories": "Categorías",
+        "magazine": "Revista",
+        "support": "Soporte",
+        "digitalEditions": "Ediciones Digitales",
+        "printSubscription": "Suscripción Impresa",
+        "advertise": "Anuncie con Nosotros",
+        "ambassador": "Sea nuestro Embajador",
+        "aboutUs": "Sobre Nosotros",
+        "contact": "Contacto",
+        "privacy": "Política de Privacidad",
+        "terms": "Términos de Uso",
+        "rights": "Todos los derechos reservados."
+    },
+    "Home": {
+        "hero_label": "DESTACADO DEL DÍA",
+        "latest_news": "ÚLTIMAS NOTICIAS",
+        "read_more": "Leer más",
+        "ai_insights": "INSIGHTS DE IA",
+        "popular_posts": "MÁS LEÍDAS",
+        "featured": "DESTACADOS",
+        "view_all": "Ver todo",
+        "updates": "Actualizaciones",
+        "latestNews": "Más Recientes",
+        "highlights": "Destacados",
+        "viewMore": "Ver Más",
+        "happened": "Sucedió",
+        "agenda": "Agenda",
+        "viewMoreNews": "Ver Más Noticias",
+        "soon": "Nuevas actualizaciones pronto...",
+        "mostRead": "Más Leídos",
+        "readTime": "{time} min lectura",
+        "waitingContent": "Esperando contenido..."
+    },
+    "Contact": {
+        "title": "CONTACTO",
+        "category": "Soporte",
+        "description": "¿Alguna duda, sugerencia o propuesta comercial? Nuestro equipo está listo para atenderle.",
+        "form": {
+            "name": "Nombre completo",
+            "email": "Su correo electrónico",
+            "message": "Mensaje",
+            "submit": "ENVIAR"
+        }
+    },
+    "Advertise": {
+        "title": "ANUNCIE CON NOSOTROS",
+        "category": "Revista",
+        "description": "Conecte su marca con la audiencia brasileña más grande y cualificada de los Estados Unidos. Facebrasil ofrece soluciones cross-media que garantizan visibilidad y resultados reales.",
+        "channels": {
+            "title": "Nuestros Canales",
+            "print": {
+                "title": "Revista Impresa",
+                "description": "Distribución en más de 500 puntos premium en Florida y EE. UU."
+            },
+            "digital": {
+                "title": "Portal Digital (SEO Enhanced)",
+                "description": "Alcance global con contenidos optimizados por IA."
+            },
+            "social": {
+                "title": "Redes Sociales",
+                "description": "Más de 100k seguidores comprometidos y apasionados por Brasil."
+            }
+        },
+        "mediakit": "Solicite nuestro Media Kit 2026 por correo electrónico a ads@facebrasil.com."
+    }
+}

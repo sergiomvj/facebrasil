@@ -1,0 +1,80 @@
+{
+    "Navbar": {
+        "news": "Notícias",
+        "categories": {
+            "health": "Saúde",
+            "wellbeing": "Bem Estar",
+            "lifestyle": "Estilo de Vida",
+            "business": "Negócios",
+            "faceBrasilInAmerica": "Face Brasil na América",
+            "immigration": "Imigração"
+        },
+        "community": "Comunidade",
+        "events": "Eventos",
+        "search": "Buscar...",
+        "dashboard": "Painel",
+        "admin": "Admin"
+    },
+    "Common": {
+        "readMore": "Ler Mais",
+        "loading": "Carregando...",
+        "error": "Ocorreu um erro",
+        "back": "Voltar"
+    },
+    "Footer": {
+        "about": "A voz digital líder da comunidade brasileira nos EUA, celebrando cultura, sucesso e estilo de vida desde 2010.",
+        "categories": "Categorias",
+        "magazine": "Revista",
+        "support": "Suporte",
+        "digitalEditions": "Edições Digitais",
+        "printSubscription": "Assinatura Impressa",
+        "advertise": "Anuncie Conosco",
+        "ambassador": "Seja nosso Embaixador",
+        "aboutUs": "Sobre Nós",
+        "contact": "Contato",
+        "privacy": "Política de Privacidade",
+        "terms": "Termos de Uso",
+        "rights": "Todos os direitos reservados."
+    },
+    "Home": {
+        "hero_label": "DESTAQUE DO DIA",
+        "latest_news": "ÚLTIMAS NOTÍCIAS",
+        "read_more": "Ler mais",
+        "ai_insights": "INSIGHTS DA IA",
+        "popular_posts": "MAIS LIDAS",
+        "featured": "DESTAQUES",
+        "view_all": "Ver tudo"
+    },
+    "Contact": {
+        "title": "CONTATO",
+        "category": "Suporte",
+        "description": "Alguma dúvida, sugestão ou proposta comercial? Nossa equipe está pronta para te atender.",
+        "form": {
+            "name": "Nome completo",
+            "email": "Seu e-mail",
+            "message": "Mensagem",
+            "submit": "ENVIAR"
+        }
+    },
+    "Advertise": {
+        "title": "ANUNCIE CONOSCO",
+        "category": "Revista",
+        "description": "Conecte sua marca à maior e mais qualificada audiência brasileira nos Estados Unidos. A Facebrasil oferece soluções cross-media que garantem visibilidade e resultados reais.",
+        "channels": {
+            "title": "Nossos Canais",
+            "print": {
+                "title": "Revista Impressa",
+                "description": "Distribuição em mais de 500 pontos premium na Flórida e EUA."
+            },
+            "digital": {
+                "title": "Portal Digital (SEO Enhanced)",
+                "description": "Alcance global com conteúdos otimizados por IA."
+            },
+            "social": {
+                "title": "Redes Sociais",
+                "description": "Mais de 100k seguidores engajados e apaixonados pelo Brasil."
+            }
+        },
+        "mediakit": "Solicite nosso Media Kit 2026 através do e-mail ads@facebrasil.com."
+    }
+}

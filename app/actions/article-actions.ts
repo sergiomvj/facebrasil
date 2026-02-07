@@ -19,7 +19,9 @@ interface UpdateArticlePayload {
     blog_id: string; // fallback
     published_at?: string | null;
     read_time?: number;
-    colocar_hero?: boolean; // Add this
+    colocar_hero?: boolean;
+    language?: string;
+    translation_group_id?: string | null;
 }
 
 export async function upsertArticle(payload: UpdateArticlePayload, id?: string) {

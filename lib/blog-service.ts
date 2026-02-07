@@ -37,6 +37,10 @@ export async function fetchPosts(params?: FetchPostsParams): Promise<PaginatedRe
         query = query.neq('category.slug', params.excludeCategory);
     }
 
+    if (params?.language) {
+        query = query.eq('language', params.language);
+    }
+
     // Sort
     if (params?.sort === 'popular') {
         query = query.order('views', { ascending: false });
@@ -82,12 +86,12 @@ export async function fetchPosts(params?: FetchPostsParams): Promise<PaginatedRe
     };
 }
 
-export async function fetchMainHero(): Promise<BlogPost | null> {
+export async function fetchMainHero(language?: string): Promise<BlogPost | null> {
     try {
         // Priority 1: Check 'colocar_hero'
         // Wrap in internal try-catch so if column doesn't exist (user didn't run SQL), we fall through to latest
         try {
-            const { data: heroData, error } = await supabase
+            let heroQuery = supabase
                 .from('articles')
                 .select(`
                     *,
@@ -96,20 +100,24 @@ export async function fetchMainHero(): Promise<BlogPost | null> {
                 `)
                 .eq('colocar_hero', true)
                 .eq('status', 'PUBLISHED')
-                .order('hero_set_at', { ascending: false }) // Latest set wins
-                .limit(1)
-                .single();
+                .order('hero_set_at', { ascending: false }); // Latest set wins
 
-            if (!error && heroData) {
+            if (language) {
+                heroQuery = heroQuery.eq('language', language);
+            }
+
+            const { data: heroData, error: heroError } = await heroQuery.limit(1).single();
+
+            if (!heroError && heroData) {
                 return mapRowToBlogPost(heroData);
             }
         } catch (innerError) {
             // Ignore error (likely missing column) and proceed to fallback
-            console.warn('Daily Hero query failed, falling back to latest. (Did you run the SQL script?)');
+            console.warn('Daily Hero query failed, falling back to latest.');
         }
 
         // Priority 2: Fallback to latest published article
-        const { data: latestData, error: latestError } = await supabase
+        let latestQuery = supabase
             .from('articles')
             .select(`
                 *,
@@ -117,9 +125,13 @@ export async function fetchMainHero(): Promise<BlogPost | null> {
                 category:categories(name, slug)
             `)
             .eq('status', 'PUBLISHED')
-            .order('published_at', { ascending: false })
-            .limit(1)
-            .single();
+            .order('published_at', { ascending: false });
+
+        if (language) {
+            latestQuery = latestQuery.eq('language', language);
+        }
+
+        const { data: latestData, error: latestError } = await latestQuery.limit(1).single();
 
         if (latestData) {
             return mapRowToBlogPost(latestData);
@@ -133,8 +145,8 @@ export async function fetchMainHero(): Promise<BlogPost | null> {
     }
 }
 
-export async function fetchFeaturedPosts(limit: number = 5): Promise<BlogPost[]> {
-    const { data } = await supabase
+export async function fetchFeaturedPosts(limit: number = 5, language?: string): Promise<BlogPost[]> {
+    let query = supabase
         .from('articles')
         .select(`
             *,
@@ -142,8 +154,13 @@ export async function fetchFeaturedPosts(limit: number = 5): Promise<BlogPost[]>
             category:categories(name, slug)
         `)
         .eq('status', 'PUBLISHED')
-        .eq('destaque_hero', true)
-        .limit(limit);
+        .eq('destaque_hero', true);
+
+    if (language) {
+        query = query.eq('language', language);
+    }
+
+    const { data } = await query.limit(limit);
 
     return (data || []).map(mapRowToBlogPost);
 }
@@ -159,16 +176,21 @@ export async function fetchVideoReports(limit: number = 4): Promise<VideoReport[
     return (data || []) as VideoReport[];
 }
 
-export async function fetchPost(slug: string): Promise<BlogPost | null> {
-    const { data, error } = await supabase
+export async function fetchPost(slug: string, language?: string): Promise<BlogPost | null> {
+    let query = supabase
         .from('articles')
         .select(`
             *,
             author:profiles(name, avatar_url),
             category:categories(name, slug)
         `)
-        .eq('slug', slug)
-        .single();
+        .eq('slug', slug);
+
+    if (language) {
+        query = query.eq('language', language);
+    }
+
+    const { data, error } = await query.single();
 
     if (error || !data) return null;
 

@@ -1,0 +1,80 @@
+{
+    "Navbar": {
+        "news": "Health",
+        "categories": {
+            "health": "Health",
+            "wellbeing": "Well-being",
+            "lifestyle": "Lifestyle",
+            "business": "Business",
+            "faceBrasilInAmerica": "Face Brazil in America",
+            "immigration": "Immigration"
+        },
+        "community": "Community",
+        "events": "Events",
+        "search": "Search...",
+        "dashboard": "Dashboard",
+        "admin": "Admin"
+    },
+    "Common": {
+        "readMore": "Read More",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "back": "Back"
+    },
+    "Footer": {
+        "about": "The leading digital voice for the Brazilian community in the USA, celebrating culture, success, and lifestyle since 2010.",
+        "categories": "Categories",
+        "magazine": "Magazine",
+        "support": "Support",
+        "digitalEditions": "Digital Editions",
+        "printSubscription": "Print Subscription",
+        "advertise": "Advertise with Us",
+        "ambassador": "Become our Ambassador",
+        "aboutUs": "About Us",
+        "contact": "Contact",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Use",
+        "rights": "All rights reserved."
+    },
+    "Home": {
+        "hero_label": "DAILY HIGHLIGHT",
+        "latest_news": "LATEST NEWS",
+        "read_more": "Read more",
+        "ai_insights": "AI INSIGHTS",
+        "popular_posts": "MOST READ",
+        "featured": "HIGHLIGHTS",
+        "view_all": "View all"
+    },
+    "Contact": {
+        "title": "CONTACT",
+        "category": "Support",
+        "description": "Any questions, suggestions, or business proposals? Our team is ready to assist you.",
+        "form": {
+            "name": "Full name",
+            "email": "Your email",
+            "message": "Message",
+            "submit": "SEND"
+        }
+    },
+    "Advertise": {
+        "title": "ADVERTISE WITH US",
+        "category": "Magazine",
+        "description": "Connect your brand to the largest and most qualified Brazilian audience in the United States. Facebrasil offers cross-media solutions that guarantee visibility and real results.",
+        "channels": {
+            "title": "Our Channels",
+            "print": {
+                "title": "Print Magazine",
+                "description": "Distribution in over 500 premium locations in Florida and the USA."
+            },
+            "digital": {
+                "title": "Digital Portal (SEO Enhanced)",
+                "description": "Global reach with AI-optimized content."
+            },
+            "social": {
+                "title": "Social Media",
+                "description": "Over 100k followers engaged and passionate about Brazil."
+            }
+        },
+        "mediakit": "Request our Media Kit 2026 via email at ads@facebrasil.com."
+    }
+}

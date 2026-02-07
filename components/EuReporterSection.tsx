@@ -3,6 +3,7 @@
 import React from 'react';
 import { Play, Send } from 'lucide-react';
 import { getEmbedUrl } from '@/lib/utils';
+import { Link } from '@/i18n/routing';
 
 interface VideoReport {
     id: string;
@@ -35,10 +36,10 @@ const EuReporterSection: React.FC<EuReporterSectionProps> = ({ videos = [] }) =>
                         </p>
                     </div>
 
-                    <a href="/eu-reporter" className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
+                    <Link href="/eu-reporter" className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-full flex items-center gap-3 transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-primary/20">
                         <Send className="w-5 h-5" />
                         ENVIAR MEU VÍDEO
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Video Grid - Shorts Style (Vertical) */}
@@ -103,12 +104,12 @@ const EuReporterSection: React.FC<EuReporterSectionProps> = ({ videos = [] }) =>
                 {/* Veja Mais Button */}
                 {videos.length > 0 && (
                     <div className="flex justify-center mt-12">
-                        <a
+                        <Link
                             href="/eu-reporter/videos"
                             className="bg-white/10 hover:bg-white/20 dark:text-white text-gray-900 font-bold py-4 px-12 rounded-full border border-white/20 hover:border-white/40 transition-all hover:scale-105 active:scale-95 shadow-lg"
                         >
                             VEJA MAIS
-                        </a>
+                        </Link>
                     </div>
                 )}
             </div>

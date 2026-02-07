@@ -16,6 +16,25 @@ interface EditorRichTextProps {
     initialInstagramUrl?: string;
 }
 
+const ToolbarButton = ({ onClick, isActive, icon: Icon, title }: {
+    onClick: () => void;
+    isActive: boolean;
+    icon: React.ElementType;
+    title: string;
+}) => (
+    <button
+        onClick={onClick}
+        className={cn(
+            "p-2 rounded hover:bg-white/10 transition-colors",
+            isActive ? "text-primary bg-white/5" : "text-slate-400"
+        )}
+        title={title}
+        type="button"
+    >
+        <Icon className="w-4 h-4" />
+    </button>
+);
+
 const EditorRichText: React.FC<EditorRichTextProps> = ({
     content = '',
     onChange,
@@ -74,19 +93,6 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
         return null;
     }
 
-    const ToolbarButton = ({ onClick, isActive, icon: Icon, title }: any) => (
-        <button
-            onClick={onClick}
-            className={cn(
-                "p-2 rounded hover:bg-white/10 transition-colors",
-                isActive ? "text-primary bg-white/5" : "text-slate-400"
-            )}
-            title={title}
-            type="button"
-        >
-            <Icon className="w-4 h-4" />
-        </button>
-    );
 
     return (
         <div className="flex flex-col gap-6">

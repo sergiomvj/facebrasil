@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { SignInButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { Search, Sun, Moon, X, Trophy, LayoutDashboard } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 import XPHUD from '@/components/XPHUD';
 import { generateSlug } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar: React.FC = () => {
+  const t = useTranslations('Navbar');
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +37,14 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const navItems = [
+    { key: 'news', label: t('news'), href: '/fbr-news' },
+    { key: 'health', label: t('categories.health'), href: '/category/saude' },
+    { key: 'wellbeing', label: t('categories.wellbeing'), href: '/category/bem-estar' },
+    { key: 'lifestyle', label: t('categories.lifestyle'), href: '/category/estilo-de-vida' },
+    { key: 'business', label: t('categories.business'), href: '/category/negocios' },
+  ];
+
   return (
     <>
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-header h-16' : 'bg-transparent h-20'}`}>
@@ -46,9 +57,9 @@ const Navbar: React.FC = () => {
               <h2 className="text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
             </Link>
             <nav className="hidden lg:flex items-center gap-8">
-              {['FBR-NEWS', 'Saúde', 'Bem Estar', 'Estilo de Vida', 'Negócios'].map((item) => (
-                <Link key={item} className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors" href={item === 'FBR-NEWS' ? '/fbr-news' : `/category/${generateSlug(item)}`}>
-                  {item}
+              {navItems.map((item) => (
+                <Link key={item.key} className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors" href={item.href}>
+                  {item.label}
                 </Link>
               ))}
 
@@ -60,7 +71,7 @@ const Navbar: React.FC = () => {
                     className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors flex items-center gap-1.5"
                   >
                     <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                    Comunidade
+                    {t('community')}
                   </Link>
                   <button className="text-gray-400 hover:text-primary transition-colors">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,13 +84,13 @@ const Navbar: React.FC = () => {
                 <div className="absolute top-full left-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-gray-200 dark:border-white/10 py-2">
                     <Link href="/events" className="block px-4 py-2 text-xs dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
-                      Eventos
+                      {t('events')}
                     </Link>
                     <Link href="/category/face-brasil-na-america" className="block px-4 py-2 text-xs dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
-                      Face Brasil na América
+                      {t('categories.faceBrasilInAmerica')}
                     </Link>
                     <Link href="/category/imigracao" className="block px-4 py-2 text-xs dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
-                      Imigração
+                      {t('categories.immigration')}
                     </Link>
                   </div>
                 </div>
@@ -88,6 +99,8 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}

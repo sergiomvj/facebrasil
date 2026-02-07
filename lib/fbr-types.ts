@@ -72,6 +72,7 @@ export interface FetchPostsParams {
     tag?: string;
     search?: string;
     sort?: 'latest' | 'popular';
+    language?: string;
 }
 
 export interface PaginatedResponse<T> {

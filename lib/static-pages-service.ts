@@ -9,24 +9,37 @@ export interface StaticPage {
     featured_image?: string;
     updated_at?: string;
     is_published?: boolean;
+    language?: string;
+    translation_group_id?: string | null;
 }
 
-export async function fetchStaticPages() {
-    const { data, error } = await supabase
+export async function fetchStaticPages(language?: string) {
+    let query = supabase
         .from('static_pages')
         .select('*')
         .order('title', { ascending: true });
+
+    if (language) {
+        query = query.eq('language', language);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data as StaticPage[];
 }
 
-export async function fetchStaticPageBySlug(slug: string) {
-    const { data, error } = await supabase
+export async function fetchStaticPageBySlug(slug: string, language?: string) {
+    let query = supabase
         .from('static_pages')
         .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
+        .eq('slug', slug);
+
+    if (language) {
+        query = query.eq('language', language);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) throw error;
     return data as StaticPage | null;
