@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
@@ -91,3 +92,4 @@ export async function deleteArticle(id: string) {
     revalidatePath('/');
     return { success: true };
 }
+

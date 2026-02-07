@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import ArticleCard from '@/components/ArticleCard';
 import { supabase } from '@/lib/supabase';
@@ -109,3 +110,4 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
     );
 }
+

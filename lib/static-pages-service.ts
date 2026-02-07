@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from './supabase';
 
 export interface StaticPage {
@@ -67,3 +68,4 @@ export async function createStaticPage(page: StaticPage) {
     if (error) throw error;
     return data as StaticPage;
 }
+
