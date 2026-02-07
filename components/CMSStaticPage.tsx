@@ -3,7 +3,15 @@ import StaticPageLayout from '@/components/StaticPageLayout';
 import { fetchStaticPageBySlug } from '@/lib/static-pages-service';
 import { notFound } from 'next/navigation';
 
-export default async function GenericStaticPage({ slug, locale }: { slug: string, locale?: string }) {
+export default async function GenericStaticPage({
+    slug,
+    locale,
+    children
+}: {
+    slug: string,
+    locale?: string,
+    children?: React.ReactNode
+}) {
     let page = null;
     try {
         page = await fetchStaticPageBySlug(slug, locale);
@@ -13,7 +21,7 @@ export default async function GenericStaticPage({ slug, locale }: { slug: string
     }
 
     if (!page) {
-        return null; // Let the caller decide or return fallback
+        return <>{children}</>;
     }
 
     return (
