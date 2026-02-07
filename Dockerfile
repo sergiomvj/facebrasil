@@ -1,15 +1,31 @@
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ENV NODE_ENV=production
+
+# dummy env para build não quebrar
+ENV NEXT_PUBLIC_SUPABASE_URL=dummy
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy
+
+RUN npm run build
+
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# 👇 Força leitura de env do sistema
-ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-
 COPY --from=builder /app ./
+COPY .env.runtime .env.runtime
 
-EXPOSE 3000
-CMD ["npm","start"]
+# carrega env runtime antes de iniciar
+CMD export $(cat .env.runtime | xargs) && npm start
