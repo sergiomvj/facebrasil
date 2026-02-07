@@ -1,6 +1,23 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.ads (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  title text NOT NULL,
+  position text NOT NULL CHECK ("position" = ANY (ARRAY['banner_top'::text, 'sidebar'::text, 'inline'::text, 'sticky_footer'::text, 'home_hero'::text, 'article_sidebar'::text, 'feed_interstitial'::text])),
+  image_url text,
+  link_url text NOT NULL,
+  is_active boolean DEFAULT true,
+  start_date timestamp with time zone DEFAULT now(),
+  end_date timestamp with time zone,
+  views integer DEFAULT 0,
+  clicks integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  category_id uuid,
+  CONSTRAINT ads_pkey PRIMARY KEY (id),
+  CONSTRAINT ads_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id)
+);
 CREATE TABLE public.articles (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   slug text NOT NULL UNIQUE,
@@ -113,7 +130,7 @@ CREATE TABLE public.news_sources (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   name text NOT NULL,
   type text NOT NULL CHECK (type = ANY (ARRAY['rss'::text, 'api'::text, 'scraper'::text])),
-  url text NOT NULL,
+  url text NOT NULL UNIQUE,
   category_slug text,
   enabled boolean DEFAULT true,
   last_fetch timestamp with time zone,
@@ -130,8 +147,15 @@ CREATE TABLE public.profiles (
   role text DEFAULT 'EDITOR'::text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT profiles_pkey PRIMARY KEY (id),
-  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+  CONSTRAINT profiles_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.static_pages (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  slug text NOT NULL UNIQUE,
+  title text NOT NULL,
+  content text,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT static_pages_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.user_activities (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -191,10 +215,9 @@ CREATE TABLE public.user_video_reports (
 );
 CREATE TABLE public.xp_logs (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
-  user_id uuid,
+  user_id text,
   type text NOT NULL,
   points integer DEFAULT 0,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT xp_logs_pkey PRIMARY KEY (id),
-  CONSTRAINT xp_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+  CONSTRAINT xp_logs_pkey PRIMARY KEY (id)
 );

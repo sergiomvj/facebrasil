@@ -1,101 +1,67 @@
 import React from 'react';
+import StaticPageLayout from '@/components/StaticPageLayout';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import CMSStaticPage from '@/components/CMSStaticPage';
 
-export default function ContactPage() {
+export default async function ContactPage() {
+    const cmsContent = await CMSStaticPage({ slug: 'contact' });
+    if (cmsContent) return cmsContent;
+
     return (
-        <div className="min-h-screen pt-32 pb-20 dark:bg-slate-950 bg-white">
-            <div className="max-w-[1280px] mx-auto px-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {/* Contact Information */}
-                    <div className="space-y-12">
-                        <div>
-                            <h1 className="text-5xl font-black tracking-tighter dark:text-white text-gray-900 mb-6">
-                                CONTATO
-                            </h1>
-                            <p className="text-xl dark:text-slate-400 text-gray-600 leading-relaxed max-w-md">
-                                Alguma dúvida, sugestão ou proposta comercial? Nossa equipe está pronta para te atender.
-                            </p>
-                        </div>
-
-                        <div className="space-y-8">
-                            <div className="flex items-start gap-4">
-                                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                    <Mail className="size-6" />
+        <StaticPageLayout
+            title="CONTATO"
+            category="Suporte"
+            featuredImage="https://images.unsplash.com/photo-1523966211575-51a9ed083b1c?auto=format&fit=crop&q=80&w=2000"
+            content={
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 not-prose">
+                    <div className="space-y-8">
+                        <p className="text-slate-500 font-medium">
+                            Alguma dúvida, sugestão ou proposta comercial? Nossa equipe está pronta para te atender.
+                        </p>
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-4">
+                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <Mail className="size-5" />
                                 </div>
-                                <div>
-                                    <h4 className="font-bold dark:text-white text-gray-900">Email</h4>
-                                    <p className="dark:text-slate-400 text-gray-600">contato@facebrasil.com</p>
-                                </div>
+                                <span className="text-slate-600 dark:text-slate-300">contato@facebrasil.com</span>
                             </div>
-
-                            <div className="flex items-start gap-4">
-                                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                    <Phone className="size-6" />
+                            <div className="flex items-center gap-4">
+                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <Phone className="size-5" />
                                 </div>
-                                <div>
-                                    <h4 className="font-bold dark:text-white text-gray-900">Telefone</h4>
-                                    <p className="dark:text-slate-400 text-gray-600">+1 (407) 000-0000</p>
-                                </div>
+                                <span className="text-slate-600 dark:text-slate-300">+1 (407) 000-0000</span>
                             </div>
-
-                            <div className="flex items-start gap-4">
-                                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                    <MapPin className="size-6" />
+                            <div className="flex items-center gap-4">
+                                <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <MapPin className="size-5" />
                                 </div>
-                                <div>
-                                    <h4 className="font-bold dark:text-white text-gray-900">Endereço</h4>
-                                    <p className="dark:text-slate-400 text-gray-600">Orlando, FL - United States</p>
-                                </div>
+                                <span className="text-slate-600 dark:text-slate-300">Orlando, FL - USA</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Contact Form */}
-                    <div className="dark:bg-slate-900 bg-gray-50 p-10 rounded-3xl border dark:border-white/10 border-gray-200 shadow-xl">
-                        <form className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold dark:text-slate-400 text-gray-600">Nome</label>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-white dark:bg-slate-800 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                                        placeholder="Seu nome"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold dark:text-slate-400 text-gray-600">Email</label>
-                                    <input
-                                        type="email"
-                                        className="w-full bg-white dark:bg-slate-800 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                                        placeholder="seu@email.com"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold dark:text-slate-400 text-gray-600">Assunto</label>
-                                <select className="w-full bg-white dark:bg-slate-800 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-all">
-                                    <option>Comercial / Anúncios</option>
-                                    <option>Redação / Sugestão de Pauta</option>
-                                    <option>Suporte Técnico</option>
-                                    <option>Outros</option>
-                                </select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold dark:text-slate-400 text-gray-600">Mensagem</label>
-                                <textarea
-                                    rows={4}
-                                    className="w-full bg-white dark:bg-slate-800 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                                    placeholder="Como podemos ajudar?"
-                                />
-                            </div>
-                            <button className="w-full bg-primary hover:bg-primary-dark text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20 active:scale-[0.98]">
-                                Enviar Mensagem
-                                <Send className="size-5" />
-                            </button>
-                        </form>
-                    </div>
+                    <form className="space-y-4 pt-4 border-t lg:border-t-0 lg:border-l lg:pl-12 border-gray-100 dark:border-white/5">
+                        <input
+                            type="text"
+                            placeholder="Nome completo"
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <input
+                            type="email"
+                            placeholder="Seu e-mail"
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <textarea
+                            rows={4}
+                            placeholder="Mensagem"
+                            className="w-full bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        <button className="w-full py-4 bg-primary text-white font-black rounded-xl flex items-center justify-center gap-2">
+                            ENVIAR <Send className="size-4" />
+                        </button>
+                    </form>
                 </div>
-            </div>
-        </div>
+            }
+        />
     );
 }

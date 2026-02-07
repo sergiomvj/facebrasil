@@ -47,41 +47,38 @@ const Navbar: React.FC = () => {
             </Link>
             <nav className="hidden lg:flex items-center gap-8">
               {['FBR-NEWS', 'Saúde', 'Bem Estar', 'Estilo de Vida', 'Negócios'].map((item) => (
-                <Link key={item} className="text-sm font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors" href={item === 'FBR-NEWS' ? '/fbr-news' : `/category/${generateSlug(item)}`}>
+                <Link key={item} className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors" href={item === 'FBR-NEWS' ? '/fbr-news' : `/category/${generateSlug(item)}`}>
                   {item}
                 </Link>
               ))}
 
-              {/* Gamification Link */}
-              <Link
-                href="/gamification"
-                className="text-sm font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors flex items-center gap-1.5"
-              >
-                <Trophy className="w-4 h-4 text-amber-500" />
-                Comunidade
-              </Link>
-
-              {/* Mais with Dropdown */}
+              {/* Comunidade with Dropdown */}
               <div className="relative group">
-                <button
-                  className="text-sm font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors flex items-center gap-1"
-                >
-                  Mais
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-1">
+                  <Link
+                    href="/gamification"
+                    className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors flex items-center gap-1.5"
+                  >
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    Comunidade
+                  </Link>
+                  <button className="text-gray-400 hover:text-primary transition-colors">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
 
                 {/* Dropdown Menu */}
                 <div className="absolute top-full left-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-gray-200 dark:border-white/10 py-2">
-                    <Link href="/events" className="block px-4 py-2 text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
+                    <Link href="/events" className="block px-4 py-2 text-xs dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
                       Eventos
                     </Link>
-                    <Link href="/category/face-brasil-na-america" className="block px-4 py-2 text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
+                    <Link href="/category/face-brasil-na-america" className="block px-4 py-2 text-xs dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
                       Face Brasil na América
                     </Link>
-                    <Link href="/category/imigracao" className="block px-4 py-2 text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
+                    <Link href="/category/imigracao" className="block px-4 py-2 text-xs dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 dark:hover:text-primary hover:text-primary transition-colors">
                       Imigração
                     </Link>
                   </div>

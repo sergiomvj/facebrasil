@@ -27,20 +27,22 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="dark:text-white text-gray-900 font-bold mb-6">Sections</h4>
+            <h4 className="dark:text-white text-gray-900 font-bold mb-6">Categorias</h4>
             <ul className="space-y-3 text-sm text-slate-400">
-              {['Health & Wellness', 'Business & Career', 'Lifestyle & Arts', 'Events & Community'].map((link) => (
-                <li key={link}><Link className="hover:text-primary transition-colors" href="#">{link}</Link></li>
-              ))}
+              <li><Link className="hover:text-primary transition-colors" href="/category/saude-bem-estar">Saúde & Bem-estar</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/category/negocios-carreira">Negócios & Carreira</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/category/estilo-de-vida-artes">Estilo de Vida & Artes</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/events">Eventos & Comunidade</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="dark:text-white text-gray-900 font-bold mb-6">Magazine</h4>
+            <h4 className="dark:text-white text-gray-900 font-bold mb-6">Revista</h4>
             <ul className="space-y-3 text-sm text-slate-400">
-              {['Digital Editions', 'Print Subscription', 'Advertise with Us', 'Distribution Points'].map((link) => (
-                <li key={link}><Link className="hover:text-primary transition-colors" href="#">{link}</Link></li>
-              ))}
+              <li><Link className="hover:text-primary transition-colors" href="/digital-editions">Edições Digitais</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/subscription">Assinatura Impressa</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/advertise">Anuncie Conosco</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/ambassador">Seja nosso Embaixador</Link></li>
             </ul>
           </div>
 

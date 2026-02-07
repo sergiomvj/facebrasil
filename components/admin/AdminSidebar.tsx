@@ -35,6 +35,7 @@ const navItems: NavItem[] = [
     { name: 'Vídeos Reportados', href: '/admin/video-reports', icon: Video },
     { name: 'Hero Diário', href: '/admin/daily-hero', icon: Star },
     { name: 'Anúncios', href: '/admin/ads', icon: DollarSign },
+    { name: 'Páginas', href: '/admin/pages', icon: FileText },
     { name: 'Configurações', href: '/admin/settings', icon: Settings },
 ];
 
