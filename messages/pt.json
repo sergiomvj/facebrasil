@@ -1,4 +1,22 @@
 {
+    "Search": {
+        "title": "RESULTADOS DA BUSCA",
+        "loading": "Buscando artigos...",
+        "noResults": "Nenhum resultado encontrado para \"{query}\"",
+        "enterTerm": "Digite um termo para buscar"
+    },
+    "Privacy": {
+        "title": "POLÍTICA DE PRIVACIDADE",
+        "category": "Suporte"
+    },
+    "Terms": {
+        "title": "TERMOS DE USO",
+        "category": "Suporte"
+    },
+    "Metadata": {
+        "title": "Nova Facebrasil",
+        "description": "A revista da comunidade brasileira nos EUA"
+    },
     "Navbar": {
         "news": "Notícias",
         "categories": {
@@ -43,7 +61,18 @@
         "ai_insights": "INSIGHTS DA IA",
         "popular_posts": "MAIS LIDAS",
         "featured": "DESTAQUES",
-        "view_all": "Ver tudo"
+        "view_all": "Ver tudo",
+        "updates": "Atualizações",
+        "latestNews": "Últimas Notícias",
+        "highlights": "Destaques",
+        "viewMore": "Ver Mais",
+        "happened": "Aconteceu",
+        "agenda": "Agenda",
+        "viewMoreNews": "Ver Mais Notícias",
+        "soon": "Novas atualizações em breve...",
+        "mostRead": "Mais Lidos",
+        "readTime": "{time} min de leitura",
+        "waitingContent": "Aguardando conteúdo..."
     },
     "Contact": {
         "title": "CONTATO",

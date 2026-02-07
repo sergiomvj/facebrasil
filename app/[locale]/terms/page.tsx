@@ -1,16 +1,19 @@
 import React from 'react';
 import StaticPageLayout from '@/components/StaticPageLayout';
 import CMSStaticPage from '@/components/CMSStaticPage';
+import { getTranslations } from 'next-intl/server';
 
 export default async function TermsPage({ params }: { params: { locale: string } }) {
     const { locale } = await params;
+    const t = await getTranslations('Terms');
+
     const cmsContent = await CMSStaticPage({ slug: 'terms', locale });
     if (cmsContent) return cmsContent;
 
     return (
         <StaticPageLayout
-            title="TERMOS DE USO"
-            category="Suporte"
+            title={t('title')}
+            category={t('category')}
             featuredImage="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&q=80&w=2000"
             content={
                 <>

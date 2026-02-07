@@ -1,4 +1,22 @@
 {
+    "Search": {
+        "title": "RESULTADOS DE BÚSQUEDA",
+        "loading": "Buscando artículos...",
+        "noResults": "No se encontraron resultados para \"{query}\"",
+        "enterTerm": "Ingrese un término para buscar"
+    },
+    "Privacy": {
+        "title": "POLÍTICA DE PRIVACIDAD",
+        "category": "Soporte"
+    },
+    "Terms": {
+        "title": "TÉRMINOS DE USO",
+        "category": "Soporte"
+    },
+    "Metadata": {
+        "title": "Nova Facebrasil",
+        "description": "La revista de la comunidad brasileña en EE. UU."
+    },
     "Navbar": {
         "news": "Noticias",
         "categories": {

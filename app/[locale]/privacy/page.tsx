@@ -1,16 +1,19 @@
 import React from 'react';
 import StaticPageLayout from '@/components/StaticPageLayout';
 import CMSStaticPage from '@/components/CMSStaticPage';
+import { getTranslations } from 'next-intl/server';
 
 export default async function PrivacyPage({ params }: { params: { locale: string } }) {
     const { locale } = await params;
+    const t = await getTranslations('Privacy');
+
     const cmsContent = await CMSStaticPage({ slug: 'privacy', locale });
     if (cmsContent) return cmsContent;
 
     return (
         <StaticPageLayout
-            title="POLÍTICA DE PRIVACIDADE"
-            category="Suporte"
+            title={t('title')}
+            category={t('category')}
             featuredImage="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2000"
             content={
                 <>

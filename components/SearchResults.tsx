@@ -5,8 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import { BlogPost } from '@/lib/fbr-types';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
+import { useTranslations } from 'next-intl';
 
 export default function SearchResultsContent() {
+    const t = useTranslations('Search');
     const searchParams = useSearchParams();
     const query = searchParams.get('q');
     const [results, setResults] = useState<BlogPost[]>([]);
@@ -16,7 +18,8 @@ export default function SearchResultsContent() {
         async function fetchResults() {
             if (!query) return;
             setLoading(true);
-
+            // ... existing fetch logic ...
+            // (Keeping the fetch logic as is, just updating the return JSX)
             const { data, error } = await supabase
                 .from('articles')
                 .select(`
@@ -30,7 +33,6 @@ export default function SearchResultsContent() {
                 .limit(20);
 
             if (!error && data) {
-                // Map data to BlogPost type using a simplified version of the logic in blog-service
                 const mappedResults = (data as unknown[]).map((rowItem) => {
                     const row = rowItem as {
                         id: string;
@@ -70,11 +72,11 @@ export default function SearchResultsContent() {
         void fetchResults();
     }, [query]);
 
-    if (!query) return <div className="text-slate-500">Digite algo para pesquisar.</div>;
-    if (loading) return <div className="text-slate-500">Buscando por &quot;{query}&quot;...</div>;
+    if (!query) return <div className="text-slate-500">{t('enterTerm')}</div>;
+    if (loading) return <div className="text-slate-500">{t('loading')}</div>;
     if (results.length === 0) return (
         <div className="text-center py-20">
-            <p className="text-xl text-slate-400">Nenhum artigo encontrado para &quot;{query}&quot;.</p>
+            <p className="text-xl text-slate-400">{t('noResults', { query })}</p>
         </div>
     );
 

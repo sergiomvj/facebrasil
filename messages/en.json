@@ -1,6 +1,24 @@
 {
+    "Search": {
+        "title": "SEARCH RESULTS",
+        "loading": "Searching articles...",
+        "noResults": "No results found for \"{query}\"",
+        "enterTerm": "Enter a term to search"
+    },
+    "Privacy": {
+        "title": "PRIVACY POLICY",
+        "category": "Support"
+    },
+    "Terms": {
+        "title": "TERMS OF USE",
+        "category": "Support"
+    },
+    "Metadata": {
+        "title": "Nova Facebrasil",
+        "description": "The magazine of the Brazilian community in the USA"
+    },
     "Navbar": {
-        "news": "Health",
+        "news": "News",
         "categories": {
             "health": "Health",
             "wellbeing": "Well-being",
@@ -43,7 +61,18 @@
         "ai_insights": "AI INSIGHTS",
         "popular_posts": "MOST READ",
         "featured": "HIGHLIGHTS",
-        "view_all": "View all"
+        "view_all": "View all",
+        "updates": "Updates",
+        "latestNews": "Latest News",
+        "highlights": "Highlights",
+        "viewMore": "View More",
+        "happened": "Happened",
+        "agenda": "Agenda",
+        "viewMoreNews": "View More News",
+        "soon": "Updates coming soon...",
+        "mostRead": "Most Read",
+        "readTime": "{time} min read",
+        "waitingContent": "Waiting for content..."
     },
     "Contact": {
         "title": "CONTACT",
