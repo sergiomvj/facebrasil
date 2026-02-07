@@ -7,9 +7,28 @@ import { Link } from '@/i18n/routing';
 import { deleteArticle } from '@/app/actions/article-actions';
 import { routing } from '@/i18n/routing';
 
+interface ArticleListItem {
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+    published_at: string;
+    views: number;
+    created_at: string;
+    language: string;
+    author: { name: string } | null;
+    category: { name: string; color: string; slug: string } | null;
+}
+
+interface CategoryListItem {
+    id: string;
+    name: string;
+    slug: string;
+}
+
 export default function ArticlesListPage() {
-    const [articles, setArticles] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [articles, setArticles] = useState<ArticleListItem[]>([]);
+    const [categories, setCategories] = useState<CategoryListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -29,7 +48,14 @@ export default function ArticlesListPage() {
             supabase.from('categories').select('id, name, slug')
         ]);
 
-        if (articlesRes.data) setArticles(articlesRes.data);
+        if (articlesRes.data) {
+            const mappedArticles = (articlesRes.data as any[]).map((item) => ({
+                ...item,
+                author: Array.isArray(item.author) ? item.author[0] : item.author,
+                category: Array.isArray(item.category) ? item.category[0] : item.category
+            })) as ArticleListItem[];
+            setArticles(mappedArticles);
+        }
         if (categoriesRes.data) setCategories(categoriesRes.data);
         setLoading(false);
     }

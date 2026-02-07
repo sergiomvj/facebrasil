@@ -1,4 +1,3 @@
-```javascript
 import React from 'react';
 import StaticPageLayout from '@/components/StaticPageLayout';
 import CMSStaticPage from '@/components/CMSStaticPage';
@@ -42,4 +41,3 @@ export default async function SubscriptionPage() {
     />
   );
 }
-```

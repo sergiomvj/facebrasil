@@ -57,12 +57,17 @@ export async function POST(request: NextRequest) {
             new_level_name: newReputation.level_name
         } : null;
 
+        interface BadgeAward {
+            badge_id: string;
+            newly_earned: boolean;
+        }
+
         // Filter only newly earned badges
-        const newBadges = badgeResults?.filter((b: any) => b.newly_earned) || [];
+        const newBadges = (badgeResults as BadgeAward[])?.filter((b) => b.newly_earned) || [];
 
         // Get full badge details for new badges
         const newBadgeDetails = await Promise.all(
-            newBadges.map(async (b: any) => {
+            newBadges.map(async (b) => {
                 const { data: badge } = await supabase
                     .from('badges')
                     .select('name, description, icon, rarity')
