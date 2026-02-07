@@ -40,7 +40,7 @@ export default function AuthorsPage() {
 
             // Get article counts for each author
             const authorsWithCounts = await Promise.all(
-                (authorsData || []).map(async (author) => {
+                ((authorsData as Author[]) || []).map(async (author) => {
                     const { count } = await supabase
                         .from('articles')
                         .select('*', { count: 'exact', head: true })
@@ -67,8 +67,8 @@ export default function AuthorsPage() {
 
     async function handleCreateAuthor() {
         try {
-            const { error } = await supabase
-                .from('profiles')
+            const { error } = await (supabase
+                .from('profiles') as any)
                 .insert([{
                     id: formData.id,
                     name: formData.name,
@@ -91,8 +91,8 @@ export default function AuthorsPage() {
         if (!editingAuthor) return;
 
         try {
-            const { error } = await supabase
-                .from('profiles')
+            const { error } = await (supabase
+                .from('profiles') as any)
                 .update({
                     name: formData.name,
                     avatar_url: formData.avatar_url || null,
