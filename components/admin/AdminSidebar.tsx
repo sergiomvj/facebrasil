@@ -11,6 +11,7 @@ import {
     Video,
     Star,
     DollarSign,
+    MonitorPlay,
     Settings,
     Menu,
     X,
@@ -28,6 +29,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Artigos', href: '/admin/articles', icon: FileText },
+    { name: 'TV Facebrasil', href: '/admin/tv-facebrasil', icon: MonitorPlay },
     { name: 'Mídia', href: '/admin/media', icon: Image },
     { name: 'Categorias', href: '/admin/categories', icon: FolderOpen },
     { name: 'Autores', href: '/admin/authors', icon: Users },
