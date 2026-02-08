@@ -10,7 +10,7 @@ import XPHUD from '@/components/XPHUD';
 import { generateSlug } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from '@/i18n/routing';
-import LanguageSwitcher from './LanguageSwitcher';
+// import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar: React.FC = () => {
   const t = useTranslations('Navbar');
@@ -99,7 +99,7 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <LanguageSwitcher />
+            {/* <LanguageSwitcher /> */}
 
             {/* Theme Toggle */}
             <button
