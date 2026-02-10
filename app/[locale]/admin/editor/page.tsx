@@ -8,6 +8,9 @@ import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Link, routing } from '@/i18n/routing';
 import { upsertArticle } from '@/app/actions/article-actions';
+import { generateMetadata } from '@/app/actions/ai-actions';
+import { sendArticlesToTV } from '@/app/actions/tv-facebrasil-actions';
+import { Sparkles, MonitorPlay } from 'lucide-react';
 
 function EditorContent() {
     const router = useRouter();
@@ -16,7 +19,32 @@ function EditorContent() {
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [generatingSlug, setGeneratingSlug] = useState(false);
+    const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
     const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+
+    const handleGenerateSlug = async () => {
+        if (!content && !title) return alert('Escreva algum conteúdo ou título primeiro');
+        setGeneratingSlug(true);
+        try {
+            const result = await generateMetadata(title || content, 'slug');
+            if (result.success && result.content) setSlug(result.content);
+        } finally {
+            setGeneratingSlug(false);
+        }
+    };
+
+    const handleGenerateExcerpt = async () => {
+        if (!content) return alert('Escreva o conteúdo primeiro');
+        setGeneratingExcerpt(true);
+        try {
+            const textContent = content.replace(/<[^>]*>/g, '');
+            const result = await generateMetadata(textContent, 'excerpt');
+            if (result.success && result.content) setExcerpt(result.content);
+        } finally {
+            setGeneratingExcerpt(false);
+        }
+    };
 
     const [title, setTitle] = useState('');
     const [slug, setSlug] = useState('');
@@ -72,14 +100,34 @@ function EditorContent() {
         void loadInitialData();
     }, [articleId]);
 
+    const handleSendToTV = async () => {
+        if (!articleId) {
+            alert('Salve o artigo antes de enviar para a TV.');
+            return;
+        }
+        if (!confirm('Deseja enviar este artigo para a curadoria da TV Facebrasil?')) return;
+
+        const baseUrl = window.location.origin;
+        const result = await sendArticlesToTV([{
+            id: articleId,
+            titulo: title,
+            conteudo: content.replace(/<[^>]*>/g, ''),
+            link: `${baseUrl}/article/${slug}`
+        }]);
+
+        if (result.success) {
+            alert('Artigo enviado com sucesso para a TV Facebrasil!');
+        } else {
+            alert('Erro ao enviar para a TV: ' + result.error);
+        }
+    };
+
     const handleSave = async (targetStatus?: 'DRAFT' | 'PUBLISHED') => {
         if (!title) return alert('Title is required');
         const finalStatus = targetStatus || status;
 
         setSaving(true);
 
-        const authorId = '301a8aef-0c7f-4b8e-b517-df3ca681f4d2';
-        const blogId = '51adbeca-d41d-4bc2-9332-19f96d956921';
         const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
         const payload = {
@@ -93,8 +141,6 @@ function EditorContent() {
             status: finalStatus,
             featured_image: JSON.stringify({ url: featuredImageUrl, alt: title }),
             updated_at: new Date().toISOString(),
-            author_id: authorId,
-            blog_id: blogId,
             published_at: finalStatus === 'PUBLISHED' ? new Date().toISOString() : null,
             read_time: Math.ceil((content || '').split(' ').length / 200) || 1,
             language: articleLanguage,
@@ -138,6 +184,13 @@ function EditorContent() {
                             <option value="PUBLISHED">Published</option>
                         </select>
                     </div>
+                    <button
+                        onClick={handleSendToTV}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-white font-black transition-all text-sm"
+                    >
+                        <MonitorPlay className="w-4 h-4 text-blue-400" />
+                        Enviar para TV
+                    </button>
                     <button
                         onClick={() => handleSave()}
                         disabled={saving}
@@ -229,7 +282,17 @@ function EditorContent() {
 
                         <div className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Slug (URL)</label>
+                                <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest flex items-center justify-between">
+                                    Slug (URL)
+                                    <button
+                                        onClick={handleGenerateSlug}
+                                        disabled={generatingSlug}
+                                        className="text-[10px] text-purple-400 font-black uppercase tracking-widest flex items-center gap-1 hover:text-purple-300 transition-colors disabled:opacity-50"
+                                    >
+                                        <Sparkles className="w-2.5 h-2.5" />
+                                        {generatingSlug ? 'Gerando...' : 'IA'}
+                                    </button>
+                                </label>
                                 <input
                                     className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none"
                                     value={slug}
@@ -261,7 +324,17 @@ function EditorContent() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Excerpt / Summary</label>
+                                <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest flex items-center justify-between">
+                                    Excerpt / Summary
+                                    <button
+                                        onClick={handleGenerateExcerpt}
+                                        disabled={generatingExcerpt}
+                                        className="text-[10px] text-purple-400 font-black uppercase tracking-widest flex items-center gap-1 hover:text-purple-300 transition-colors disabled:opacity-50"
+                                    >
+                                        <Sparkles className="w-2.5 h-2.5" />
+                                        {generatingExcerpt ? 'Gerando...' : 'IA'}
+                                    </button>
+                                </label>
                                 <textarea
                                     className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white h-32 resize-none focus:outline-none leading-relaxed"
                                     value={excerpt}

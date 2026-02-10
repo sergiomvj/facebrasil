@@ -4,6 +4,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
+import { reportArticleToSEO } from '@/lib/seo-api';
 
 interface UpdateArticlePayload {
     title: string;
@@ -72,6 +73,20 @@ export async function upsertArticle(payload: UpdateArticlePayload, id?: string) 
     revalidatePath('/');
     if (result.data?.slug) {
         revalidatePath(`/article/${result.data.slug}`);
+    }
+
+    // Report to SEO API if Published
+    if (finalPayload.status === 'PUBLISHED') {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://facebrasil.com';
+        void reportArticleToSEO({
+            id: result.data.id,
+            title: result.data.title,
+            slug: result.data.slug,
+            content: result.data.content,
+            excerpt: result.data.excerpt,
+            link: `${baseUrl}/article/${result.data.slug}`,
+            category: result.data.category_id // Might need name lookup if important, but slug/link are primary
+        });
     }
 
     return { success: true, data: result.data };

@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe, Sparkles, X, BrainCircuit, Type, FileText, Languages } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { deleteArticle } from '@/app/actions/article-actions';
+import { deleteArticle, upsertArticle } from '@/app/actions/article-actions';
+import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
 
 interface ArticleListItem {
@@ -33,6 +34,74 @@ export default function ArticlesListPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLanguage, setSelectedLanguage] = useState('all');
+
+    // AI Generation Modal State
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+    const [aiTopic, setAiTopic] = useState('');
+    const [aiKeywords, setAiKeywords] = useState<string[]>([]);
+    const [aiStyle, setAiStyle] = useState('jornalístico e informativo');
+    const [aiSize, setAiSize] = useState<'small' | 'medium' | 'large'>('medium');
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [isSuggestingKeywords, setIsSuggestingKeywords] = useState(false);
+
+    const handleSuggestKeywords = async () => {
+        if (!aiTopic) return alert('Digite um tema primeiro');
+        setIsSuggestingKeywords(true);
+        try {
+            const res = await generateKeywords(aiTopic);
+            if (res.success && res.keywords) setAiKeywords(res.keywords);
+        } finally {
+            setIsSuggestingKeywords(false);
+        }
+    };
+
+    const handleGenerateArticle = async () => {
+        if (!aiTopic) return alert('Digite um tema');
+        setIsGenerating(true);
+        try {
+            const result = await generateArticle({
+                topic: aiTopic,
+                keywords: aiKeywords,
+                style: aiStyle,
+                size: aiSize,
+                language: selectedLanguage === 'all' ? 'pt' : selectedLanguage
+            });
+
+            if (result.success && result.title && result.content) {
+                // Criar Draft e redirecionar
+                const slug = result.title.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^\w\s-]/g, '')
+                    .replace(/[\s_-]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+
+                const payload = {
+                    title: result.title,
+                    slug,
+                    content: result.content,
+                    status: 'DRAFT',
+                    language: selectedLanguage === 'all' ? 'pt' : selectedLanguage,
+                    translation_group_id: crypto.randomUUID(),
+                    read_time: Math.ceil(result.content.split(' ').length / 200) || 1,
+                    updated_at: new Date().toISOString(),
+                };
+
+                const response = await upsertArticle(payload as any) as { success: boolean, data?: any, error?: string };
+
+                if (!response.success) {
+                    alert('Erro ao criar artigo: ' + response.error);
+                } else if (response.data) {
+                    window.location.href = `/admin/editor?id=${response.data.id}`;
+                }
+            } else {
+                alert('Erro na geração: ' + result.error);
+            }
+        } catch (error: any) {
+            alert('Erro crítico: ' + error.message);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     async function fetchInitialData() {
         setLoading(true);
@@ -111,13 +180,140 @@ export default function ArticlesListPage() {
                     <p className="text-slate-400 text-sm">Manage your editorial content across all languages</p>
                 </div>
 
-                <Link
-                    href="/admin/editor"
-                    className="bg-primary text-slate-900 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all w-full md:w-auto"
-                >
-                    <Plus className="w-5 h-5" /> New Article
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <button
+                        onClick={() => setIsAiModalOpen(true)}
+                        className="bg-slate-900 border border-purple-500/30 text-purple-400 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-purple-500/10 transition-all group"
+                    >
+                        <Sparkles className="w-5 h-5 group-hover:animate-pulse" /> Gerar com IA
+                    </button>
+                    <Link
+                        href="/admin/editor"
+                        className="bg-primary text-slate-900 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all"
+                    >
+                        <Plus className="w-5 h-5" /> New Article
+                    </Link>
+                </div>
             </div>
+
+            {/* AI Generation Modal */}
+            {isAiModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden scale-in-center">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-slate-950/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-500/20 rounded-lg">
+                                    <BrainCircuit className="w-6 h-6 text-purple-400" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">Gerar Artigo com IA</h2>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">GPT-4o Premium Engine</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setIsAiModalOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                <X className="w-5 h-5 text-slate-500" />
+                            </button>
+                        </div>
+
+                        <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            <div className="space-y-2">
+                                <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                    <Type className="w-3 h-3" /> Tema ou Título da Matéria
+                                </label>
+                                <input
+                                    type="text"
+                                    value={aiTopic}
+                                    onChange={(e) => setAiTopic(e.target.value)}
+                                    placeholder="Ex: O impacto da inteligência artificial no mercado imobiliário em Orlando"
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white placeholder:text-slate-600 focus:ring-1 focus:ring-purple-500/50 outline-none transition-all"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                        <FileText className="w-3 h-3" /> Palavras-chave (Opcional)
+                                    </label>
+                                    <button
+                                        onClick={handleSuggestKeywords}
+                                        disabled={isSuggestingKeywords}
+                                        className="text-[10px] font-black text-purple-400 uppercase tracking-widest hover:text-purple-300 transition-colors disabled:opacity-50"
+                                    >
+                                        {isSuggestingKeywords ? 'Sugerindo...' : 'Sugerir com IA'}
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={aiKeywords.join(', ')}
+                                    onChange={(e) => setAiKeywords(e.target.value.split(',').map(s => s.trim()))}
+                                    placeholder="Separe por vírgulas..."
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white placeholder:text-slate-600 focus:ring-1 focus:ring-purple-500/50 outline-none transition-all"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Estilo de Escrita</label>
+                                    <select
+                                        value={aiStyle}
+                                        onChange={(e) => setAiStyle(e.target.value)}
+                                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-purple-500/50 outline-none transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="jornalístico e informativo">Jornalístico (Padrão)</option>
+                                        <option value="storytelling envolvente">Storytelling</option>
+                                        <option value="técnico e detalhado">Técnico</option>
+                                        <option value="coloquial e amigável">Amigável</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Tamanho Estimado</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {(['small', 'medium', 'large'] as const).map((size) => (
+                                            <button
+                                                key={size}
+                                                onClick={() => setAiSize(size)}
+                                                className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${aiSize === size
+                                                        ? 'bg-purple-500/20 border-purple-500 text-purple-400'
+                                                        : 'bg-slate-950 border-white/5 text-slate-500 hover:border-white/10'
+                                                    }`}
+                                            >
+                                                {size === 'small' ? 'Curto' : size === 'medium' ? 'Médio' : 'Longo'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-slate-950/50 border-t border-white/5 flex gap-3">
+                            <button
+                                onClick={() => setIsAiModalOpen(false)}
+                                className="flex-1 px-6 py-4 rounded-xl border border-white/10 text-slate-400 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleGenerateArticle}
+                                disabled={isGenerating || !aiTopic}
+                                className="flex-[2] bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:from-purple-500 hover:to-blue-500 shadow-xl shadow-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 group"
+                            >
+                                {isGenerating ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Gerando Artigo...
+                                    </>
+                                ) : (
+                                    <>
+                                        🚀 Começar Geração
+                                        <Sparkles className="w-4 h-4 group-hover:animate-bounce" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Filters Row */}
             <div className="flex flex-col md:flex-row gap-4 mb-6">
