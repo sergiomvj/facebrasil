@@ -1,30 +1,23 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-function getSupabaseAdmin() {
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!url || !key) {
-        throw new Error('Supabase environment variables are missing');
-    }
-
-    return createClient(url, key);
-}
-
 export async function POST(req: Request) {
+    console.log('[Upload API] Request received');
     try {
         const formData = await req.formData();
         const file = formData.get('image') as File;
 
         if (!file) {
+            console.error('[Upload API] No image provided');
             return NextResponse.json({ error: 'No image provided' }, { status: 400 });
         }
 
+        console.log(`[Upload API] Uploading file: ${file.name} (${file.size} bytes)`);
+
         const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        const supabaseAdmin = getSupabaseAdmin();
+
         const { data, error } = await supabaseAdmin.storage
             .from('blog-assets')
             .upload(filename, file, {
@@ -32,15 +25,24 @@ export async function POST(req: Request) {
                 upsert: false
             });
 
-        if (error) throw error;
+        if (error) {
+            console.error('[Upload API] Supabase error:', error);
+            throw error;
+        }
 
-        const { data: { publicUrl } } = getSupabaseAdmin().storage
+        console.log('[Upload API] Upload successful, getting public URL...');
+
+        const { data: { publicUrl } } = supabaseAdmin.storage
             .from('blog-assets')
             .getPublicUrl(filename);
 
+        console.log('[Upload API] Success:', publicUrl);
         return NextResponse.json({ url: publicUrl });
     } catch (error: any) {
-        console.error('Upload Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('[Upload API] Catch Error:', error);
+        return NextResponse.json({
+            error: error.message || 'Erro interno no servidor de upload',
+            details: error.toString()
+        }, { status: 500 });
     }
 }
