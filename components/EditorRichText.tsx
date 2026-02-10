@@ -54,9 +54,6 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
         extensions: [
             StarterKit,
             Image,
-            Link.configure({
-                openOnClick: false,
-            }),
             Placeholder.configure({
                 placeholder: 'Write something amazing...',
             }),

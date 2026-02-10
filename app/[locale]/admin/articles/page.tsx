@@ -109,7 +109,7 @@ export default function ArticlesListPage() {
             supabase
                 .from('articles')
                 .select(`
-                    id, title, slug, status, published_at, views, created_at, language,
+                    id, title, slug, status, published_at, created_at, language,
                     author:profiles(name),
                     category:categories(name, color, slug)
                 `)
@@ -274,8 +274,8 @@ export default function ArticlesListPage() {
                                                 key={size}
                                                 onClick={() => setAiSize(size)}
                                                 className={`py-3 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${aiSize === size
-                                                        ? 'bg-purple-500/20 border-purple-500 text-purple-400'
-                                                        : 'bg-slate-950 border-white/5 text-slate-500 hover:border-white/10'
+                                                    ? 'bg-purple-500/20 border-purple-500 text-purple-400'
+                                                    : 'bg-slate-950 border-white/5 text-slate-500 hover:border-white/10'
                                                     }`}
                                             >
                                                 {size === 'small' ? 'Curto' : size === 'medium' ? 'Médio' : 'Longo'}

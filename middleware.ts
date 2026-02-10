@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 
@@ -26,6 +27,11 @@ export default clerkMiddleware(async (auth, req) => {
         if (!userId) {
             return (await auth()).redirectToSignIn();
         }
+    }
+
+    // Don't apply intl middleware to API routes
+    if (req.nextUrl.pathname.startsWith('/api')) {
+        return NextResponse.next();
     }
 
     return intlMiddleware(req);
