@@ -97,13 +97,19 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
                 method: 'POST',
                 body: formData,
             });
+
             const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || `Erro no servidor (${res.status})`);
+            }
+
             if (data.url) {
                 editor?.chain().focus().setImage({ src: data.url }).run();
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Upload error:', error);
-            alert('Failed to upload image');
+            alert(`Erro no upload: ${error.message}`);
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';

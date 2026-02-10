@@ -8,16 +8,21 @@ export interface TVArticlePayload {
 }
 
 export async function sendArticlesToTV(articles: TVArticlePayload[]) {
-    const N8N_URL = process.env.N8N_URL;
+    let webhookUrl = process.env.TV_FACEBRASIL_WEBHOOK_URL || process.env.N8N_URL;
     const N8N_API_KEY = process.env.N8N_API_KEY;
 
-    if (!N8N_URL) {
-        console.warn('N8N_URL não configurado. Artigos não enviados para a TV.');
+    if (!webhookUrl) {
+        console.warn('URL da TV Facebrasil não configurada (N8N_URL ou TV_FACEBRASIL_WEBHOOK_URL).');
         return { success: false, error: 'Webhook URL não configurada' };
     }
 
+    // Ensure the URL has the correct intake path as per docs/guia-integracao-tvfacebrasil.md
+    if (!webhookUrl.includes('/webhook/')) {
+        webhookUrl = `${webhookUrl.replace(/\/$/, '')}/webhook/facebrasil-intake`;
+    }
+
     try {
-        const response = await fetch(N8N_URL, {
+        const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
