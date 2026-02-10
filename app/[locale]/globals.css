@@ -236,3 +236,27 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #303b54;
 }
+
+/* Tiptap Editor Selection Styles */
+.ProseMirror-selectednode {
+  outline: 3px solid var(--color-primary);
+  box-shadow: 0 0 15px rgba(19, 91, 236, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ProseMirror-focused .ProseMirror-selectednode {
+  outline: 3px solid var(--color-primary);
+}
+
+.ProseMirror img {
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.ProseMirror img:hover {
+  filter: brightness(1.1);
+}
+
+.ProseMirror-selectednode img {
+  filter: brightness(1.1);
+}

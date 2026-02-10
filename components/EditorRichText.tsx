@@ -53,7 +53,12 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
     const editor = useEditor({
         extensions: [
             StarterKit,
-            Image,
+            Image.configure({
+                inline: false,
+                HTMLAttributes: {
+                    class: 'mx-auto rounded-lg shadow-xl cursor-all-scroll',
+                },
+            }),
             Placeholder.configure({
                 placeholder: 'Write something amazing...',
             }),
