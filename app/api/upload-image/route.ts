@@ -1,10 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const dynamic = 'force-dynamic';
+
+function getSupabaseAdmin() {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+        throw new Error('Supabase environment variables are missing');
+    }
+
+    return createClient(url, key);
+}
 
 export async function POST(req: Request) {
     try {
@@ -16,6 +24,7 @@ export async function POST(req: Request) {
         }
 
         const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const supabaseAdmin = getSupabaseAdmin();
         const { data, error } = await supabaseAdmin.storage
             .from('blog-assets')
             .upload(filename, file, {
@@ -25,7 +34,7 @@ export async function POST(req: Request) {
 
         if (error) throw error;
 
-        const { data: { publicUrl } } = supabaseAdmin.storage
+        const { data: { publicUrl } } = getSupabaseAdmin().storage
             .from('blog-assets')
             .getPublicUrl(filename);
 

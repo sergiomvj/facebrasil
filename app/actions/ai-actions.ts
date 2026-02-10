@@ -1,8 +1,10 @@
 import { OpenAI } from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAI() {
+    return new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+}
 
 export interface GenerateArticleOptions {
     topic: string;
@@ -29,7 +31,7 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
         O tamanho aproximado deve ser de ${wordCount} palavras.
         Retorne no formato JSON com as chaves "title" e "content" (em HTML semântico).`;
 
-        const completion = await openai.chat.completions.create({
+        const completion = await getOpenAI().chat.completions.create({
             model: 'gpt-4o',
             messages: [
                 { role: 'system', content: 'Você é um assistente especializado em criar artigos de alta qualidade para blogs. Sempre retorne JSON válido.' },
@@ -58,7 +60,7 @@ export async function generateKeywords(topic: string): Promise<{ success: boolea
     try {
         const prompt = `Sugira 5 a 8 palavras-chave relevantes (SEO) para o tema: "${topic}". Retorne apenas um array JSON de strings.`;
 
-        const completion = await openai.chat.completions.create({
+        const completion = await getOpenAI().chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
@@ -81,7 +83,7 @@ export async function generateMetadata(content: string, type: 'slug' | 'excerpt'
         if (type === 'excerpt') prompt = `Gere um resumo curto (máximo 160 caracteres) para este conteúdo: "${content.substring(0, 1000)}".`;
         if (type === 'social_summary') prompt = `Gere uma legenda cativante para Instagram/Social Media baseada neste conteúdo: "${content.substring(0, 1000)}". Máximo 150 palavras.`;
 
-        const completion = await openai.chat.completions.create({
+        const completion = await getOpenAI().chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'user', content: prompt }],
         });
