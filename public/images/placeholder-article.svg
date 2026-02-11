@@ -1,0 +1,27 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="500" fill="#f8fafc"/>
+  <defs>
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#ff9d00" />
+      <stop offset="100%" stopColor="#f97316" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(400, 250) scale(6)">
+    <path 
+      d="M0 16.7l-2.9-2.63C-13.2 4.72-20 -1.45-20-9C-20-15.17-15.17-20-9-20c3.48 0 6.82 1.62 9 4.17 2.18-2.55 5.52-4.17 9-4.17 6.17 0 11 4.83 11 11 0 7.55-6.8 13.72-17.1 23.08L0 16.7z" 
+      fill="url(#heartGradient)"
+    />
+    <text 
+      x="0" 
+      y="2" 
+      fill="white" 
+      font-size="14" 
+      font-weight="900" 
+      font-family="sans-serif" 
+      text-anchor="middle"
+      style="letter-spacing: -1px"
+    >
+      FB
+    </text>
+  </g>
+</svg>

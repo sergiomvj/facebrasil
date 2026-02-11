@@ -10,6 +10,7 @@ import SocialShareBar from '@/components/SocialShareBar';
 import { fetchPost, fetchPosts } from '@/lib/blog-service';
 import { getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
+import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
 
 interface PageProps {
     params: Promise<{
@@ -62,7 +63,7 @@ export default async function ArticlePage({ params }: PageProps) {
             <div className="relative h-[60vh] w-full">
                 <div
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${article.featuredImage.url}')` }}
+                    style={{ backgroundImage: `url('${article.featuredImage?.url || FALLBACK_ARTICLE_IMAGE}')` }}
                 ></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
 

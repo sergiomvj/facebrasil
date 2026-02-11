@@ -92,8 +92,31 @@ export const EDITIONS: Edition[] = [
   }
 ];
 
+export const FALLBACK_ARTICLE_IMAGE = '/images/placeholder-article.svg';
+
 export const LogoSVG = ({ className }: { className?: string }) => (
-  <svg fill="none" viewBox="0 0 48 48" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+  <svg viewBox="0 0 48 48" className={className} xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#ff9d00" />
+        <stop offset="100%" stopColor="#f97316" />
+      </linearGradient>
+    </defs>
+    <path
+      d="M24 42.7l-2.9-2.63C10.8 30.72 4 24.55 4 17C4 10.83 8.83 6 15 6c3.48 0 6.82 1.62 9 4.17 2.18-2.55 5.52-4.17 9-4.17 6.17 0 11 4.83 11 11 0 7.55-6.8 13.72-17.1 23.08L24 42.7z"
+      fill="url(#heartGradient)"
+    />
+    <text
+      x="24"
+      y="28"
+      fill="white"
+      fontSize="14"
+      fontWeight="900"
+      fontFamily="Inter, sans-serif"
+      textAnchor="middle"
+      style={{ letterSpacing: '-1px' }}
+    >
+      FB
+    </text>
   </svg>
 );

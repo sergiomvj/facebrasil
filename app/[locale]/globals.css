@@ -94,8 +94,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* Brand Blue #135bec approx match */
-  --primary: #135bec;
+  /* Brand Orange #F97316 match */
+  --primary: #f97316;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -131,7 +131,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: #151b2b;
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #135bec;
+  --primary: #f97316;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);

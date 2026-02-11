@@ -5,6 +5,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { BlogPost } from '@/lib/fbr-types';
 import Link from 'next/link';
 import { Clock, TrendingUp } from 'lucide-react';
+import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
 
 interface FeaturedCarouselProps {
     posts: BlogPost[];
@@ -36,7 +37,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ posts }) => {
                                     <div className="flex items-start gap-4">
                                         <div
                                             className="w-20 h-20 rounded-lg bg-cover bg-center flex-shrink-0 bg-slate-700"
-                                            style={{ backgroundImage: `url('${post.featuredImage.url}')` }}
+                                            style={{ backgroundImage: `url('${post.featuredImage?.url || FALLBACK_ARTICLE_IMAGE}')` }}
                                         ></div>
                                         <div className="flex-1 min-w-0">
                                             <span className="text-[10px] uppercase font-bold text-blue-400 mb-1 block truncate">
@@ -65,7 +66,7 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ posts }) => {
                         <div className="bg-slate-800/80 backdrop-blur-md border border-white/10 rounded-xl p-3 flex items-center gap-4 hover:bg-slate-800 transition-colors">
                             <div
                                 className="w-16 h-16 rounded-lg bg-cover bg-center flex-shrink-0 bg-slate-700"
-                                style={{ backgroundImage: `url('${post.featuredImage.url}')` }}
+                                style={{ backgroundImage: `url('${post.featuredImage?.url || FALLBACK_ARTICLE_IMAGE}')` }}
                             ></div>
                             <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-bold text-white leading-tight mb-1 line-clamp-2">

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/lib/fbr-types';
+import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
 
 interface HeroProps {
   post: BlogPost | null;
@@ -15,7 +16,7 @@ const Hero: React.FC<HeroProps> = ({ post }) => {
   }
 
   // Fallback image source if featuredImage is missing or empty
-  const imageUrl = post.featuredImage?.url || 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?q=80&w=2670&auto=format&fit=crop';
+  const imageUrl = post.featuredImage?.url || FALLBACK_ARTICLE_IMAGE;
 
   // Categories fallback
   const categoryName = post.categories?.[0] || 'Destaque';
