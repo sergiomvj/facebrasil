@@ -38,11 +38,18 @@ export default function AdminDashboard() {
 
     async function fetchDashboardData() {
         setLoading(true);
+        console.log('[Dashboard] Fetching data...');
 
         // Fetch article stats
-        const { data: articles } = await supabase
+        const { data: articles, error: articlesError } = await supabase
             .from('articles')
             .select('id, status, views');
+        
+        if (articlesError) {
+            console.error('[Dashboard] Error fetching articles:', articlesError);
+        } else {
+            console.log('[Dashboard] Articles fetched:', articles?.length || 0);
+        }
 
         const totalArticles = articles?.length || 0;
         const publishedArticles = articles?.filter(a => a.status === 'PUBLISHED').length || 0;
@@ -50,22 +57,30 @@ export default function AdminDashboard() {
         const totalViews = articles?.reduce((sum, a) => sum + (a.views || 0), 0) || 0;
 
         // Fetch pending videos
-        const { data: videos } = await supabase
+        const { data: videos, error: videosError } = await supabase
             .from('user_video_reports')
             .select('id')
             .eq('status', 'PENDING');
+        
+        if (videosError) {
+            console.error('[Dashboard] Error fetching videos:', videosError);
+        }
 
         const pendingVideos = videos?.length || 0;
 
         // Fetch categories
-        const { data: categories } = await supabase
+        const { data: categories, error: categoriesError } = await supabase
             .from('categories')
             .select('id');
+        
+        if (categoriesError) {
+            console.error('[Dashboard] Error fetching categories:', categoriesError);
+        }
 
         const activeCategories = categories?.length || 0;
 
         // Fetch recent articles
-        const { data: recent } = await supabase
+        const { data: recent, error: recentError } = await supabase
             .from('articles')
             .select(`
         id, title, slug, status, created_at,
@@ -73,8 +88,23 @@ export default function AdminDashboard() {
       `)
             .order('created_at', { ascending: false })
             .limit(5);
+        
+        if (recentError) {
+            console.error('[Dashboard] Error fetching recent articles:', recentError);
+        }
 
-        setStats({
+        const finalStats = {
+            totalArticles,
+            publishedArticles,
+            draftArticles,
+            totalViews,
+            pendingVideos,
+            activeCategories,
+        };
+        
+        console.log('[Dashboard] Final stats:', finalStats);
+
+        setStats(finalStats);
             totalArticles,
             publishedArticles,
             draftArticles,
