@@ -50,6 +50,11 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
     const [generatingSocial, setGeneratingSocial] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const extractFirstImage = (html: string) => {
+        const match = html.match(/<img[^>]+src="([^">]+)"/);
+        return match ? match[1] : undefined;
+    };
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -71,18 +76,21 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
         },
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
-            onChange?.(html, socialSummary, instagramUrl);
+            const firstImage = extractFirstImage(html);
+            onChange?.(html, socialSummary, instagramUrl, firstImage);
         },
         immediatelyRender: false,
     });
 
     const handleSocialChange = (key: 'summary' | 'url', value: string) => {
+        const html = editor?.getHTML() || '';
+        const firstImage = extractFirstImage(html);
         if (key === 'summary') {
             setSocialSummary(value);
-            onChange?.(editor?.getHTML() || '', value, instagramUrl);
+            onChange?.(html, value, instagramUrl, firstImage);
         } else {
             setInstagramUrl(value);
-            onChange?.(editor?.getHTML() || '', socialSummary, value);
+            onChange?.(html, socialSummary, value, firstImage);
         }
     };
 
@@ -128,7 +136,8 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
             const result = await generateMetadata(textContent, 'social_summary');
             if (result.success && result.content) {
                 setSocialSummary(result.content);
-                onChange?.(htmlContent, result.content, instagramUrl);
+                const firstImage = extractFirstImage(htmlContent);
+                onChange?.(htmlContent, result.content, instagramUrl, firstImage);
             }
         } finally {
             setGeneratingSocial(false);

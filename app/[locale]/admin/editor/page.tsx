@@ -216,10 +216,14 @@ function EditorContent() {
                         content={content}
                         initialSocialSummary={socialSummary}
                         initialInstagramUrl={instagramUrl}
-                        onChange={(html, summary, url) => {
+                        onChange={(html, summary, url, firstImageUrl) => {
                             setContent(html);
                             setSocialSummary(summary);
                             setInstagramUrl(url);
+                            // Auto-fill featured image if empty and we found one in content
+                            if (!featuredImageUrl && firstImageUrl) {
+                                setFeaturedImageUrl(firstImageUrl);
+                            }
                         }}
                     />
                 </div>

@@ -43,6 +43,8 @@ CREATE TABLE public.articles (
   original_source text,
   ai_context jsonb,
   news_queue_id uuid,
+  language text DEFAULT 'pt'::text,
+  translation_group_id uuid DEFAULT gen_random_uuid(),
   CONSTRAINT articles_pkey PRIMARY KEY (id),
   CONSTRAINT articles_author_id_fkey FOREIGN KEY (author_id) REFERENCES public.profiles(id),
   CONSTRAINT articles_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id),
