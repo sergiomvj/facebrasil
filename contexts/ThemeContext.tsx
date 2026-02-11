@@ -21,11 +21,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Load theme from localStorage or default to dark
         const savedTheme = localStorage.getItem('theme') as Theme | null;
-        if (savedTheme) {
+        if (savedTheme && savedTheme !== 'dark') {
             setTheme(savedTheme);
-            document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+            document.documentElement.classList.remove('light', 'dark'); // Clear existing classes
+            document.documentElement.classList.add(savedTheme);
         } else {
-            // Default to dark mode
+            setTheme('dark');
+            document.documentElement.classList.remove('light', 'dark'); // Clear existing classes
             document.documentElement.classList.add('dark');
         }
     }, []);

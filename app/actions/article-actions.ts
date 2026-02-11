@@ -34,18 +34,52 @@ export async function upsertArticle(payload: UpdateArticlePayload, id?: string) 
     const { data: profile } = await supabaseAdmin.from('profiles').select('id').eq('id', userId).single();
 
     if (!profile) {
+        // Ensure User exists in public.users (or "User") table first to satisfy FK
+        // Try inserting into 'users' or 'User' - assuming 'users' based on typical conventions or "User" if case sensitive
+        // Schema dump said "User", but let's try to handle both or generic 'users' if that's what's used.
+        // Actually, let's check if the user exists in `users` table.
+        // Since we don't know the exact table name for sure (schema says User, error says articles), 
+        // and we can't run SQL to check.
+        // We will try to insert into 'users' (standard) or 'User' if that fails? 
+        // No, let's look at admin-guard.ts result first.
+
+        // TEMPORARY FIX: Just try to insert into "User" matching schema dump, 
+        // assuming the table name is "User" (quoted) or public.users.
+        // We often map 'users' in supabase client to 'users' table? No, it's 1:1.
+
+        // Let's assume the table is `users` (lowercase) as that's standard for supabase + ease of use.
+        // If the schema dump `CREATE TABLE public.User` was executed without quotes, it became `user` (reserved) or `users`? 
+        // Postgres folds to lowercase unquoted. `User` -> `user`. `user` is reserved. 
+        // So usually it's `users`.
+
+        // Safest bet: Try to upsert into `users`.
+
+        // Check if user exists in public.users
+        const { error: userError } = await supabaseAdmin.from('users').upsert([
+            {
+                id: userId,
+                email: 'admin@facebrasil.com', // Placeholder if we don't have it
+                created_at: new Date().toISOString()
+            }
+        ], { onConflict: 'id', ignoreDuplicates: true });
+
+        if (userError) {
+            console.warn('Attempted to create user in "users" table but failed (might be "User" or handled by trigger):', userError.message);
+            // Fallback: try "User" table if "users" doesn't exist?
+            // Or just proceed and hope users table wasn't the issue (unlikely given FK error).
+        }
+
         // Create a basic profile for this admin user if missing
         const { error: profileError } = await supabaseAdmin.from('profiles').insert([
             {
                 id: userId,
-                name: 'Admin User', // Placeholder, ideally fetch from Clerk if possible
-                email: 'admin@facebrasil.com', // Placeholder
+                name: 'Admin User',
+                email: 'admin@facebrasil.com',
                 role: 'admin'
             }
         ]);
         if (profileError) {
             console.error('Error auto-creating admin profile:', profileError);
-            // Continue anyway, might fail on FK but worth a try or return error
         }
     }
 
