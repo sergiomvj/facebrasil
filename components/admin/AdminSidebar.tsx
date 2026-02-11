@@ -51,7 +51,7 @@ export default function AdminSidebar() {
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg dark:bg-slate-800 bg-white border dark:border-white/10 border-gray-200 shadow-lg"
+                className="lg:hidden fixed top-4 left-4 z-[70] p-2 rounded-lg dark:bg-slate-800 bg-white border dark:border-white/10 border-gray-200 shadow-lg"
             >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -59,7 +59,7 @@ export default function AdminSidebar() {
             {/* Overlay for mobile */}
             {isOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 bg-black/50 z-30"
+                    className="lg:hidden fixed inset-0 bg-black/50 z-[55]"
                     onClick={() => setIsOpen(false)}
                 />
             )}
@@ -67,7 +67,7 @@ export default function AdminSidebar() {
             {/* Sidebar */}
             <aside
                 className={`
-          fixed top-0 left-0 h-screen dark:bg-slate-900 bg-white border-r dark:border-white/10 border-gray-200 z-40
+          fixed top-0 left-0 h-screen dark:bg-slate-900 bg-white border-r dark:border-white/10 border-gray-200 z-[60]
           transition-all duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${isCollapsed ? 'w-20' : 'w-64'}
