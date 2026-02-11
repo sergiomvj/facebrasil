@@ -3,7 +3,7 @@ import StaticPageLayout from '@/components/StaticPageLayout';
 import CMSStaticPage from '@/components/CMSStaticPage';
 import { getTranslations } from 'next-intl/server';
 
-export default async function PrivacyPage({ params }: { params: { locale: string } }) {
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     const t = await getTranslations('Privacy');
 

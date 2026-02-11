@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import CMSStaticPage from '@/components/CMSStaticPage';
 import { getTranslations } from 'next-intl/server';
 
-export default async function ContactPage({ params }: { params: { locale: string } }) {
+export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     const t = await getTranslations('Contact');
 

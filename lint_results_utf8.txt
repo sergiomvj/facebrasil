@@ -1,0 +1,358 @@
+﻿
+> temp_next_app@0.1.0 lint
+> eslint
+
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\ads\page.tsx
+  236:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  285:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\articles\page.tsx
+   5:117  warning  'Languages' is defined but never used     @typescript-eslint/no-unused-vars
+  89:65   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  89:100  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:25   error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\authors\page.tsx
+    5:10  warning  'Users' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   71:38  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   95:38  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  197:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\categories\page.tsx
+   1:1   error  Do not use "@ts-nocheck" because it alters compilation errors                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/ban-ts-comment
+  31:14  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\categories\page.tsx:31:14
+  29 |
+  30 |     useEffect(() => {
+> 31 |         void fetchCategories();
+     |              ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  32 |     }, []);
+  33 |
+  34 |     const handleSave = async () => {  react-hooks/set-state-in-effect
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\daily-hero\page.tsx
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\editor\page.tsx
+    1:1   error    Do not use "@ts-nocheck" because it alters compilation errors                                                       @typescript-eslint/ban-ts-comment
+   88:26  warning  'e' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+  101:8   warning  React Hook useEffect has a missing dependency: 'loadInitialData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\events\page.tsx
+   1:1   error    Do not use "@ts-nocheck" because it alters compilation errors                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/ban-ts-comment
+  45:14  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\events\page.tsx:45:14
+  43 |
+  44 |     useEffect(() => {
+> 45 |         void fetchEvents();
+     |              ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  46 |     }, [filter]);
+  47 |
+  48 |     const updateStatus = async (id: string, status: 'approved' | 'rejected') => {  react-hooks/set-state-in-effect
+  46:8   warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\media\page.tsx
+   48:14  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\media\page.tsx:48:14
+  46 |
+  47 |     useEffect(() => {
+> 48 |         void fetchMedia();
+     |              ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |     }, []);
+  50 |
+  51 |     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {  react-hooks/set-state-in-effect
+  168:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @next/next/no-img-element
+  234:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @next/next/no-img-element
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\page.tsx
+   1:1   error    Do not use "@ts-nocheck" because it alters compilation errors                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/ban-ts-comment
+  91:14  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\page.tsx:91:14
+  89 |
+  90 |     useEffect(() => {
+> 91 |         void fetchDashboardData();
+     |              ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  92 |     }, []);
+  93 |
+  94 |     const statCards = [  react-hooks/set-state-in-effect
+  92:8   warning  React Hook useEffect has a missing dependency: 'fetchDashboardData'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react-hooks/exhaustive-deps
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\pages\[id]\page.tsx
+  46:8  warning  React Hook useEffect has a missing dependency: 'loadPage'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\tv-facebrasil\page.tsx
+   41:14   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\tv-facebrasil\page.tsx:41:14
+  39 |
+  40 |     useEffect(() => {
+> 41 |         void fetchArticles();
+     |              ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  42 |     }, []);
+  43 |
+  44 |     const toggleSelection = (id: string) => {  react-hooks/set-state-in-effect
+  191:88   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+  191:101  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             react/no-unescaped-entities
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\video-reports\page.tsx
+  42:14  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\admin\video-reports\page.tsx:42:14
+  40 |
+  41 |     useEffect(() => {
+> 42 |         void fetchVideos();
+     |              ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  43 |     }, [filter]);
+  44 |
+  45 |     const updateStatus = async (id: string, status: 'APPROVED' | 'REJECTED') => {  react-hooks/set-state-in-effect
+  43:8   warning  React Hook useEffect has a missing dependency: 'fetchVideos'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+
+C:\Projetos\NovaFacebrasil\app\[locale]\article\[id]\page.tsx
+  2:22  warning  'BookOpen' is defined but never used     @typescript-eslint/no-unused-vars
+  5:8   warning  'AIAssistant' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\app\[locale]\category\[slug]\page.tsx
+   1:1   error    Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  28:11  warning  't' is assigned a value but never used                         @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\app\[locale]\dashboard\page.tsx
+   6:20  warning  'Heart' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   7:8   warning  'Link' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  23:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Projetos\NovaFacebrasil\app\[locale]\eu-reporter\page.tsx
+   1:1   error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  47:23  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\[locale]\eu-reporter\videos\page.tsx
+  52:14  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\app\[locale]\eu-reporter\videos\page.tsx:52:14
+  50 |
+  51 |     useEffect(() => {
+> 52 |         void fetchVideos();
+     |              ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  53 |     }, []);
+  54 |
+  55 |     const filteredVideos = videos.filter(video => {  react-hooks/set-state-in-effect
+
+C:\Projetos\NovaFacebrasil\app\[locale]\events\page.tsx
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\[locale]\events\submit\page.tsx
+  1:1   error    Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  8:20  warning  'MapPin' is defined but never used                             @typescript-eslint/no-unused-vars
+  8:28  warning  'Clock' is defined but never used                              @typescript-eslint/no-unused-vars
+  8:35  warning  'User' is defined but never used                               @typescript-eslint/no-unused-vars
+  8:41  warning  'Mail' is defined but never used                               @typescript-eslint/no-unused-vars
+  8:47  warning  'Phone' is defined but never used                              @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\app\[locale]\gamification\page.tsx
+  5:10  warning  'Trophy' is defined but never used  @typescript-eslint/no-unused-vars
+  5:50  warning  'Star' is defined but never used    @typescript-eslint/no-unused-vars
+  6:10  warning  'useXP' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\app\[locale]\layout.tsx
+   1:15  warning  'Metadata' is defined but never used                                                                                                                             @typescript-eslint/no-unused-vars
+  37:43  error    Unexpected any. Specify a different type                                                                                                                         @typescript-eslint/no-explicit-any
+  50:13  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+C:\Projetos\NovaFacebrasil\app\actions\ad-actions.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\actions\ai-actions.ts
+  55:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  76:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  94:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\actions\article-actions.ts
+   1:1   error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  18:22  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  53:25  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\actions\tv-facebrasil-actions.ts
+  43:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\actions\video-actions.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\api\articles\new\route.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\api\articles\route.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\api\context\[id]\route.ts
+   1:1   error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  14:12  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\api\gamification\xp\route.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\app\api\leaderboard\route.ts
+   1:1   error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  48:54  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  80:59  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  87:66  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\api\upload-image\route.ts
+  21:17  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  41:21  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\app\api\user\achievement\route.ts
+   1:1   error    Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  15:28  warning  'request' is defined but never used                            @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\app\api\user\reaction\route.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\components\AdSpace.tsx
+  13:70  warning  'categoryId' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\components\CMSStaticPage.tsx
+  4:10  warning  'notFound' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\components\EditorRichText.tsx
+    6:8   warning  'Link' is defined but never used          @typescript-eslint/no-unused-vars
+    8:51  warning  'LinkIcon' is defined but never used      @typescript-eslint/no-unused-vars
+  120:25  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\components\FBRNewsSection.tsx
+  2:10  warning  'Newspaper' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\components\Hero.tsx
+  29:9   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  80:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  90:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Projetos\NovaFacebrasil\components\LanguageSwitcher.tsx
+  4:34  warning  'routing' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\components\Navbar.tsx
+  10:10  warning  'generateSlug' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\components\XPHUD.tsx
+  7:25  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\contexts\ThemeContext.tsx
+  25:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\contexts\ThemeContext.tsx:25:13
+  23 |         const savedTheme = localStorage.getItem('theme') as Theme | null;
+  24 |         if (savedTheme) {
+> 25 |             setTheme(savedTheme);
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |             document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  27 |         } else {
+  28 |             // Default to dark mode  react-hooks/set-state-in-effect
+
+C:\Projetos\NovaFacebrasil\diagnose_articles.ts
+   9:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  10:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\i18n\request.ts
+   6:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\ad-service.ts
+   1:1   error    Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+  19:17  error    'query' is never reassigned. Use 'const' instead               prefer-const
+  19:17  warning  'query' is assigned a value but never used                     @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\lib\admin-guard.ts
+  16:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\blog-service.ts
+   68:54  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   90:37  warning  'language' is defined but never used                    @typescript-eslint/no-unused-vars
+   95:17  error    'heroQuery' is never reassigned. Use 'const' instead    prefer-const
+  115:18  warning  'innerError' is defined but never used                  @typescript-eslint/no-unused-vars
+  121:13  error    'latestQuery' is never reassigned. Use 'const' instead  prefer-const
+  135:42  warning  'latestError' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  149:61  warning  'language' is defined but never used                    @typescript-eslint/no-unused-vars
+  150:9   error    'query' is never reassigned. Use 'const' instead        prefer-const
+  180:47  warning  'language' is defined but never used                    @typescript-eslint/no-unused-vars
+  181:9   error    'query' is never reassigned. Use 'const' instead        prefer-const
+  204:32  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  210:18  warning  'e' is defined but never used                           @typescript-eslint/no-unused-vars
+  237:31  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\seo-api.ts
+  37:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\static-pages-service.ts
+  1:1  error  Do not use "@ts-nocheck" because it alters compilation errors  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\lib\supabase-admin.ts
+  10:13  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  33:9   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\lib\supabase.ts
+  12:13  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  27:9   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Projetos\NovaFacebrasil\lib\utils.ts
+  46:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\migration\src\scrape-images.js
+  82:26  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 122 problems (71 errors, 51 warnings)
+  5 errors and 0 warnings potentially fixable with the `--fix` option.
+

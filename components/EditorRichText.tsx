@@ -12,7 +12,7 @@ import { generateMetadata } from '@/app/actions/ai-actions';
 
 interface EditorRichTextProps {
     content?: string;
-    onChange?: (html: string, socialSummary: string, instagramUrl: string) => void;
+    onChange?: (html: string, socialSummary: string, instagramUrl: string, firstImage?: string) => void;
     initialSocialSummary?: string;
     initialInstagramUrl?: string;
 }
