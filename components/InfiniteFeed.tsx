@@ -5,21 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ArticleCard from './ArticleCard';
 import { supabase } from '@/lib/supabase';
 import { Loader2, RefreshCw } from 'lucide-react';
+import { BlogPost } from '@/lib/fbr-types';
+import { mapRowToBlogPost } from '@/lib/blog-service';
 
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  featured_image: string | { url: string; alt?: string };
-  category?: { name: string; slug: string };
-  author?: { name: string };
-  created_at: string;
-  status: string;
-}
+
 
 interface InfiniteFeedProps {
-  initialArticles: Article[];
+  initialArticles: BlogPost[];
   category?: string;
   excludeIds?: string[];
   postsPerPage?: number;
@@ -31,7 +23,7 @@ export default function InfiniteFeed({
   excludeIds = [],
   postsPerPage = 6
 }: InfiniteFeedProps) {
-  const [articles, setArticles] = useState<Article[]>(initialArticles);
+  const [articles, setArticles] = useState<BlogPost[]>(initialArticles);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -47,19 +39,13 @@ export default function InfiniteFeed({
 
     try {
       const excludeIdList = [...excludeIds, ...articles.map(a => a.id)];
-      
+
       let query = supabase
         .from('articles')
         .select(`
-          id,
-          title,
-          slug,
-          excerpt,
-          featured_image,
-          created_at,
-          status,
+          *,
           category:categories(name, slug),
-          author:profiles(name)
+          author:profiles(name, avatar_url)
         `)
         .eq('status', 'PUBLISHED')
         .not('id', 'in', `(${excludeIdList.join(',')})`)
@@ -76,7 +62,7 @@ export default function InfiniteFeed({
         throw supabaseError;
       }
 
-      const newArticles = (data || []) as Article[];
+      const newArticles = (data || []).map(row => mapRowToBlogPost(row));
 
       if (newArticles.length === 0) {
         setHasMore(false);
@@ -137,7 +123,7 @@ export default function InfiniteFeed({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ 
+              transition={{
                 duration: 0.4,
                 delay: index < initialArticles.length ? 0 : (index % postsPerPage) * 0.1
               }}

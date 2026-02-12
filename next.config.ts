@@ -5,24 +5,24 @@ const withNextIntl = createNextIntlPlugin(
   './i18n/request.ts'
 );
 
-const nextConfig: NextConfig = {
-  output: 'standalone',
+const nextConfig = {
+  output: 'standalone' as const,
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: 'https' as const,
         hostname: 'images.unsplash.com',
       },
       {
-        protocol: 'https',
+        protocol: 'https' as const,
         hostname: '**.supabase.co',
       },
       {
-        protocol: 'https',
+        protocol: 'https' as const,
         hostname: 'lh3.googleusercontent.com',
       },
       {
-        protocol: 'https',
+        protocol: 'https' as const,
         hostname: 'picsum.photos',
       },
     ],

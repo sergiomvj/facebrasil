@@ -201,7 +201,7 @@ export async function fetchPost(slug: string, language?: string): Promise<BlogPo
 
 
 
-function mapRowToBlogPost(row: any): BlogPost {
+export function mapRowToBlogPost(row: any): BlogPost {
     let featuredImage = { url: '', alt: '', width: 800, height: 600 };
     if (row.featured_image) {
         try {

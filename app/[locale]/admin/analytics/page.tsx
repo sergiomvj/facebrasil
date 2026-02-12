@@ -2,27 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  LineChart, 
-  Line, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell
 } from 'recharts';
-import { 
-  TrendingUp, 
-  Users, 
-  Eye, 
-  FileText, 
+import {
+  TrendingUp,
+  Users,
+  Eye,
+  FileText,
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
@@ -83,7 +83,7 @@ export default function AnalyticsDashboard() {
 
       // Agrupar por categoria
       const categoryMap = new Map<string, number>();
-      articles?.forEach(article => {
+      articles?.forEach((article: any) => {
         const catName = article.category?.name || 'Sem categoria';
         categoryMap.set(catName, (categoryMap.get(catName) || 0) + 1);
       });
@@ -94,14 +94,14 @@ export default function AnalyticsDashboard() {
         .slice(0, 6);
 
       // Top artigos
-      const topArticles = articles?.slice(0, 5).map(a => ({
+      const topArticles = articles?.slice(0, 5).map((a: any) => ({
         title: a.title,
         views: a.views || 0,
         slug: a.slug
       })) || [];
 
       // Estatísticas
-      const totalViews = articles?.reduce((sum, a) => sum + (a.views || 0), 0) || 0;
+      const totalViews = articles?.reduce((sum, a: any) => sum + (a.views || 0), 0) || 0;
       const totalArticles = articles?.length || 0;
 
       setData({
@@ -145,18 +145,17 @@ export default function AnalyticsDashboard() {
           <h1 className="text-3xl font-black text-white mb-2">Analytics</h1>
           <p className="text-slate-400">Métricas e estatísticas do portal</p>
         </div>
-        
+
         {/* Period Selector */}
         <div className="flex bg-slate-900 rounded-lg p-1">
           {(['7d', '30d', '90d'] as const).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                period === p 
-                  ? 'bg-primary text-white' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${period === p
+                ? 'bg-primary text-white'
+                : 'text-slate-400 hover:text-white'
+                }`}
             >
               {p === '7d' ? '7 dias' : p === '30d' ? '30 dias' : '90 dias'}
             </button>
@@ -215,27 +214,27 @@ export default function AnalyticsDashboard() {
               <AreaChart data={data.viewsOverTime}>
                 <defs>
                   <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
                 <YAxis stroke="#9CA3AF" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: 'none', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1F2937',
+                    border: 'none',
                     borderRadius: '8px',
                     color: '#fff'
-                  }} 
+                  }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="views" 
-                  stroke="#3B82F6" 
-                  fillOpacity={1} 
-                  fill="url(#colorViews)" 
+                <Area
+                  type="monotone"
+                  dataKey="views"
+                  stroke="#3B82F6"
+                  fillOpacity={1}
+                  fill="url(#colorViews)"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -271,10 +270,10 @@ export default function AnalyticsDashboard() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: 'none', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1F2937',
+                    border: 'none',
                     borderRadius: '8px',
                     color: '#fff'
                   }}
@@ -286,8 +285,8 @@ export default function AnalyticsDashboard() {
           <div className="flex flex-wrap justify-center gap-2 mt-4">
             {data.articlesByCategory.map((cat, index) => (
               <div key={cat.name} className="flex items-center gap-1 text-xs">
-                <div 
-                  className="w-3 h-3 rounded-full" 
+                <div
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
                 <span className="text-slate-400">{cat.name}</span>
@@ -310,20 +309,19 @@ export default function AnalyticsDashboard() {
             Artigos Mais Lidos
           </h3>
         </div>
-        
+
         <div className="space-y-4">
           {data.topArticles.map((article, index) => (
-            <div 
+            <div
               key={article.slug}
               className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl hover:bg-slate-800 transition-colors"
             >
               <div className="flex items-center gap-4">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${
-                  index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
                   index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                  index === 2 ? 'bg-orange-600/20 text-orange-400' :
-                  'bg-slate-700 text-slate-400'
-                }`}>
+                    index === 2 ? 'bg-orange-600/20 text-orange-400' :
+                      'bg-slate-700 text-slate-400'
+                  }`}>
                   {index + 1}
                 </div>
                 <div>
@@ -343,17 +341,17 @@ export default function AnalyticsDashboard() {
   );
 }
 
-function StatCard({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
-  color 
-}: { 
-  title: string; 
-  value: string; 
-  change: number; 
-  icon: any; 
+function StatCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  color
+}: {
+  title: string;
+  value: string;
+  change: number;
+  icon: any;
   color: 'blue' | 'green' | 'yellow' | 'red';
 }) {
   const colors = {
@@ -378,10 +376,9 @@ function StatCard({
           <Icon className="w-6 h-6" />
         </div>
       </div>
-      
-      <div className={`flex items-center gap-1 mt-4 text-sm ${
-        change >= 0 ? 'text-green-400' : 'text-red-400'
-      }`}>
+
+      <div className={`flex items-center gap-1 mt-4 text-sm ${change >= 0 ? 'text-green-400' : 'text-red-400'
+        }`}>
         {change >= 0 ? (
           <ArrowUpRight className="w-4 h-4" />
         ) : (
