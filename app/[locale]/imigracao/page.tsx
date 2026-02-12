@@ -2,17 +2,21 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Passport, 
-  FileCheck, 
-  Briefcase, 
+import {
+  IdCard,
+  FileCheck,
+  Briefcase,
   GraduationCap,
   Users,
   Scale,
   ArrowRight,
   Star,
   Shield,
-  Clock
+  Clock,
+  Target,
+  FileText,
+  DollarSign,
+  Building
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -39,7 +43,7 @@ export default function ImigracaoPage() {
       description: 'Para estudar em universidades ou escolas de inglês',
       requirements: ['Carta da instituição', 'Comprovação financeira', 'Inglês básico'],
       duration: 'Duração do curso',
-        color: 'bg-purple-500',
+      color: 'bg-purple-500',
       popular: false
     },
     {
@@ -127,10 +131,10 @@ export default function ImigracaoPage() {
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ 
-              backgroundImage: 'url(https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?w=1920&q=80)' 
+            style={{
+              backgroundImage: 'url(https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?w=1920&q=80)'
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
@@ -143,16 +147,16 @@ export default function ImigracaoPage() {
             transition={{ duration: 0.6 }}
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-sm font-medium text-white mb-6">
-              <Passport className="w-4 h-4" />
+              <IdCard className="w-4 h-4" />
               Guia de Imigração
             </span>
-            
+
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
               Imigração para os <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">EUA</span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-              Tudo sobre vistos, green card e regularização. 
+              Tudo sobre vistos, green card e regularização.
               Guia completo desde a aplicação até a residência permanente.
             </p>
 
@@ -203,20 +207,20 @@ export default function ImigracaoPage() {
                     </span>
                   </div>
                 )}
-                
+
                 <div className="h-full p-8 bg-slate-900/50 backdrop-blur-sm border border-white/5 rounded-2xl hover:border-white/10 transition-all hover:bg-slate-900">
                   <div className={`inline-flex p-4 rounded-xl ${visa.color} bg-opacity-10 mb-6`}>
-                    <Passport className={`w-8 h-8 ${visa.color.replace('bg-', 'text-')}`} />
+                    <IdCard className={`w-8 h-8 ${visa.color.replace('bg-', 'text-')}`} />
                   </div>
-                  
+
                   <h3 className="text-xl font-bold text-white mb-3">
                     {visa.title}
                   </h3>
-                  
+
                   <p className="text-slate-400 mb-6 text-sm leading-relaxed">
                     {visa.description}
                   </p>
-                  
+
                   <div className="space-y-3 mb-6">
                     <div>
                       <span className="text-xs text-slate-500 uppercase tracking-wider">Requisitos:</span>
@@ -229,13 +233,13 @@ export default function ImigracaoPage() {
                         ))}
                       </ul>
                     </div>
-                    
+
                     <div className="pt-3 border-t border-white/5">
                       <span className="text-xs text-slate-500 uppercase tracking-wider">Duração:</span>
                       <p className="text-sm text-white font-medium mt-1">{visa.duration}</p>
                     </div>
                   </div>
-                  
+
                   <Link
                     href={`/imigracao/${visa.title.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '')}`}
                     className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors group-hover:gap-3"
@@ -273,7 +277,7 @@ export default function ImigracaoPage() {
                 {index < steps.length - 1 && (
                   <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-white/20 to-transparent" />
                 )}
-                
+
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 text-white font-black text-xl mb-4">
                     {step.number}
@@ -336,9 +340,9 @@ export default function ImigracaoPage() {
               <div>
                 <h3 className="text-lg font-bold text-yellow-400 mb-2">Aviso Importante</h3>
                 <p className="text-slate-300 leading-relaxed">
-                  Este guia tem caráter informativo. A imigração é um processo complexo e 
-                  sujeito a mudanças frequentes nas leis. Recomendamos sempre consultar um 
-                  advogado de imigração licenciado para casos específicos. Não nos 
+                  Este guia tem caráter informativo. A imigração é um processo complexo e
+                  sujeito a mudanças frequentes nas leis. Recomendamos sempre consultar um
+                  advogado de imigração licenciado para casos específicos. Não nos
                   responsabilizamos por decisões tomadas baseadas apenas neste conteúdo.
                 </p>
               </div>

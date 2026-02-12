@@ -44,7 +44,7 @@ export default function AdminDashboard() {
         const { data: articles, error: articlesError } = await supabase
             .from('articles')
             .select('id, status, views');
-        
+
         if (articlesError) {
             console.error('[Dashboard] Error fetching articles:', articlesError);
         } else {
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
             .from('user_video_reports')
             .select('id')
             .eq('status', 'PENDING');
-        
+
         if (videosError) {
             console.error('[Dashboard] Error fetching videos:', videosError);
         }
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
         const { data: categories, error: categoriesError } = await supabase
             .from('categories')
             .select('id');
-        
+
         if (categoriesError) {
             console.error('[Dashboard] Error fetching categories:', categoriesError);
         }
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
       `)
             .order('created_at', { ascending: false })
             .limit(5);
-        
+
         if (recentError) {
             console.error('[Dashboard] Error fetching recent articles:', recentError);
         }
@@ -101,17 +101,11 @@ export default function AdminDashboard() {
             pendingVideos,
             activeCategories,
         };
-        
+
         console.log('[Dashboard] Final stats:', finalStats);
 
         setStats(finalStats);
-            totalArticles,
-            publishedArticles,
-            draftArticles,
-            totalViews,
-            pendingVideos,
-            activeCategories,
-        });
+
 
         setRecentArticles((recent as unknown as RecentArticle[]) || []);
         setLoading(false);

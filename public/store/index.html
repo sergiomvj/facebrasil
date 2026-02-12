@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceStore — Facebrasil Commerce Hub</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0D0D0D;
+            --cream: #F7F3EC;
+            --gold: #C9A84C;
+            --gold-light: #E8C96A;
+            --rust: #C94F2A;
+            --forest: #1E3A2F;
+            --mist: #E8E3DA;
+            --white: #FFFFFF;
+            --editorial-red: #D0351C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        /* ─── NOISE TEXTURE OVERLAY ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* ─── HEADER / NAV ─── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 60px;
+            background: rgba(247, 243, 236, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo-badge {
+            width: 36px;
+            height: 36px;
+            background: var(--editorial-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            color: white;
+            font-size: 16px;
+            letter-spacing: -1px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .nav-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo-text span {
+            color: var(--editorial-red);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 36px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--editorial-red);
+        }
+
+        .nav-cta {
+            background: var(--ink);
+            color: var(--cream) !important;
+            padding: 10px 22px;
+            border-radius: 2px;
+            transition: background .2s !important;
+        }
+
+        .nav-cta:hover {
+            background: var(--editorial-red) !important;
+            color: white !important;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding-top: 80px;
+            overflow: hidden;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 60px 80px 60px;
+            position: relative;
+        }
+
+        .hero-eyebrow {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--editorial-red);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            width: 32px;
+            height: 1px;
+            background: var(--editorial-red);
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(52px, 6vw, 88px);
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -2px;
+            margin-bottom: 32px;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--editorial-red);
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            line-height: 1.7;
+            color: #444;
+            max-width: 480px;
+            margin-bottom: 48px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: var(--editorial-red);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            transition: all .25s;
+            text-decoration: none;
+            display: inline-block;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+        }
+
+        .btn-primary:hover {
+            background: var(--ink);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 2px;
+            transition: color .2s, border-color .2s;
+        }
+
+        .btn-secondary:hover {
+            color: var(--editorial-red);
+            border-color: var(--editorial-red);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item {}
+
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--editorial-red);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* HERO RIGHT */
+        .hero-right {
+            position: relative;
+            background: var(--ink);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+        }
+
+        .hero-right-grid {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 2px;
+            background: rgba(201, 168, 76, 0.1);
+            opacity: 0.08;
+        }
+
+        .hero-right-grid div {
+            background: var(--gold);
+        }
+
+        .hero-magazine-mock {
+            position: relative;
+            z-index: 2;
+            padding: 60px 50px;
+        }
+
+        .magazine-card {
+            background: var(--cream);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            transform: perspective(800px) rotateY(-6deg) rotateX(2deg);
+            transition: transform .4s ease;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        .magazine-card:hover {
+            transform: perspective(800px) rotateY(0deg) rotateX(0deg);
+        }
+
+        .mag-header {
+            background: var(--editorial-red);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mag-header-title {
+            font-family: 'Playfair Display', serif;
+            color: white;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .mag-header-edition {
+            font-family: 'Space Mono', monospace;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 10px;
+        }
+
+        .mag-content {
+            padding: 24px 20px;
+        }
+
+        .mag-article-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        .mag-article-excerpt {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .mag-product-strip {
+            background: var(--mist);
+            border-radius: 4px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .product-img-mock {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--gold), var(--rust));
+            border-radius: 6px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .product-info-mock {
+            flex: 1;
+        }
+
+        .product-name-mock {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .product-price-mock {
+            font-family: 'Space Mono', monospace;
+            font-size: 15px;
+            color: var(--editorial-red);
+            font-weight: 700;
+        }
+
+        .product-cta-mock {
+            background: var(--editorial-red);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mag-tag-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .mag-tag {
+            font-size: 10px;
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            background: var(--cream);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 2px;
+            color: #555;
+        }
+
+        .mag-tag.featured {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white;
+        }
+
+        /* ─── TICKER ─── */
+        .ticker {
+            background: var(--ink);
+            color: var(--cream);
+            padding: 12px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .ticker-inner {
+            display: inline-flex;
+            animation: ticker 30s linear infinite;
+            gap: 0;
+        }
+
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 40px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .ticker-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ─── SECTION GENERICS ─── */
+        section {
+            padding: 100px 60px;
+        }
+
+        .section-eyebrow {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--editorial-red);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-eyebrow::before {
+            content: '';
+            width: 24px;
+            height: 1px;
+            background: var(--editorial-red);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(36px, 4vw, 56px);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+        }
+
+        /* ─── PROPOSTA DE VALOR ─── */
+        .value-section {
+            background: var(--forest);
+            color: var(--cream);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .value-section::before {
+            content: 'VALOR';
+            position: absolute;
+            font-family: 'Playfair Display', serif;
+            font-size: 320px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            top: -60px;
+            right: -40px;
+            pointer-events: none;
+            line-height: 1;
+            letter-spacing: -10px;
+        }
+
+        .value-section .section-eyebrow {
+            color: var(--gold);
+        }
+
+        .value-section .section-eyebrow::before {
+            background: var(--gold);
+        }
+
+        .value-section .section-title {
+            color: var(--cream);
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 60px;
+            align-items: start;
+        }
+
+        .value-lead {
+            font-size: 20px;
+            line-height: 1.7;
+            color: rgba(247, 243, 236, 0.8);
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+
+        .value-pillars {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .pillar {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-left: 3px solid var(--gold);
+            padding: 24px 28px;
+            border-radius: 2px;
+            transition: background .3s;
+        }
+
+        .pillar:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .pillar-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .pillar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--cream);
+            margin-bottom: 8px;
+        }
+
+        .pillar-text {
+            font-size: 14px;
+            color: rgba(247, 243, 236, 0.65);
+            line-height: 1.7;
+        }
+
+        .value-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            padding: 28px 24px;
+            border-radius: 2px;
+            text-align: center;
+        }
+
+        .metric-big {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--gold);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .metric-desc {
+            font-size: 13px;
+            color: rgba(247, 243, 236, 0.6);
+            line-height: 1.5;
+        }
+
+        /* ─── COMO FUNCIONA / EDITORIAL COMMERCE ─── */
+        .how-section {
+            background: var(--cream);
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .how-step {
+            position: relative;
+        }
+
+        .how-step-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 96px;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.06);
+            line-height: 1;
+            position: absolute;
+            top: -20px;
+            left: -10px;
+        }
+
+        .how-step-content {
+            padding-top: 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .how-step-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--editorial-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .how-step-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .how-step-text {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        /* ─── MODELOS DE PARCERIA ─── */
+        .partner-section {
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .partner-section .section-title {
+            color: var(--cream);
+        }
+
+        .partner-section .section-eyebrow {
+            color: var(--gold);
+        }
+
+        .partner-section .section-eyebrow::before {
+            background: var(--gold);
+        }
+
+        .partner-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            margin-top: 60px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .partner-card {
+            background: var(--ink);
+            padding: 40px 36px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            position: relative;
+            overflow: hidden;
+            transition: background .3s;
+            cursor: pointer;
+        }
+
+        .partner-card:hover {
+            background: #161616;
+        }
+
+        .partner-card.featured {
+            background: var(--editorial-red);
+            border-color: var(--editorial-red);
+        }
+
+        .partner-card.featured .partner-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .partner-card.featured .partner-desc {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .partner-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--gold);
+            color: var(--ink);
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 5px 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .partner-model-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .partner-card.featured .partner-model-tag {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .partner-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--cream);
+            margin-bottom: 6px;
+        }
+
+        .partner-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .partner-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .partner-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .partner-features li {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.65);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .partner-features li::before {
+            content: '→';
+            color: var(--gold);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .partner-card.featured .partner-features li {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* ─── RECURSOS INOVADORES ─── */
+        .innovation-section {
+            background: var(--cream);
+        }
+
+        .innovation-bento {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: auto;
+            gap: 16px;
+            margin-top: 60px;
+        }
+
+        .bento-card {
+            background: white;
+            border-radius: 4px;
+            padding: 32px 28px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            position: relative;
+            transition: transform .3s, box-shadow .3s;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .bento-card.col-2 {
+            grid-column: span 2;
+        }
+
+        .bento-card.col-3 {
+            grid-column: span 3;
+        }
+
+        .bento-card.col-4 {
+            grid-column: span 4;
+        }
+
+        .bento-card.col-6 {
+            grid-column: span 6;
+        }
+
+        .bento-card.dark {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: var(--cream);
+        }
+
+        .bento-card.red {
+            background: var(--editorial-red);
+            border-color: var(--editorial-red);
+            color: white;
+        }
+
+        .bento-card.gold {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--ink);
+        }
+
+        .bento-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .bento-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .bento-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .bento-card.dark .bento-text {
+            color: rgba(247, 243, 236, 0.65);
+        }
+
+        .bento-card.red .bento-text {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .bento-card.gold .bento-text {
+            color: rgba(13, 13, 13, 0.75);
+        }
+
+        .bento-big-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 1;
+            opacity: 0.15;
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+        }
+
+        .bento-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .bento-tag-item {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bento-card.dark .bento-tag-item {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(247, 243, 236, 0.7);
+        }
+
+        /* ─── VISUAL IDENTITY SECTION ─── */
+        .visual-section {
+            background: var(--mist);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 2px;
+            height: 80px;
+            margin-top: 32px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .color-swatch {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 10px 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .typography-showcase {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .type-sample {
+            padding: 32px 28px;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 2px;
+        }
+
+        .type-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        /* ─── CTA FINAL ─── */
+        .cta-section {
+            background: var(--editorial-red);
+            color: white;
+            text-align: center;
+            padding: 120px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: 'PARCERIA';
+            position: absolute;
+            font-family: 'Playfair Display', serif;
+            font-size: 280px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.05);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: -8px;
+        }
+
+        .cta-section .section-eyebrow {
+            color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+        }
+
+        .cta-section .section-eyebrow::before {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .cta-section .section-title {
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .cta-lead {
+            font-size: 20px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto 48px;
+            line-height: 1.6;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--editorial-red);
+            border: none;
+            padding: 16px 36px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            text-decoration: none;
+            display: inline-block;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+        }
+
+        .btn-white:hover {
+            background: var(--gold);
+            color: var(--ink);
+        }
+
+        .btn-outline-white {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            padding-bottom: 2px;
+            transition: border-color .2s;
+        }
+
+        .btn-outline-white:hover {
+            border-color: white;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--ink);
+            color: var(--cream);
+            padding: 60px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            border-top: 1px solid rgba(201, 168, 76, 0.2);
+        }
+
+        .footer-brand {}
+
+        .footer-brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .footer-brand-desc {
+            font-size: 14px;
+            color: rgba(247, 243, 236, 0.55);
+            line-height: 1.7;
+            max-width: 300px;
+        }
+
+        .footer-col-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: rgba(247, 243, 236, 0.55);
+            font-size: 13px;
+            transition: color .2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--cream);
+        }
+
+        .footer-bottom {
+            background: var(--ink);
+            padding: 20px 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-bottom-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-eyebrow {
+            animation: fadeUp .6s ease both;
+        }
+
+        .hero-title {
+            animation: fadeUp .8s .1s ease both;
+        }
+
+        .hero-subtitle {
+            animation: fadeUp .8s .2s ease both;
+        }
+
+        .hero-actions {
+            animation: fadeUp .8s .3s ease both;
+        }
+
+        .hero-stats {
+            animation: fadeUp .8s .4s ease both;
+        }
+
+        .magazine-card {
+            animation: fadeUp 1s .3s ease both;
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cream);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--editorial-red);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-logo">
+            <div class="nav-logo-badge">FB</div>
+            <div class="nav-logo-text">Face<span>Store</span></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#valor">Proposta de Valor</a></li>
+            <li><a href="#parceria">Parcerias</a></li>
+            <li><a href="#inovacao">Recursos</a></li>
+            <li><a href="#visual">Visual</a></li>
+            <li><a href="#parceria" class="nav-cta">Seja Parceiro</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="hero-eyebrow">Projeto Conceitual · Facebrasil Commerce</div>
+            <h1 class="hero-title">
+                16 anos<br>
+                de <em>autoridade.</em><br>
+                Agora<br>convertendo.
+            </h1>
+            <p class="hero-subtitle">
+                A FaceStore transforma o legado editorial da Facebrasil em um ecossistema de vendas vivo — onde cada
+                artigo, review e tendência conecta leitores às melhores marcas e produtos do mercado.
+            </p>
+            <div class="hero-actions">
+                <a href="#parceria" class="btn-primary">Quero ser parceiro</a>
+                <a href="#valor" class="btn-secondary">Ver proposta completa →</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Empresas anunciantes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">16</div>
+                    <div class="stat-label">Anos de presença</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Modelos de parceria</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="hero-right-grid">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="hero-magazine-mock">
+                <div class="magazine-card">
+                    <div class="mag-header">
+                        <div class="mag-header-title">Facebrasil</div>
+                        <div class="mag-header-edition">Ed. Digital · 2026</div>
+                    </div>
+                    <div class="mag-content">
+                        <div class="mag-article-title">Tendências em Design de Interiores para 2026</div>
+                        <div class="mag-article-excerpt">Especialistas apontam que o biofílico e o minimalismo
+                            brasileiro lideram as preferências dos consumidores...</div>
+                        <div class="mag-product-strip">
+                            <div class="product-img-mock">🛋️</div>
+                            <div class="product-info-mock">
+                                <div class="product-name-mock">Sofá Orgânico Premium</div>
+                                <div class="product-price-mock">R$ 4.890</div>
+                            </div>
+                            <button class="product-cta-mock">Comprar</button>
+                        </div>
+                        <div class="mag-tag-row">
+                            <span class="mag-tag featured">Review Verificado</span>
+                            <span class="mag-tag">Frete grátis</span>
+                            <span class="mag-tag">Parceiro FB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker">
+        <div class="ticker-inner">
+            <span class="ticker-item"><span class="ticker-dot"></span> Editorial Commerce</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Affiliate Marketing</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Reviews Verificados</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Conteúdo + Conversão</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> 500+ Parceiros</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Programa de Parceria</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Receita Recorrente</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Editorial Commerce</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Affiliate Marketing</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Reviews Verificados</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Conteúdo + Conversão</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> 500+ Parceiros</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Programa de Parceria</span>
+            <span class="ticker-item"><span class="ticker-dot"></span> Receita Recorrente</span>
+        </div>
+    </div>
+
+    <!-- PROPOSTA DE VALOR -->
+    <section class="value-section" id="valor">
+        <div class="section-eyebrow">Proposta de Valor</div>
+        <h2 class="section-title">Por que a<br>FaceStore funciona</h2>
+
+        <div class="value-grid">
+            <div>
+                <p class="value-lead">
+                    Conteúdo editorial de qualidade já cria intenção de compra. A FaceStore fecha o ciclo —
+                    transformando leitores engajados em compradores qualificados, sem abandonar a credibilidade
+                    construída em 16 anos.
+                </p>
+                <div class="value-pillars">
+                    <div class="pillar">
+                        <div class="pillar-icon">📖</div>
+                        <div class="pillar-title">Autoridade Editorial</div>
+                        <div class="pillar-text">Cada recomendação nasce de um artigo jornalístico real, não de um
+                            banner. O leitor confia porque a Facebrasil já provou seu valor.</div>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-icon">🎯</div>
+                        <div class="pillar-title">Audiência Qualificada</div>
+                        <div class="pillar-text">16 anos de leitores segmentados por interesse — empresários,
+                            consumidores de alto ticket, profissionais liberais. Conversão orgânica, não forçada.</div>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-icon">🔗</div>
+                        <div class="pillar-title">Contexto como Vantagem</div>
+                        <div class="pillar-text">Produtos aparecem exatamente no artigo certo, no momento certo. O link
+                            afiliado dentro de um review consome é 8x mais clicado que um banner genérico.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="value-metrics">
+                <div class="metric-card">
+                    <div class="metric-big">8×</div>
+                    <div class="metric-desc">Mais cliques em links contextuais vs. banners tradicionais</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-big">73%</div>
+                    <div class="metric-desc">Dos consumidores pesquisa em revistas digitais antes de comprar</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-big">R$0</div>
+                    <div class="metric-desc">Custo inicial para parceiros no modelo de comissão por venda</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-big">360°</div>
+                    <div class="metric-desc">Integração: artigo, email, redes sociais e push notification</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="how-section" id="como-funciona">
+        <div class="section-eyebrow">Editorial Commerce</div>
+        <h2 class="section-title">Como a FaceStore<br>funciona na prática</h2>
+
+        <div class="how-grid">
+            <div class="how-step">
+                <div class="how-step-number">01</div>
+                <div class="how-step-content">
+                    <div class="how-step-icon">✍️</div>
+                    <div class="how-step-title">Conteúdo Editorial Publicado</div>
+                    <div class="how-step-text">A equipe da Facebrasil produz artigos, reportagens e reviews sobre
+                        produtos e serviços dos parceiros — com a mesma voz editorial de sempre. Sem parecer propaganda.
+                    </div>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="how-step-number">02</div>
+                <div class="how-step-content">
+                    <div class="how-step-icon">🔗</div>
+                    <div class="how-step-title">Produto Integrado ao Texto</div>
+                    <div class="how-step-text">Dentro do artigo, um bloco visual apresenta o produto avaliado com preço,
+                        link de compra e badge "Parceiro Verificado Facebrasil" — gerando confiança sem interromper a
+                        leitura.</div>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="how-step-number">03</div>
+                <div class="how-step-content">
+                    <div class="how-step-icon">💰</div>
+                    <div class="how-step-title">Comissão Automática por Venda</div>
+                    <div class="how-step-text">Cada clique que gera compra retorna uma comissão diretamente para a
+                        Facebrasil via plataformas como Hotmart, Amazon Afiliados, Rakuten ou link próprio do parceiro —
+                        tudo rastreado em dashboard.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODELOS DE PARCERIA -->
+    <section class="partner-section" id="parceria">
+        <div class="section-eyebrow">Modelos de Parceria</div>
+        <h2 class="section-title">Três caminhos<br>para parceiros</h2>
+
+        <div class="partner-grid">
+
+            <!-- MODELO 1 -->
+            <div class="partner-card">
+                <div class="partner-model-tag">Modelo 01 · Afiliado</div>
+                <div class="partner-title">Performance Pura</div>
+                <div class="partner-subtitle">Risco zero para ambos os lados</div>
+                <div class="partner-desc">
+                    Ideal para empresas que já têm programa de afiliados ativo (Hotmart, Amazon, Shopify, etc.). A
+                    Facebrasil integra os links nos artigos e recebe comissão por venda gerada.
+                </div>
+                <ul class="partner-features">
+                    <li>Sem custo de entrada para o parceiro</li>
+                    <li>Comissão de 5% a 30% por venda rastreada</li>
+                    <li>Relatórios mensais de conversão</li>
+                    <li>Badge "Recomendado pela Facebrasil"</li>
+                    <li>Compatível com todos os grandes afiliadores</li>
+                </ul>
+            </div>
+
+            <!-- MODELO 2 - DESTAQUE -->
+            <div class="partner-card featured">
+                <div class="partner-badge">Mais Popular</div>
+                <div class="partner-model-tag">Modelo 02 · Editorial Comercial</div>
+                <div class="partner-title">Review Patrocinado</div>
+                <div class="partner-subtitle">Conteúdo + Performance combinados</div>
+                <div class="partner-desc">
+                    O parceiro paga uma taxa editorial fixa e ainda ativa o sistema de comissão. A Facebrasil produz um
+                    review aprofundado, publicado como artigo nativo com distribuição total nas redes.
+                </div>
+                <ul class="partner-features">
+                    <li>Artigo editorial completo de até 1.500 palavras</li>
+                    <li>Bloco de produto integrado com CTA</li>
+                    <li>Distribuição em email, redes e push</li>
+                    <li>Comissão + taxa editorial mensal</li>
+                    <li>Relatório de alcance e conversão</li>
+                    <li>Destaque na FaceStore por 30 dias</li>
+                </ul>
+            </div>
+
+            <!-- MODELO 3 -->
+            <div class="partner-card">
+                <div class="partner-model-tag">Modelo 03 · Loja Parceira</div>
+                <div class="partner-title">Vitrine Permanente</div>
+                <div class="partner-subtitle">Presença contínua no ecossistema FB</div>
+                <div class="partner-desc">
+                    Para marcas que querem presença duradoura. Uma página dedicada na FaceStore com catálogo de
+                    produtos, histórico de reviews e link direto para a loja — como um microsite dentro da Facebrasil.
+                </div>
+                <ul class="partner-features">
+                    <li>Página exclusiva da marca na FaceStore</li>
+                    <li>Catálogo de até 50 produtos</li>
+                    <li>Integração com sua plataforma de e-commerce</li>
+                    <li>Destaque em artigos temáticos relevantes</li>
+                    <li>Relatório trimestral de performance</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- RECURSOS INOVADORES -->
+    <section class="innovation-section" id="inovacao">
+        <div class="section-eyebrow">Recursos Inovadores</div>
+        <h2 class="section-title">O que torna a<br>FaceStore diferente</h2>
+
+        <div class="innovation-bento">
+
+            <div class="bento-card col-3 dark">
+                <div class="bento-icon">🤖</div>
+                <div class="bento-title">Matching Inteligente Artigo-Produto</div>
+                <div class="bento-text">Um sistema semi-automatizado analisa o conteúdo de cada artigo publicado e
+                    sugere os produtos do catálogo de parceiros mais relevantes — reduzindo o trabalho editorial e
+                    aumentando a precisão da recomendação.</div>
+                <div class="bento-tags">
+                    <span class="bento-tag-item">IA Editorial</span>
+                    <span class="bento-tag-item">Automação</span>
+                </div>
+            </div>
+
+            <div class="bento-card col-3 red">
+                <div class="bento-icon">📊</div>
+                <div class="bento-title">Dashboard do Parceiro em Tempo Real</div>
+                <div class="bento-text">Cada parceiro acessa um painel exclusivo com cliques, conversões, receita gerada
+                    e os artigos que mais performaram. Transparência total, dados acionáveis.</div>
+                <div class="bento-big-number">📈</div>
+            </div>
+
+            <div class="bento-card col-2">
+                <div class="bento-icon">⭐</div>
+                <div class="bento-title">Selo de Confiança Facebrasil</div>
+                <div class="bento-text">Produtos avaliados pela equipe editorial ganham um selo verificado —
+                    diferenciando parceiros sérios e elevando a taxa de conversão.</div>
+            </div>
+
+            <div class="bento-card col-2 gold">
+                <div class="bento-icon">📱</div>
+                <div class="bento-title">Compra Nativa no Artigo</div>
+                <div class="bento-text">O leitor não precisa sair da página. Um checkout rápido integrado ao artigo
+                    reduz o abandono por redirecionamento.</div>
+            </div>
+
+            <div class="bento-card col-2">
+                <div class="bento-icon">🗓️</div>
+                <div class="bento-title">Calendário Editorial Comercial</div>
+                <div class="bento-text">Planejamento compartilhado com parceiros: datas comemorativas, lançamentos e
+                    sazonalidades — todos alinhados com a pauta da revista.</div>
+            </div>
+
+            <div class="bento-card col-4">
+                <div class="bento-icon">📩</div>
+                <div class="bento-title">Newsletter Commerce: Recomendações que Vendem</div>
+                <div class="bento-text">A newsletter da Facebrasil passa a incluir uma seção "O que a redação está
+                    usando e recomendando" — curada, autêntica e com links rastreados. Com base de leitores fiel de
+                    anos, a conversão via email tende a superar qualquer anúncio pago. Parceiros podem patrocinar
+                    edições temáticas com exclusividade de categoria.</div>
+                <div class="bento-tags">
+                    <span class="bento-tag-item">Email Marketing</span>
+                    <span class="bento-tag-item">Curadoria</span>
+                    <span class="bento-tag-item">Alta Conversão</span>
+                </div>
+            </div>
+
+            <div class="bento-card col-2 dark">
+                <div class="bento-icon">🎥</div>
+                <div class="bento-title">Reviews em Vídeo Curto</div>
+                <div class="bento-text">Formato Reels/Shorts integrado ao artigo — o produto é mostrado em até 60
+                    segundos pelo time editorial ou pelo parceiro, com link de compra direto.</div>
+            </div>
+
+            <div class="bento-card col-2">
+                <div class="bento-icon">🏆</div>
+                <div class="bento-title">Prêmio Facebrasil de Qualidade</div>
+                <div class="bento-text">Anuário com os melhores produtos e serviços avaliados no ano — lacre de
+                    prestígio para os parceiros que podem exibir o troféu em suas comunicações.</div>
+            </div>
+
+            <div class="bento-card col-2 red">
+                <div class="bento-icon">🔄</div>
+                <div class="bento-title">Conteúdo Sempre Atualizado</div>
+                <div class="bento-text">Artigos são atualizados automaticamente com novos preços e disponibilidade —
+                    links nunca ficam quebrados ou desatualizados.</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- VISUAL IDENTITY -->
+    <section class="visual-section" id="visual">
+        <div class="section-eyebrow">Identidade Visual</div>
+        <h2 class="section-title">Como o projeto<br>deve se apresentar</h2>
+
+        <p style="font-size:17px; color:#555; line-height:1.7; max-width:660px; margin-bottom:40px;">
+            A FaceStore herda o DNA editorial da Facebrasil — credibilidade, profissionalismo e presença — mas adiciona
+            uma camada comercial vibrante que convida à ação sem comprometer a seriedade.
+        </p>
+
+        <div class="color-palette">
+            <div class="color-swatch" style="background: #0D0D0D; color: #F7F3EC;">Tinta<br>#0D0D0D</div>
+            <div class="color-swatch" style="background: #D0351C; color: #F7F3EC;">Editorial Red<br>#D0351C</div>
+            <div class="color-swatch" style="background: #C9A84C; color: #0D0D0D;">Ouro<br>#C9A84C</div>
+            <div class="color-swatch" style="background: #1E3A2F; color: #F7F3EC;">Floresta<br>#1E3A2F</div>
+            <div class="color-swatch" style="background: #F7F3EC; color: #0D0D0D; border: 1px solid #ddd;">
+                Creme<br>#F7F3EC</div>
+            <div class="color-swatch" style="background: #E8E3DA; color: #0D0D0D; border: 1px solid #ddd;">
+                Névoa<br>#E8E3DA</div>
+        </div>
+
+        <div class="typography-showcase">
+            <div class="type-sample">
+                <div class="type-label">Display — Playfair Display</div>
+                <div
+                    style="font-family:'Playfair Display',serif; font-size:38px; font-weight:900; line-height:1.1; letter-spacing:-1px;">
+                    O artigo que vende.
+                </div>
+            </div>
+            <div class="type-sample">
+                <div class="type-label">Body — DM Sans</div>
+                <div style="font-family:'DM Sans',sans-serif; font-size:16px; line-height:1.7; color:#444;">
+                    Conteúdo editorial que informa e, ao mesmo tempo, conecta leitores a produtos e serviços de
+                    qualidade verificada. Confiança que converte.
+                </div>
+            </div>
+            <div class="type-sample">
+                <div class="type-label">Code/Tags — Space Mono</div>
+                <div style="font-family:'Space Mono',monospace; font-size:13px; line-height:1.8; color:#888;">
+                    PARCEIRO VERIFICADO<br>
+                    R$ 299,90 → COMPRAR<br>
+                    REVIEW · ARTIGO Nº 4.821
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-section" id="contato">
+        <div class="section-eyebrow">Próximo Passo</div>
+        <h2 class="section-title" style="max-width:700px; margin:0 auto 24px;">
+            Pronto para transformar<br>conteúdo em receita?
+        </h2>
+        <p class="cta-lead">
+            Junte-se ao ecossistema FaceStore e coloque seus produtos na frente de uma audiência que já confia na
+            Facebrasil há mais de uma década.
+        </p>
+        <div class="cta-actions">
+            <a href="#" class="btn-white">Enviar proposta de parceria</a>
+            <a href="#" class="btn-outline-white">Ver kit de mídia completo →</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-brand">
+            <div class="footer-brand-logo">
+                <div class="nav-logo-badge">FB</div>
+                <div class="nav-logo-text" style="color:var(--cream);">Face<span>Store</span></div>
+            </div>
+            <p class="footer-brand-desc">
+                A FaceStore é o braço de commerce da Facebrasil — 16 anos de jornalismo de qualidade agora conectados ao
+                maior ecossistema de vendas digitais do Brasil.
+            </p>
+        </div>
+        <div>
+            <div class="footer-col-title">Parceiros</div>
+            <ul class="footer-links">
+                <li><a href="#">Como funciona</a></li>
+                <li><a href="#">Modelos de parceria</a></li>
+                <li><a href="#">Kit de mídia</a></li>
+                <li><a href="#">Dashboard de acesso</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Conteúdo</div>
+            <ul class="footer-links">
+                <li><a href="#">Reviews</a></li>
+                <li><a href="#">Tendências</a></li>
+                <li><a href="#">Guias de compra</a></li>
+                <li><a href="#">Newsletter</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Empresa</div>
+            <ul class="footer-links">
+                <li><a href="#">Sobre a Facebrasil</a></li>
+                <li><a href="#">Política editorial</a></li>
+                <li><a href="#">Transparência</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </div>
+    </footer>
+    <div class="footer-bottom">
+        <span class="footer-bottom-text">© 2026 Facebrasil · FaceStore Commerce Hub — Projeto Conceitual</span>
+        <span class="footer-bottom-text">Todos os direitos reservados · Política de privacidade</span>
+    </div>
+
+</body>
+
+</html>
