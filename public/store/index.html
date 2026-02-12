@@ -1189,6 +1189,140 @@
         ::-webkit-scrollbar-thumb {
             background: var(--editorial-red);
         }
+
+        /* ─── MOBILE OPTIMIZATION ─── */
+        @media (max-width: 768px) {
+            
+            /* GLOBAL LAYOUT */
+            section {
+                padding: 60px 24px;
+            }
+
+            /* HIDDEN DESKTOP NAV ITEMS */
+            .nav-links li:not(:last-child) {
+                display: none;
+            }
+            
+            nav {
+                padding: 16px 24px;
+            }
+
+            /* HERO */
+            .hero {
+                grid-template-columns: 1fr;
+                padding-top: 76px;
+                height: auto;
+                min-height: auto;
+            }
+
+            .hero-left {
+                padding: 40px 24px 60px;
+                order: 2;
+            }
+
+            .hero-right {
+                order: 1;
+                height: 50vh;
+                min-height: 420px;
+            }
+
+            .hero-title {
+                font-size: 42px;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 24px;
+                margin-top: 40px;
+            }
+            
+            .magazine-card {
+                transform: scale(0.9);
+                margin-top: 40px;
+            }
+
+            /* VALUE PROPOSITION */
+            .value-section::before {
+                font-size: 15rem;
+                top: -40px;
+                right: -40px;
+            }
+            
+            .value-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                margin-top: 40px;
+            }
+
+            .value-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            /* HOW IT WORKS */
+            .how-grid {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+
+            /* PARTNERS */
+            .partner-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .partner-card {
+                padding: 30px 24px;
+            }
+
+            /* BENTO GRID */
+            .innovation-bento {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .bento-card {
+                grid-column: auto !important;
+            }
+
+            /* VISUAL IDENTITY */
+            .typography-showcase {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* CTA */
+            .cta-section {
+                padding: 80px 24px;
+            }
+            
+            .cta-section::before {
+                font-size: 100px;
+            }
+            
+            .cta-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-white, .btn-outline-white {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            /* FOOTER */
+            footer {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding: 40px 24px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 24px;
+            }
+        }
     </style>
 </head>
 
