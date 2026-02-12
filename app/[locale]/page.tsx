@@ -2,6 +2,7 @@ import React from 'react';
 import Hero from '@/components/Hero';
 import FeaturedCarousel from '@/components/FeaturedCarousel';
 import ArticleCard from '@/components/ArticleCard';
+import InfiniteFeed from '@/components/InfiniteFeed';
 import MailNewsletter from '@/components/MailNewsletter';
 import EventsAgenda from '@/components/EventsAgenda';
 import EuReporterSection from '@/components/EuReporterSection';
@@ -94,6 +95,23 @@ export default async function Home({
                 <ArticleCard key={article.id} article={article} />
               ))}
             </div>
+
+            {/* Infinite Feed Section */}
+            <section className="mt-12">
+              <div className="flex items-end justify-between mb-8 border-b dark:border-white/10 border-gray-200 pb-4">
+                <div>
+                  <span className="text-accent-yellow font-bold text-sm tracking-widest uppercase mb-2 block">Explorar</span>
+                  <h2 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
+                    <TrendingUp className="w-6 h-6 dark:text-white text-gray-900" />
+                    Mais Artigos
+                  </h2>
+                </div>
+              </div>
+              <InfiniteFeed 
+                initialArticles={allLatest.slice(3)} 
+                postsPerPage={6}
+              />
+            </section>
 
             {/* Destaques Section */}
             <div className="mt-12 pt-12 border-t dark:border-white/10 border-gray-200">
