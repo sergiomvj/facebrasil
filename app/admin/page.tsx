@@ -10,111 +10,78 @@ import {
   TrendingDown,
   ArrowUpRight,
   Clock,
-  CheckCircle,
-  AlertCircle
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AdminLayout } from './components/AdminLayout';
+import { useAdminStats, useRecentArticles, useCategoryStats } from '@/hooks/useAdmin';
 
-// Mock Data
-const stats = [
-  {
-    title: 'Total de Artigos',
-    value: 156,
-    change: 12,
-    trend: 'up',
-    icon: FileText,
-    color: 'blue',
-  },
-  {
-    title: 'Usuários Ativos',
-    value: 2453,
-    change: 8.5,
-    trend: 'up',
-    icon: Users,
-    color: 'green',
-  },
-  {
-    title: 'Visualizações (30d)',
-    value: 45231,
-    change: 23.4,
-    trend: 'up',
-    icon: Eye,
-    color: 'purple',
-  },
-  {
-    title: 'Taxa de Engajamento',
-    value: '68.4%',
-    change: -2.1,
-    trend: 'down',
-    icon: TrendingUp,
-    color: 'orange',
-  },
-];
+const StatCard = ({ 
+  title, 
+  value, 
+  change, 
+  trend, 
+  icon: Icon, 
+  color,
+  loading 
+}: { 
+  title: string;
+  value: string | number;
+  change?: number;
+  trend?: 'up' | 'down' | 'neutral';
+  icon: React.ElementType;
+  color: 'blue' | 'green' | 'purple' | 'orange';
+  loading?: boolean;
+}) => {
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg border shadow-sm p-6 animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-24 mb-4" />
+        <div className="h-8 bg-gray-200 rounded w-32" />
+      </div>
+    );
+  }
 
-const recentArticles = [
-  { id: 1, title: 'Como Imigrar Legalmente para os EUA em 2026', author: 'Maria Silva', status: 'published', views: 1234, date: '2026-02-10' },
-  { id: 2, title: 'Guia Completo de Documentação de Imigração', author: 'João Santos', status: 'published', views: 892, date: '2026-02-09' },
-  { id: 3, title: 'Dicas de Entrevista no Consulado Americano', author: 'Ana Costa', status: 'draft', views: 0, date: '2026-02-08' },
-  { id: 4, title: 'Vida nos EUA: Expectativa vs Realidade', author: 'Pedro Oliveira', status: 'published', views: 2156, date: '2026-02-07' },
-  { id: 5, title: 'Como Encontrar Trabalho nos EUA', author: 'Maria Silva', status: 'review', views: 0, date: '2026-02-06' },
-];
-
-const topCategories = [
-  { name: 'Imigração', articles: 45, views: 15234, color: 'bg-blue-500' },
-  { name: 'Vida nos EUA', articles: 38, views: 12890, color: 'bg-green-500' },
-  { name: 'Trabalho', articles: 32, views: 9876, color: 'bg-purple-500' },
-  { name: 'Documentação', articles: 28, views: 7654, color: 'bg-orange-500' },
-  { name: 'Cidadania', articles: 13, views: 4567, color: 'bg-red-500' },
-];
-
-const recentActivity = [
-  { user: 'Maria Silva', action: 'publicou', target: 'Como Imigrar Legalmente...', time: '2 horas atrás' },
-  { user: 'João Santos', action: 'editou', target: 'Guia de Documentação', time: '4 horas atrás' },
-  { user: 'Ana Costa', action: 'criou rascunho', target: 'Dicas de Entrevista', time: '6 horas atrás' },
-  { user: 'Pedro Oliveira', action: 'comentou', target: 'Vida nos EUA', time: '8 horas atrás' },
-];
-
-const StatCard = ({ stat }: { stat: typeof stats[0] }) => {
-  const Icon = stat.icon;
-  const isPositive = stat.trend === 'up';
+  const isPositive = change && change > 0;
   const TrendIcon = isPositive ? TrendingUp : TrendingDown;
   
   const colorVariants = {
-    blue: 'bg-blue-50 border-blue-200 text-blue-700',
-    green: 'bg-green-50 border-green-200 text-green-700',
-    purple: 'bg-purple-50 border-purple-200 text-purple-700',
-    orange: 'bg-orange-50 border-orange-200 text-orange-700',
+    blue: 'bg-blue-50 border-blue-200 text-blue-900',
+    green: 'bg-green-50 border-green-200 text-green-900',
+    purple: 'bg-purple-50 border-purple-200 text-purple-900',
+    orange: 'bg-orange-50 border-orange-200 text-orange-900',
   };
 
   return (
     <div className={cn(
       "rounded-lg border p-6 transition-shadow hover:shadow-md",
-      colorVariants[stat.color as keyof typeof colorVariants]
+      colorVariants[color]
     )}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium opacity-70">{stat.title}</p>
-          <h3 className="text-2xl font-bold mt-2">{stat.value}</h3>
+          <p className="text-sm font-medium opacity-70">{title}</p>
+          <h3 className="text-2xl font-bold mt-2">{value}</h3>
         </div>
         <div className="p-2 bg-white/50 rounded-lg">
           <Icon className="w-5 h-5" />
         </div>
       </div>
-      
-      <div className="flex items-center gap-2 mt-4">
-        <TrendIcon className={cn(
-          "w-4 h-4",
-          isPositive ? "text-green-600" : "text-red-600"
-        )} />
-        <span className={cn(
-          "text-sm font-medium",
-          isPositive ? "text-green-600" : "text-red-600"
-        )}>
-          {isPositive ? '+' : ''}{stat.change}%
-        </span>
-        <span className="text-sm opacity-60">vs mês anterior</span>
-      </div>
+
+      {change !== undefined && (
+        <div className="flex items-center gap-2 mt-4">
+          <TrendIcon className={cn(
+            "w-4 h-4",
+            isPositive ? "text-green-600" : "text-red-600"
+          )} />
+          <span className={cn(
+            "text-sm font-medium",
+            isPositive ? "text-green-600" : "text-red-600"
+          )}>
+            {isPositive ? '+' : ''}{change}%
+          </span>
+          <span className="text-sm opacity-60">vs mês anterior</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -135,14 +102,18 @@ const StatusBadge = ({ status }: { status: string }) => {
   return (
     <span className={cn(
       "px-2.5 py-0.5 rounded-full text-xs font-medium border",
-      variants[status as keyof typeof variants]
+      variants[status as keyof typeof variants] || variants.draft
     )}>
-      {labels[status as keyof typeof labels]}
+      {labels[status as keyof typeof labels] || status}
     </span>
   );
 };
 
 export default function AdminDashboard() {
+  const { stats, loading: statsLoading } = useAdminStats();
+  const { articles: recentArticles, loading: articlesLoading } = useRecentArticles(5);
+  const { categories, loading: categoriesLoading } = useCategoryStats();
+
   return (
     <AdminLayout>
       {/* Header */}
@@ -153,9 +124,42 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <StatCard key={index} stat={stat} />
-        ))}
+        <StatCard
+          title="Total de Artigos"
+          value={stats?.totalArticles || 0}
+          change={12}
+          trend="up"
+          icon={FileText}
+          color="blue"
+          loading={statsLoading}
+        />
+        <StatCard
+          title="Usuários Ativos"
+          value={stats?.activeUsers?.toLocaleString() || 0}
+          change={8.5}
+          trend="up"
+          icon={Users}
+          color="green"
+          loading={statsLoading}
+        />
+        <StatCard
+          title="Visualizações (30d)"
+          value={stats?.totalViews?.toLocaleString() || 0}
+          change={23.4}
+          trend="up"
+          icon={Eye}
+          color="purple"
+          loading={statsLoading}
+        />
+        <StatCard
+          title="Taxa de Engajamento"
+          value={`${stats?.engagementRate || 0}%`}
+          change={stats?.engagementChange}
+          trend={stats?.engagementChange && stats.engagementChange > 0 ? 'up' : 'down'}
+          icon={TrendingUp}
+          color="orange"
+          loading={statsLoading}
+        />
       </div>
 
       {/* Main Content Grid */}
@@ -175,29 +179,35 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          <div className="divide-y divide-gray-200">
-            {recentArticles.map((article) => (
-              <div key={article.id} className="p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 truncate">{article.title}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Por {article.author} • {article.date}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 ml-4">
-                    <StatusBadge status={article.status} />
-                    {article.views > 0 && (
-                      <span className="text-sm text-gray-500 flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        {article.views.toLocaleString()}
-                      </span>
-                    )}
+          {articlesLoading ? (
+            <div className="p-8 flex justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {recentArticles.map((article) => (
+                <div key={article.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate">{article.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Por {article.author?.name || 'Unknown'} • {new Date(article.created_at).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4 ml-4">
+                      <StatusBadge status={article.status} />
+                      {article.views > 0 && (
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {article.views.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -205,52 +215,44 @@ export default function AdminDashboard() {
           {/* Top Categories */}
           <div className="bg-white rounded-lg border shadow-sm p-6">
             <h2 className="text-lg font-semibold mb-4">Categorias Populares</h2>
-            <div className="space-y-4">
-              {topCategories.map((category, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("w-3 h-3 rounded-full", category.color)} />
-                      <span className="font-medium text-sm">{category.name}</span>
+            {categoriesLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {categories.slice(0, 5).map((category, index) => (
+                  <div key={category.id}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-3 h-3 rounded-full",
+                          ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500'][index]
+                        )} />
+                        <span className="font-medium text-sm">{category.name}</span>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {category.total_views.toLocaleString()} views
+                      </span>
                     </div>
-                    <span className="text-sm text-gray-500">
-                      {category.views.toLocaleString()} views
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div 
-                      className={cn("h-2 rounded-full", category.color)}
-                      style={{ width: `${(category.views / 15234) * 100}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {category.articles} artigos
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="bg-white rounded-lg border shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-4">Atividade Recente</h2>
-            <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm">
-                      <span className="font-medium">{activity.user}</span>
-                      {' '}{activity.action}{' '}
-                      <span className="font-medium text-gray-900">{activity.target}</span>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div 
+                        className={cn(
+                          "h-2 rounded-full",
+                          ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500'][index]
+                        )}
+                        style={{ 
+                          width: `${Math.min(100, (category.total_views / (categories[0]?.total_views || 1)) * 100)}%` 
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {category.article_count} artigos
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick Actions */}

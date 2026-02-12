@@ -7,121 +7,49 @@ import {
   Plus, 
   Search, 
   Filter, 
-  MoreHorizontal,
   Edit,
   Trash2,
   Eye,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AdminLayout } from './components/AdminLayout';
-
-// Mock Data
-const mockArticles = [
-  { 
-    id: 1, 
-    title: 'Como Imigrar Legalmente para os EUA em 2026', 
-    author: 'Maria Silva',
-    category: 'Imigração',
-    status: 'published',
-    views: 1234,
-    likes: 89,
-    comments: 23,
-    date: '2026-02-10',
-    featured: true,
-  },
-  { 
-    id: 2, 
-    title: 'Guia Completo de Documentação de Imigração', 
-    author: 'João Santos',
-    category: 'Documentação',
-    status: 'published',
-    views: 892,
-    likes: 67,
-    comments: 15,
-    date: '2026-02-09',
-    featured: false,
-  },
-  { 
-    id: 3, 
-    title: 'Dicas de Entrevista no Consulado Americano', 
-    author: 'Ana Costa',
-    category: 'Imigração',
-    status: 'draft',
-    views: 0,
-    likes: 0,
-    comments: 0,
-    date: '2026-02-08',
-    featured: false,
-  },
-  { 
-    id: 4, 
-    title: 'Vida nos EUA: Expectativa vs Realidade', 
-    author: 'Pedro Oliveira',
-    category: 'Vida nos EUA',
-    status: 'published',
-    views: 2156,
-    likes: 156,
-    comments: 45,
-    date: '2026-02-07',
-    featured: true,
-  },
-  { 
-    id: 5, 
-    title: 'Como Encontrar Trabalho nos EUA', 
-    author: 'Maria Silva',
-    category: 'Trabalho',
-    status: 'review',
-    views: 0,
-    likes: 0,
-    comments: 0,
-    date: '2026-02-06',
-    featured: false,
-  },
-  { 
-    id: 6, 
-    title: 'Custo de Vida em Miami 2026', 
-    author: 'Carlos Lima',
-    category: 'Vida nos EUA',
-    status: 'published',
-    views: 3421,
-    likes: 234,
-    comments: 67,
-    date: '2026-02-05',
-    featured: true,
-  },
-];
+import { useAdminArticles, useUpdateCommentStatus } from '@/hooks/useAdmin';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const variants = {
     published: 'bg-green-100 text-green-700 border-green-200',
     draft: 'bg-gray-100 text-gray-700 border-gray-200',
     review: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    archived: 'bg-red-100 text-red-700 border-red-200',
   };
 
   const icons = {
     published: CheckCircle,
     draft: Clock,
     review: Clock,
+    archived: XCircle,
   };
 
   const labels = {
     published: 'Publicado',
     draft: 'Rascunho',
     review: 'Em Revisão',
+    archived: 'Arquivado',
   };
 
-  const Icon = icons[status as keyof typeof icons];
+  const Icon = icons[status as keyof typeof icons] || Clock;
 
   return (
     <span className={cn(
       "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border",
-      variants[status as keyof typeof variants]
+      variants[status as keyof typeof variants] || variants.draft
     )}>
       <Icon className="w-3 h-3" />
-      {labels[status as keyof typeof labels]}
+      {labels[status as keyof typeof labels] || status}
     </span>
   );
 };
@@ -129,13 +57,32 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function ArticlesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const filteredArticles = mockArticles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         article.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || article.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  const { 
+    articles, 
+    total, 
+    loading, 
+    refresh 
+  } = useAdminArticles({
+    status: statusFilter,
+    search: searchTerm,
+    page,
+    limit,
   });
+
+  const totalPages = Math.ceil(total / limit);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setPage(1); // Reset to first page on search
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+    setPage(1);
+  };
 
   return (
     <AdminLayout>
@@ -144,7 +91,9 @@ export default function ArticlesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Artigos</h1>
-            <p className="text-gray-500 mt-1">Gerencie todo o conteúdo da plataforma</p>
+            <p className="text-gray-500 mt-1">
+              {loading ? 'Carregando...' : `${total} artigos no total`}
+            </p>
           </div>
           <Link 
             href="/admin/articles/new"
@@ -165,19 +114,20 @@ export default function ArticlesPage() {
               type="text"
               placeholder="Buscar artigos..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={handleStatusChange}
             className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             <option value="all">Todos os status</option>
             <option value="published">Publicados</option>
             <option value="draft">Rascunhos</option>
             <option value="review">Em Revisão</option>
+            <option value="archived">Arquivados</option>
           </select>
         </div>
       </div>
@@ -212,79 +162,104 @@ export default function ArticlesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredArticles.map((article) => (
-                <tr key={article.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      {article.featured && (
-                        <span className="mr-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
-                          Destaque
-                        </span>
-                      )}
-                      <span className="font-medium text-gray-900">{article.title}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {article.author}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                      {article.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={article.status} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        {article.views.toLocaleString()}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        👍 {article.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        💬 {article.comments}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {article.date}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg" title="Visualizar">
-                        <Eye className="w-4 h-4 text-gray-600" />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 rounded-lg" title="Editar">
-                        <Edit className="w-4 h-4 text-gray-600" />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 rounded-lg" title="Excluir">
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto" />
+                    <p className="text-gray-500 mt-2">Carregando artigos...</p>
                   </td>
                 </tr>
-              ))}
+              ) : articles.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    Nenhum artigo encontrado
+                  </td>
+                </tr>
+              ) : (
+                articles.map((article) => (
+                  <tr key={article.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        {article.featured && (
+                          <span className="mr-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
+                            Destaque
+                          </span>
+                        )}
+                        <span className="font-medium text-gray-900">{article.title}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {article.author?.name || 'Unknown'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                        {article.category?.name || 'Uncategorized'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <StatusBadge status={article.status} />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {article.views.toLocaleString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          👍 {article.likes}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          💬 {article.comments_count}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {new Date(article.created_at).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="p-2 hover:bg-gray-100 rounded-lg" title="Visualizar">
+                          <Eye className="w-4 h-4 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg" title="Editar">
+                          <Edit className="w-4 h-4 text-gray-600" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded-lg" title="Excluir">
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
         
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Mostrando {filteredArticles.length} de {mockArticles.length} artigos
-          </p>
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" disabled>
-              Anterior
-            </button>
-            <button className="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" disabled>
-              Próximo
-            </button>
+        {!loading && articles.length > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p className="text-sm text-gray-500">
+              Página {page} de {totalPages} • {total} artigos
+            </p>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Próximo
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   );
