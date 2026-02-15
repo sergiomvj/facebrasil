@@ -16,10 +16,10 @@ export async function sendArticlesToTV(articles: TVArticlePayload[]) {
         return { success: false, error: 'Webhook URL não configurada' };
     }
 
-    // Ensure the URL has the correct intake path as per docs/guia-integracao-tvfacebrasil.md
-    if (!webhookUrl.includes('/webhook/')) {
-        webhookUrl = `${webhookUrl.replace(/\/$/, '')}/webhook/facebrasil-intake`;
-    }
+    // Ensure the URL is valid. We no longer force /webhook/ suffix to allow for direct API integration.
+    // if (!webhookUrl.includes('/webhook/')) {
+    //    webhookUrl = `${webhookUrl.replace(/\/$/, '')}/webhook/facebrasil-intake`;
+    // }
 
     try {
         const response = await fetch(webhookUrl, {

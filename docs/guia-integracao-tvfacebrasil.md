@@ -5,11 +5,13 @@ Este documento descreve as especificações para o time de desenvolvimento da Fa
 ## 1. Visão Geral
 O sistema de automação aguarda o recebimento de lotes de artigos para a curadoria do "Editor Chefe AI". O Editor Chefe processará cada notícia e decidirá se ela se tornará um **Short (1-3 min)** ou um **Vídeo Doc (10 min)**.
 
-## 2. Endpoint da API (Webhook)
-O envio deve ser feito via HTTP POST para a URL do n8n:
+## 2. Endpoint da API (Integração Direta)
+O envio é feito via HTTP POST diretamente para a API do Portal de Vídeos da TV Facebrasil:
 
-**URL:** `https://[URL-DO-SEU-N8N]/webhook/facebrasil-intake`
-*Nota: A URL exata será fornecida após a ativação do workflow no n8n.*
+**URL Produção:** `https://tv.fbr.news/api/intake`
+**URL Dev:** `http://localhost:3000/api/intake` (ou porta correspondente)
+
+*Nota: A integração via N8N foi substituída por esta chamada direta.*
 
 ## 3. Frequência e Lote
 - **Frequência Recomenda**: A cada 60 minutos.
