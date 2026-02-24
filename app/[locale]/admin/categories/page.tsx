@@ -3,7 +3,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash2, Save, X, Hash, Palette, Search } from 'lucide-react';
+import {
+    Plus, Edit, Trash2, Save, X, Hash, Palette, Search,
+    ChevronRight, ChevronDown, Folder, CornerDownRight
+} from 'lucide-react';
 
 interface Category {
     id: string;
@@ -11,6 +14,9 @@ interface Category {
     slug: string;
     color: string;
     blog_id?: string;
+    parent_id?: string | null;
+    escopo?: string[];
+    children?: Category[];
 }
 
 export default function CategoriesPage() {
@@ -19,17 +25,62 @@ export default function CategoriesPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [currentCat, setCurrentCat] = useState<Partial<Category>>({});
     const [searchQuery, setSearchQuery] = useState('');
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
+    // Fetch and build tree
     async function fetchCategories() {
         setLoading(true);
-        const { data } = await supabase.from('categories').select('*').order('name');
-        if (data) setCategories(data as Category[]);
+        // Try 'Category' first, fallback handling if needed (though migration used "Category")
+        const { data, error } = await supabase.from('Category').select('*').order('name');
+
+        if (error) {
+            console.error('Error fetching categories:', error);
+            // Fallback to 'categories' if 'Category' fails, just in case
+            const { data: fallbackData } = await supabase.from('categories').select('*').order('name');
+            if (fallbackData) buildTree(fallbackData as Category[]);
+        } else if (data) {
+            buildTree(data as Category[]);
+        }
         setLoading(false);
+    }
+
+    function buildTree(rawCategories: Category[]) {
+        const catMap: Record<string, Category> = {};
+        const tree: Category[] = [];
+
+        // Initialize map
+        rawCategories.forEach(cat => {
+            catMap[cat.id] = { ...cat, children: [] };
+        });
+
+        // Build hierarchy
+        rawCategories.forEach(cat => {
+            if (cat.parent_id && catMap[cat.parent_id]) {
+                catMap[cat.parent_id].children?.push(catMap[cat.id]);
+            } else {
+                tree.push(catMap[cat.id]);
+            }
+        });
+
+        // Sort children
+        const sortCats = (cats: Category[]) => {
+            cats.sort((a, b) => a.name.localeCompare(b.name));
+            cats.forEach(c => {
+                if (c.children?.length) sortCats(c.children);
+            });
+        };
+        sortCats(tree);
+
+        setCategories(tree);
     }
 
     useEffect(() => {
         void fetchCategories();
     }, []);
+
+    const toggleExpand = (id: string) => {
+        setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     const handleSave = async () => {
         if (!currentCat.name || !currentCat.slug) return;
@@ -38,6 +89,8 @@ export default function CategoriesPage() {
             name: currentCat.name,
             slug: currentCat.slug,
             color: currentCat.color || '#3B82F6',
+            parent_id: currentCat.parent_id || null, // Handle parent_id
+            escopo: currentCat.escopo || [],
         };
 
         // Ensure we have a blog_id for new categories
@@ -49,11 +102,13 @@ export default function CategoriesPage() {
         }
 
         let error;
+        const tableName = 'categories';
+
         if (currentCat.id) {
-            const { error: err } = await supabase.from('categories').update(payload).eq('id', currentCat.id);
+            const { error: err } = await supabase.from(tableName).update(payload).eq('id', currentCat.id);
             error = err;
         } else {
-            const { error: err } = await supabase.from('categories').insert([payload]);
+            const { error: err } = await supabase.from(tableName).insert([payload]);
             error = err;
         }
 
@@ -73,50 +128,137 @@ export default function CategoriesPage() {
         else fetchCategories();
     };
 
-    const filteredCategories = categories.filter(cat =>
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Helper to flatten tree for displaying in parent selector
+    const getFlatCategories = (cats: Category[], depth = 0, excludeId?: string): { id: string, name: string, depth: number }[] => {
+        let flat: { id: string, name: string, depth: number }[] = [];
+        for (const cat of cats) {
+            if (cat.id === excludeId) continue; // Prevent circular reference
+            flat.push({ id: cat.id, name: cat.name, depth });
+            if (cat.children && cat.children.length > 0) {
+                flat = [...flat, ...getFlatCategories(cat.children, depth + 1, excludeId)];
+            }
+        }
+        return flat;
+    };
+
+    const flatListForDropdown = getFlatCategories(categories, 0, currentCat.id);
+
+    // Recursive Tree Item Component
+    const CategoryItem = ({ category, level = 0 }: { category: Category, level?: number }) => {
+        const hasChildren = category.children && category.children.length > 0;
+        const isExpanded = expanded[category.id];
+
+        // Filter based on search - simplistic approach: if parent matches, show. 
+        // If child matches, show parent+child. 
+        // For now, basic search filtering on top level is hard with tree, 
+        // so we just show the tree. Ideally we'd filter the tree structure.
+
+        return (
+            <div className="select-none">
+                <div
+                    className={`
+                        flex items-center gap-3 p-3 rounded-xl border border-transparent 
+                        hover:bg-white/[0.02] hover:border-white/5 transition-all group
+                        ${level > 0 ? 'ml-6' : ''}
+                    `}
+                >
+                    <div className="flex items-center gap-2 flex-1">
+                        {/* Indent connector */}
+                        {level > 0 && <CornerDownRight className="w-4 h-4 text-slate-600" />}
+
+                        {/* Expand Button */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); toggleExpand(category.id); }}
+                            className={`p-1 rounded-lg hover:bg-white/10 transition-colors ${hasChildren ? 'visible' : 'invisible'}`}
+                        >
+                            {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                        </button>
+
+                        {/* Icon & Color */}
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-white/10 shadow-sm" style={{ backgroundColor: category.color + '20' }}>
+                            <Folder className="w-4 h-4" style={{ color: category.color }} />
+                        </div>
+
+                        {/* Name & Slug */}
+                        <div>
+                            <div className="font-bold text-slate-200 group-hover:text-white transition-colors">
+                                {category.name}
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-500 bg-slate-950/30 px-1.5 py-0.5 rounded inline-block">
+                                {category.slug}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                            onClick={() => {
+                                setCurrentCat({ parent_id: category.id, color: '#3B82F6' });
+                                setIsEditing(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            title="Add Subcategory"
+                        >
+                            <Plus className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => { setCurrentCat(category); setIsEditing(true); }}
+                            className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            title="Edit"
+                        >
+                            <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(category.id)}
+                            className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                            title="Delete"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Subcategories */}
+                {hasChildren && isExpanded && (
+                    <div className="border-l-2 border-slate-800 ml-9 pl-1 mt-1 space-y-1">
+                        {category.children!.map(child => (
+                            <CategoryItem key={child.id} category={child} level={level + 1} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-black dark:text-white text-gray-900 mb-1">Categories</h1>
-                    <p className="text-slate-400 text-sm">Organize your content into sections</p>
+                    <h1 className="text-3xl font-black dark:text-white text-gray-900 mb-1">Categories Structure</h1>
+                    <p className="text-slate-400 text-sm">Manage category hierarchy and organization</p>
                 </div>
                 {!isEditing && (
                     <button
-                        onClick={() => { setCurrentCat({ color: '#3B82F6' }); setIsEditing(true); }}
+                        onClick={() => { setCurrentCat({ color: '#3B82F6', parent_id: null }); setIsEditing(true); }}
                         className="bg-primary text-slate-900 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all w-full md:w-auto"
                     >
-                        <Plus className="w-5 h-5" /> New Category
+                        <Plus className="w-5 h-5" /> New Root Category
                     </button>
                 )}
             </div>
 
-            {/* Quick Filter */}
-            {!isEditing && (
-                <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                        type="text"
-                        placeholder="Filter categories..."
-                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-            )}
-
+            {/* Editing Form */}
             {isEditing && (
                 <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 mb-8 shadow-2xl animate-in fade-in zoom-in duration-200">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-2">
                             <div className="p-2 bg-primary/20 rounded-lg">
-                                <Plus className="w-5 h-5 text-primary" />
+                                {currentCat.id ? <Edit className="w-5 h-5 text-primary" /> : <Plus className="w-5 h-5 text-primary" />}
                             </div>
-                            <h3 className="font-black text-xl text-white">{currentCat.id ? 'Edit Category' : 'Create New Category'}</h3>
+                            <h3 className="font-black text-xl text-white">
+                                {currentCat.id ? 'Edit Category' : 'Create New Category'}
+                            </h3>
                         </div>
                         <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                             <X className="w-5 h-5 text-slate-400" />
@@ -127,14 +269,12 @@ export default function CategoriesPage() {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Display Name</label>
-                                <div className="relative">
-                                    <input
-                                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 pl-4 text-white focus:border-primary/50 outline-none transition-all"
-                                        placeholder="e.g. Saúde e Bem Estar"
-                                        value={currentCat.name || ''}
-                                        onChange={e => setCurrentCat({ ...currentCat, name: e.target.value })}
-                                    />
-                                </div>
+                                <input
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 pl-4 text-white focus:border-primary/50 outline-none transition-all"
+                                    placeholder="e.g. Technology"
+                                    value={currentCat.name || ''}
+                                    onChange={e => setCurrentCat({ ...currentCat, name: e.target.value })}
+                                />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">URL Slug</label>
@@ -142,14 +282,31 @@ export default function CategoriesPage() {
                                     <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                     <input
                                         className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 pl-10 text-white font-mono text-sm focus:border-primary/50 outline-none transition-all"
-                                        placeholder="saude-e-bem-estar"
+                                        placeholder="technology"
                                         value={currentCat.slug || ''}
                                         onChange={e => setCurrentCat({ ...currentCat, slug: e.target.value })}
                                     />
                                 </div>
                             </div>
                         </div>
+
                         <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Parent Category</label>
+                                <select
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:border-primary/50 outline-none transition-all appearance-none"
+                                    value={currentCat.parent_id || ''}
+                                    onChange={e => setCurrentCat({ ...currentCat, parent_id: e.target.value || null })}
+                                >
+                                    <option value="">No Parent (Root Level)</option>
+                                    {flatListForDropdown.map(cat => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {'\u00A0'.repeat(cat.depth * 4)} {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Theme Color</label>
                                 <div className="flex gap-4">
@@ -168,8 +325,21 @@ export default function CategoriesPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-4 bg-slate-950/50 border border-white/5 rounded-xl text-xs text-slate-500 italic">
-                                Tip: The color will be used for badges and category highlights throughout the site.
+
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                                    Escopo do Artigo (Tópicos Sugeridos)
+                                </label>
+                                <textarea
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-primary/50 outline-none transition-all h-32 resize-none leading-relaxed"
+                                    placeholder="Insira um tópico por linha...&#10;Ex: Visto de Estudante&#10;Processo de Imigração&#10;Custo de Vida"
+                                    value={currentCat.escopo ? currentCat.escopo.join('\n') : ''}
+                                    onChange={e => setCurrentCat({
+                                        ...currentCat,
+                                        escopo: e.target.value.split('\n').filter(line => line.trim() !== '')
+                                    })}
+                                />
+                                <p className="mt-2 text-[10px] text-slate-500 italic">Estes tópicos aparecerão como opções fixas no gerador de artigos via IA.</p>
                             </div>
                         </div>
                     </div>
@@ -185,64 +355,37 @@ export default function CategoriesPage() {
                             onClick={handleSave}
                             className="bg-green-500 hover:bg-green-600 text-white px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-green-500/20 transition-all"
                         >
-                            <Save className="w-5 h-5" /> {currentCat.id ? 'Update Category' : 'Create Category'}
+                            <Save className="w-5 h-5" /> {currentCat.id ? 'Update' : 'Create'}
                         </button>
                     </div>
                 </div>
             )}
 
-            <div className="bg-slate-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-                {loading ? <div className="p-12 text-center text-slate-400">Loading categories...</div> : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-slate-950/50 border-b border-white/5 text-slate-400 text-[10px] uppercase font-bold tracking-widest">
-                                <tr>
-                                    <th className="p-4 pl-6">Category Name</th>
-                                    <th className="p-4">Slug</th>
-                                    <th className="p-4">Color</th>
-                                    <th className="p-4 text-right pr-6">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {filteredCategories.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={4} className="p-8 text-center text-slate-500 italic">No categories found matching your search.</td>
-                                    </tr>
-                                ) : filteredCategories.map((cat) => (
-                                    <tr key={cat.id} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="p-4 pl-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                                                <span className="font-bold text-white group-hover:text-primary transition-colors">{cat.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className="text-xs text-slate-400 font-mono tracking-tight bg-slate-950/50 px-2 py-1 rounded border border-white/5">{cat.slug}</span>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500">
-                                                <div className="w-6 h-6 rounded-lg border border-white/20 shadow-md" style={{ backgroundColor: cat.color }}></div>
-                                                {cat.color.toUpperCase()}
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-right pr-6">
-                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                                                <button onClick={() => { setCurrentCat(cat); setIsEditing(true); }} className="p-2.5 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors" title="Edit Category">
-                                                    <Edit className="w-4.5 h-4.5" />
-                                                </button>
-                                                <button onClick={() => handleDelete(cat.id)} className="p-2.5 text-slate-400 hover:text-red-400 rounded-xl hover:bg-red-400/10 transition-colors" title="Delete Category">
-                                                    <Trash2 className="w-4.5 h-4.5" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            {/* Tree View */}
+            <div className="bg-slate-900 border border-white/5 rounded-2xl p-6 shadow-xl min-h-[400px]">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-400 animate-pulse">
+                        <Folder className="w-12 h-12 mb-4 opacity-50" />
+                        <p>Loading structure...</p>
+                    </div>
+                ) : categories.length === 0 ? (
+                    <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-xl">
+                        <p className="text-slate-500 mb-4">No categories found in the database.</p>
+                        <button
+                            onClick={() => { setCurrentCat({ color: '#3B82F6' }); setIsEditing(true); }}
+                            className="text-primary font-bold hover:underline"
+                        >
+                            Create your first category
+                        </button>
+                    </div>
+                ) : (
+                    <div className="space-y-1">
+                        {categories.map(cat => (
+                            <CategoryItem key={cat.id} category={cat} />
+                        ))}
                     </div>
                 )}
             </div>
         </>
     );
 }
-

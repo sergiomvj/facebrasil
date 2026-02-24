@@ -14,6 +14,7 @@ export interface GenerateArticleOptions {
     style: string;
     size: 'small' | 'medium' | 'large';
     language: string;
+    scope?: string;
 }
 
 export interface GenerateArticleResult {
@@ -28,6 +29,7 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
         const wordCount = options.size === 'small' ? 400 : options.size === 'medium' ? 800 : 1200;
 
         const prompt = `Crie um artigo de alta qualidade em ${options.language === 'en' ? 'Inglês' : options.language === 'es' ? 'Espanhol' : 'Português Brasileiro'} sobre o tema: "${options.topic}".
+        ${options.scope ? `O artigo deve focar especificamente no seguinte escopo/tópico: "${options.scope}".` : ''}
         Use as seguintes palavras-chave: ${options.keywords.join(', ')}.
         O estilo deve ser ${options.style}.
         O tamanho aproximado deve ser de ${wordCount} palavras.

@@ -25,6 +25,8 @@ interface CategoryListItem {
     id: string;
     name: string;
     slug: string;
+    escopo?: string[];
+    parent_id?: string | null;
 }
 
 export default function ArticlesListPage() {
@@ -41,6 +43,8 @@ export default function ArticlesListPage() {
     const [aiKeywords, setAiKeywords] = useState<string[]>([]);
     const [aiStyle, setAiStyle] = useState('jornalístico e informativo');
     const [aiSize, setAiSize] = useState<'small' | 'medium' | 'large'>('medium');
+    const [aiCategory, setAiCategory] = useState('');
+    const [aiScope, setAiScope] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSuggestingKeywords, setIsSuggestingKeywords] = useState(false);
 
@@ -64,7 +68,8 @@ export default function ArticlesListPage() {
                 keywords: aiKeywords,
                 style: aiStyle,
                 size: aiSize,
-                language: selectedLanguage === 'all' ? 'pt' : selectedLanguage
+                language: selectedLanguage === 'all' ? 'pt' : selectedLanguage,
+                scope: aiScope
             });
 
             if (result.success && result.title && result.content) {
@@ -83,6 +88,7 @@ export default function ArticlesListPage() {
                     language: selectedLanguage === 'all' ? 'pt' : selectedLanguage,
                     translation_group_id: crypto.randomUUID(),
                     read_time: Math.ceil(result.content.split(' ').length / 200) || 1,
+                    category_id: aiCategory || null,
                     updated_at: new Date().toISOString(),
                 };
 
@@ -114,7 +120,7 @@ export default function ArticlesListPage() {
                     category:categories(name, color, slug)
                 `)
                 .order('created_at', { ascending: false }),
-            supabase.from('categories').select('id, name, slug')
+            supabase.from('categories').select('id, name, slug, escopo, parent_id').order('name')
         ]);
 
         if (articlesRes.data) {
@@ -249,6 +255,40 @@ export default function ArticlesListPage() {
                                     placeholder="Separe por vírgulas..."
                                     className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white placeholder:text-slate-600 focus:ring-1 focus:ring-purple-500/50 outline-none transition-all"
                                 />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Categoria Target</label>
+                                    <select
+                                        value={aiCategory}
+                                        onChange={(e) => {
+                                            setAiCategory(e.target.value);
+                                            setAiScope(''); // Reset scope when category changes
+                                        }}
+                                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-purple-500/50 outline-none transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Selecione uma categoria...</option>
+                                        {categories.map(cat => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Escopo / Tópico Específico</label>
+                                    <select
+                                        value={aiScope}
+                                        onChange={(e) => setAiScope(e.target.value)}
+                                        disabled={!aiCategory || !categories.find(c => c.id === aiCategory)?.escopo?.length}
+                                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-purple-500/50 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <option value="">Geral (Sem escopo fixo)</option>
+                                        {aiCategory && categories.find(c => c.id === aiCategory)?.escopo?.map((topic, i) => (
+                                            <option key={i} value={topic}>{topic}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
