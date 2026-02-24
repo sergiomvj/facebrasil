@@ -3,12 +3,11 @@
 export interface TVArticlePayload {
     id: string;
     titulo: string;
-    conteudo: string;
     link: string;
 }
 
 export async function sendArticlesToTV(articles: TVArticlePayload[]) {
-    let webhookUrl = process.env.TV_FACEBRASIL_WEBHOOK_URL || process.env.N8N_URL;
+    const webhookUrl = process.env.TV_FACEBRASIL_WEBHOOK_URL || process.env.N8N_URL || 'https://tv.fbr.news/api/webhooks/facebrasil';
     const N8N_API_KEY = process.env.N8N_API_KEY;
 
     if (!webhookUrl) {
@@ -16,12 +15,13 @@ export async function sendArticlesToTV(articles: TVArticlePayload[]) {
         return { success: false, error: 'Webhook URL não configurada' };
     }
 
-    // Ensure the URL is valid. We no longer force /webhook/ suffix to allow for direct API integration.
-    // if (!webhookUrl.includes('/webhook/')) {
-    //    webhookUrl = `${webhookUrl.replace(/\/$/, '')}/webhook/facebrasil-intake`;
-    // }
-
     try {
+        console.log('[TV-Facebrasil] Enviando payload otimizado...', {
+            url: webhookUrl,
+            articlesCount: articles.length,
+            timestamp: new Date().toISOString()
+        });
+
         const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
@@ -36,6 +36,8 @@ export async function sendArticlesToTV(articles: TVArticlePayload[]) {
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[TV-Facebrasil] Erro do Servidor (n8n):', response.status, errorText);
             throw new Error(`Erro no envio para TV (${response.status})`);
         }
 

@@ -68,7 +68,6 @@ export default function TVFacebrasilPage() {
             .map(a => ({
                 id: a.id,
                 titulo: a.title,
-                conteudo: a.content,
                 link: `https://facebrasil.com/article/${a.slug}`
             }));
 
@@ -119,8 +118,8 @@ export default function TVFacebrasilPage() {
 
             {status.type && (
                 <div className={`p-4 rounded-xl flex items-start gap-3 border ${status.type === 'success'
-                        ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                        : 'bg-red-500/10 border-red-500/20 text-red-400'
+                    ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                    : 'bg-red-500/10 border-red-500/20 text-red-400'
                     }`}>
                     {status.type === 'success' ? <CheckCircle2 className="w-5 h-5 mt-0.5" /> : <AlertCircle className="w-5 h-5 mt-0.5" />}
                     <p className="font-medium">{status.message}</p>

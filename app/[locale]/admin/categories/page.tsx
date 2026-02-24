@@ -30,14 +30,10 @@ export default function CategoriesPage() {
     // Fetch and build tree
     async function fetchCategories() {
         setLoading(true);
-        // Try 'Category' first, fallback handling if needed (though migration used "Category")
-        const { data, error } = await supabase.from('Category').select('*').order('name');
+        const { data, error } = await supabase.from('categories').select('*').order('name');
 
         if (error) {
             console.error('Error fetching categories:', error);
-            // Fallback to 'categories' if 'Category' fails, just in case
-            const { data: fallbackData } = await supabase.from('categories').select('*').order('name');
-            if (fallbackData) buildTree(fallbackData as Category[]);
         } else if (data) {
             buildTree(data as Category[]);
         }
@@ -85,11 +81,11 @@ export default function CategoriesPage() {
     const handleSave = async () => {
         if (!currentCat.name || !currentCat.slug) return;
 
-        const payload: Partial<Category> = {
+        const payload: any = {
             name: currentCat.name,
             slug: currentCat.slug,
             color: currentCat.color || '#3B82F6',
-            parent_id: currentCat.parent_id || null, // Handle parent_id
+            parent_id: currentCat.parent_id || null,
             escopo: currentCat.escopo || [],
         };
 
@@ -101,23 +97,20 @@ export default function CategoriesPage() {
             }
         }
 
-        let error;
-        const tableName = 'categories';
-
+        let result;
         if (currentCat.id) {
-            const { error: err } = await supabase.from(tableName).update(payload).eq('id', currentCat.id);
-            error = err;
+            result = await supabase.from('categories').update(payload).eq('id', currentCat.id);
         } else {
-            const { error: err } = await supabase.from(tableName).insert([payload]);
-            error = err;
+            result = await supabase.from('categories').insert([payload]);
         }
 
-        if (!error) {
+        if (!result.error) {
             setIsEditing(false);
             setCurrentCat({});
             fetchCategories();
         } else {
-            alert('Error saving category: ' + error.message);
+            console.error('Save error:', result.error);
+            alert('Error saving category: ' + result.error.message);
         }
     };
 
@@ -147,11 +140,6 @@ export default function CategoriesPage() {
     const CategoryItem = ({ category, level = 0 }: { category: Category, level?: number }) => {
         const hasChildren = category.children && category.children.length > 0;
         const isExpanded = expanded[category.id];
-
-        // Filter based on search - simplistic approach: if parent matches, show. 
-        // If child matches, show parent+child. 
-        // For now, basic search filtering on top level is hard with tree, 
-        // so we just show the tree. Ideally we'd filter the tree structure.
 
         return (
             <div className="select-none">
