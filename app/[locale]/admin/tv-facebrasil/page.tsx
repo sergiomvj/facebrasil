@@ -22,6 +22,7 @@ export default function TVFacebrasilPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [sending, setSending] = useState(false);
+    const [debugMode, setDebugMode] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
 
     async function fetchArticles() {
@@ -69,8 +70,13 @@ export default function TVFacebrasilPage() {
         const selectedArticles = articles
             .filter(a => selectedIds.includes(a.id))
             .map(a => {
-                // Limpeza básica de HTML para não quebrar o parser do n8n se houver nós sensíveis
-                const cleanContent = a.content ? a.content.replace(/<[^>]*>?/gm, '') : '';
+                // Limpeza básica de HTML
+                let cleanContent = a.content ? a.content.replace(/<[^>]*>?/gm, '') : '';
+
+                // Modo de depuração: envia apenas uma prévia para testar se o problema é o tamanho/buffer
+                if (debugMode && cleanContent.length > 200) {
+                    cleanContent = cleanContent.substring(0, 200) + '... (DEBUG MODE ACTIVE)';
+                }
 
                 // Trata o nome da categoria com segurança
                 let catName = 'Geral';
@@ -147,15 +153,29 @@ export default function TVFacebrasilPage() {
                 </div>
             )}
 
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                    type="text"
-                    placeholder="Buscar artigos por título..."
-                    className="w-full bg-slate-900/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <div className="flex items-center gap-4 bg-slate-900/30 p-4 rounded-xl border border-white/5">
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="debugMode"
+                        checked={debugMode}
+                        onChange={(e) => setDebugMode(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="debugMode" className="text-sm font-medium text-slate-300 cursor-pointer">
+                        Modo de Depuração (Envia conteúdo curto para testar o n8n)
+                    </label>
+                </div>
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <input
+                        type="text"
+                        placeholder="Buscar artigos por título..."
+                        className="w-full bg-slate-900/50 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

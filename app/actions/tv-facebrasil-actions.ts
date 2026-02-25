@@ -14,10 +14,10 @@ export async function sendArticlesToTV(articles: TVArticlePayload[]) {
     const API_KEY = process.env.TV_FACEBRASIL_API_KEY || process.env.N8N_API_KEY;
 
     try {
-        console.log('[TV-Facebrasil] Tentativa de envio:', {
+        console.log('[TV-Facebrasil] Payload Send:', {
             url: webhookUrl,
-            items: articles.length,
-            ids: articles.map(a => a.id)
+            count: articles.length,
+            debug: articles[0]?.corpo?.includes('DEBUG MODE ACTIVE')
         });
 
         const response = await fetch(webhookUrl, {
@@ -29,31 +29,30 @@ export async function sendArticlesToTV(articles: TVArticlePayload[]) {
             body: JSON.stringify({
                 articles
             }),
-            // Importante para evitar timeouts em requisições grandes para n8n
             cache: 'no-store'
         });
 
         const responseText = await response.text();
 
         if (!response.ok) {
-            console.error('[TV-Facebrasil] Erro no Workflow n8n:', response.status, responseText);
+            console.error('[TV-Facebrasil] n8n Final Error:', response.status, responseText);
 
-            // Se o n8n retornar um JSON com mensagem de erro, tentamos extrair
-            let detailedError = responseText;
+            // Tenta ver se é um erro amigável do n8n
+            let msg = responseText;
             try {
-                const json = JSON.parse(responseText);
-                detailedError = json.message || responseText;
+                const parsed = JSON.parse(responseText);
+                msg = parsed.message || parsed.error || responseText;
             } catch (e) { }
 
             return {
                 success: false,
-                error: `Erro no servidor (n8n): ${detailedError.substring(0, 150)}`
+                error: `n8n Reportou: ${msg}`
             };
         }
 
         return { success: true, data: responseText };
     } catch (error: any) {
-        console.error('[TV-Facebrasil] Erro de Conexão:', error.message);
-        return { success: false, error: `Falha de conexão: ${error.message}` };
+        console.error('[TV-Facebrasil] Connection Fatal:', error.message);
+        return { success: false, error: `Falha de rede/dns: ${error.message}` };
     }
 }
