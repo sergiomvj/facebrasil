@@ -120,10 +120,10 @@ export default function TVFacebrasilPage() {
 
                 <button
                     onClick={handleSend}
-                    disabled={selectedIds.length !== 5 || sending}
+                    disabled={selectedIds.length === 0 || selectedIds.length > 5 || sending}
                     className={`
                         flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg
-                        ${selectedIds.length === 5 && !sending
+                        ${selectedIds.length > 0 && selectedIds.length <= 5 && !sending
                             ? 'bg-primary text-slate-900 hover:scale-105 shadow-primary/20'
                             : 'bg-slate-800 text-slate-500 cursor-not-allowed'}
                     `}
