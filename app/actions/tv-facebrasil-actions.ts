@@ -10,7 +10,7 @@ export interface TVArticlePayload {
 }
 
 export async function sendArticlesToTV(articles: TVArticlePayload[]) {
-    const webhookUrl = process.env.TV_FACEBRASIL_WEBHOOK_URL || 'https://tools-n8n.ldm9ti.easypanel.host/webhook/facebrasil-intake';
+    const webhookUrl = process.env.TV_FACEBRASIL_WEBHOOK_URL || 'https://tools-n8n.ldm9ti.easypanel.host/webhook-test/facebrasil-intake';
     const API_KEY = process.env.TV_FACEBRASIL_API_KEY || process.env.N8N_API_KEY;
 
     try {
