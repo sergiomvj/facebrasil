@@ -8,7 +8,7 @@ O sistema de automação aguarda o recebimento de lotes de artigos para a curado
 ## 2. Endpoint da API (Integração Direta)
 O envio é feito via HTTP POST diretamente para a API do Portal de Vídeos da TV Facebrasil:
 
-**URL Produção:** `https://tv.fbr.news/api/intake`
+**URL Produção:** `https://tools-n8n.ldm9ti.easypanel.host/webhook/facebrasil-intake`
 **URL Dev:** `http://localhost:3000/api/intake` (ou porta correspondente)
 
 *Nota: A integração via N8N foi substituída por esta chamada direta.*

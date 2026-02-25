@@ -4,23 +4,20 @@ export interface TVArticlePayload {
     id: string;
     titulo: string;
     corpo: string;
+    conteudo: string; // Adicionado para compatibilidade
     link: string;
     categoria: string;
 }
 
 export async function sendArticlesToTV(articles: TVArticlePayload[]) {
-    // Conforme especificação atualizada pelo usuário
     const webhookUrl = process.env.TV_FACEBRASIL_WEBHOOK_URL || 'https://tv.fbr.news/api/intake';
     const API_KEY = process.env.TV_FACEBRASIL_API_KEY || process.env.N8N_API_KEY;
 
-    if (!webhookUrl) {
-        return { success: false, error: 'Webhook URL não configurada' };
-    }
-
     try {
-        console.log('[TV-Facebrasil] Enviando lote com payload final...', {
+        console.log('[TV-Facebrasil] Enviando com compatibilidade dupla...', {
             url: webhookUrl,
-            count: articles.length
+            items: articles.length,
+            hasAuth: !!API_KEY
         });
 
         const response = await fetch(webhookUrl, {
@@ -35,14 +32,14 @@ export async function sendArticlesToTV(articles: TVArticlePayload[]) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('[TV-Facebrasil] Erro na Resposta:', response.status, errorText);
-            throw new Error(`Erro no envio para TV (${response.status})`);
+            const errorBody = await response.text();
+            console.error('[TV-Facebrasil] Erro do Servidor:', response.status, errorBody);
+            throw new Error(`Erro ${response.status}: ${errorBody.substring(0, 100)}`);
         }
 
         return { success: true };
     } catch (error: any) {
-        console.error('Erro ao enviar para TV Facebrasil:', error);
+        console.error('[TV-Facebrasil] Falha:', error.message);
         return { success: false, error: error.message };
     }
 }

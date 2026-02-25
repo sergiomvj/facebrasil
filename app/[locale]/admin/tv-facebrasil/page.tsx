@@ -58,8 +58,8 @@ export default function TVFacebrasilPage() {
     };
 
     const handleSend = async () => {
-        if (selectedIds.length !== 5) {
-            alert('Por favor, selecione exatamente 5 artigos.');
+        if (selectedIds.length === 0 || selectedIds.length > 5) {
+            alert('Por favor, selecione entre 1 e 5 artigos.');
             return;
         }
 
@@ -72,6 +72,7 @@ export default function TVFacebrasilPage() {
                 id: a.id,
                 titulo: a.title,
                 corpo: a.content,
+                conteudo: a.content, // Compatibilidade com versões antigas do n8n
                 link: `https://facebrasil.com/article/${a.slug}`,
                 categoria: a.categories?.name || 'Geral'
             }));
