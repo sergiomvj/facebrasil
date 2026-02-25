@@ -27,6 +27,19 @@ O formato deve seguir rigorosamente a estrutura abaixo:
 {
   "articles": [
     {
+      "id": "ID_DO_POST_WordPress",
+      "titulo": "Título da Matéria",
+      "conteudo": "Texto completo do artigo aqui...",
+      "link": "https://exemplo.com/url-da-materia"
+    }
+  ]
+}
+
+
+
+{
+  "articles": [
+    {
       "id": "ID_INTERNO_MATERIA_1",
       "titulo": "Título da Matéria 1",
       "conteudo": "Texto completo da matéria, incluindo parágrafos e aspas importantes. Quanto mais detalhado, melhor para o roteirista AI.",

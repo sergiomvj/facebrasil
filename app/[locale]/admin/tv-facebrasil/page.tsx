@@ -11,6 +11,9 @@ interface ArticleItem {
     slug: string;
     content: string;
     created_at: string;
+    categories?: {
+        name: string;
+    };
 }
 
 export default function TVFacebrasilPage() {
@@ -25,14 +28,14 @@ export default function TVFacebrasilPage() {
         setLoading(true);
         const { data, error } = await supabase
             .from('articles')
-            .select('id, title, slug, content, created_at')
+            .select('id, title, slug, content, created_at, categories(name)')
             .order('created_at', { ascending: false })
             .limit(50);
 
         if (error) {
             console.error('Error fetching articles:', error);
         } else if (data) {
-            setArticles(data);
+            setArticles(data as any);
         }
         setLoading(false);
     }
@@ -68,7 +71,9 @@ export default function TVFacebrasilPage() {
             .map(a => ({
                 id: a.id,
                 titulo: a.title,
-                link: `https://facebrasil.com/article/${a.slug}`
+                corpo: a.content,
+                link: `https://facebrasil.com/article/${a.slug}`,
+                categoria: a.categories?.name || 'Geral'
             }));
 
         const result = await sendArticlesToTV(selectedArticles);
