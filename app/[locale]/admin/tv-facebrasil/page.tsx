@@ -68,14 +68,29 @@ export default function TVFacebrasilPage() {
 
         const selectedArticles = articles
             .filter(a => selectedIds.includes(a.id))
-            .map(a => ({
-                id: a.id,
-                titulo: a.title,
-                corpo: a.content,
-                conteudo: a.content, // Compatibilidade com versões antigas do n8n
-                link: `https://facebrasil.com/article/${a.slug}`,
-                categoria: a.categories?.name || 'Geral'
-            }));
+            .map(a => {
+                // Limpeza básica de HTML para não quebrar o parser do n8n se houver nós sensíveis
+                const cleanContent = a.content ? a.content.replace(/<[^>]*>?/gm, '') : '';
+
+                // Trata o nome da categoria com segurança
+                let catName = 'Geral';
+                if (a.categories) {
+                    if (Array.isArray(a.categories)) {
+                        catName = a.categories[0]?.name || 'Geral';
+                    } else {
+                        catName = (a.categories as any).name || 'Geral';
+                    }
+                }
+
+                return {
+                    id: a.id,
+                    titulo: a.title,
+                    corpo: cleanContent,
+                    conteudo: cleanContent,
+                    link: `https://facebrasil.com/article/${a.slug}`,
+                    categoria: catName
+                };
+            });
 
         const result = await sendArticlesToTV(selectedArticles);
 
