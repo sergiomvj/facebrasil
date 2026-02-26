@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Plus, Edit2, Trash2, Search, UserCircle, UserPlus, Shield } from 'lucide-react';
-import { upsertAuthor, deleteAuthor } from '@/app/actions/author-actions';
+import { Users, Plus, Edit2, Trash2, Search, UserCircle, UserPlus, Shield, Mail } from 'lucide-react';
+import { upsertAuthor, deleteAuthor, inviteAuthor } from '@/app/actions/author-actions';
 
 interface Author {
     id: string;
@@ -19,6 +19,9 @@ export default function AuthorsPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviting, setInviting] = useState(false);
     const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
     const [formData, setFormData] = useState({
         id: '',
@@ -66,6 +69,22 @@ export default function AuthorsPage() {
     useEffect(() => {
         void fetchAuthors();
     }, []);
+
+    async function handleInviteAuthor() {
+        if (!inviteEmail) return alert('Email é obrigatório');
+        setInviting(true);
+        try {
+            const result = await inviteAuthor(inviteEmail);
+            if (!result.success) throw new Error(result.error);
+            alert('Convite enviado com sucesso para ' + inviteEmail);
+            setShowInviteModal(false);
+            setInviteEmail('');
+        } catch (error: any) {
+            alert('Erro ao enviar convite: ' + error.message);
+        } finally {
+            setInviting(false);
+        }
+    }
 
     async function handleCreateAuthor() {
         if (!formData.name) return alert('Nome é obrigatório');
@@ -171,6 +190,13 @@ export default function AuthorsPage() {
                         className="w-full pl-10 pr-4 py-2 dark:bg-slate-800 bg-white border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                 </div>
+                <button
+                    onClick={() => setShowInviteModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors"
+                >
+                    <Mail className="w-5 h-5" />
+                    Convidar Autor (Clerk)
+                </button>
                 <button
                     onClick={() => setShowCreateModal(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
@@ -352,6 +378,64 @@ export default function AuthorsPage() {
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
                                     editingAuthor ? 'Atualizar' : 'Criar'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Invitation Modal */}
+            {showInviteModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="dark:bg-slate-800 bg-white rounded-lg max-w-md w-full p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-blue-500/20 rounded-lg">
+                                <Mail className="w-6 h-6 text-blue-400" />
+                            </div>
+                            <h2 className="text-2xl font-bold dark:text-white text-gray-900">
+                                Convidar Novo Autor
+                            </h2>
+                        </div>
+
+                        <p className="text-sm text-slate-400 mb-6">
+                            O Clerk enviará um convite oficial por email para que o colaborador possa criar sua conta e acessar o painel.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
+                                    Email do Autor *
+                                </label>
+                                <input
+                                    type="email"
+                                    value={inviteEmail}
+                                    onChange={(e) => setInviteEmail(e.target.value)}
+                                    placeholder="email@exemplo.com"
+                                    className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowInviteModal(false);
+                                    setInviteEmail('');
+                                }}
+                                className="flex-1 px-4 py-2 dark:bg-slate-700 bg-gray-100 dark:text-white text-gray-900 rounded-lg hover:bg-slate-600 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleInviteAuthor}
+                                disabled={!inviteEmail || inviting}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            >
+                                {inviting ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    'Enviar Convite'
                                 )}
                             </button>
                         </div>

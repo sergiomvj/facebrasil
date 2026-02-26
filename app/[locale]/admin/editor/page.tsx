@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import EditorRichText from '@/components/EditorRichText';
-import { Save, ArrowLeft, Globe, Link as LinkIcon, Sparkles, MonitorPlay } from 'lucide-react';
+import { Save, ArrowLeft, Globe, Link as LinkIcon, Sparkles, MonitorPlay, User } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Link, routing } from '@/i18n/routing';
@@ -22,6 +22,21 @@ function EditorContent() {
     const [generatingSlug, setGeneratingSlug] = useState(false);
     const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [authors, setAuthors] = useState<any[]>([]);
+    const [authorId, setAuthorId] = useState('');
+
+    const [title, setTitle] = useState('');
+    const [slug, setSlug] = useState('');
+    const [content, setContent] = useState('');
+    const [excerpt, setExcerpt] = useState('');
+    const [socialSummary, setSocialSummary] = useState('');
+    const [instagramUrl, setInstagramUrl] = useState('');
+    const [categoryId, setCategoryId] = useState('');
+    const [featuredImageUrl, setFeaturedImageUrl] = useState('');
+    const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT');
+    const [articleLanguage, setArticleLanguage] = useState('pt');
+    const [translationGroupId, setTranslationGroupId] = useState('');
+    const [colocarHero, setColocarHero] = useState(false);
 
     const handleGenerateSlug = async () => {
         if (!content && !title) return alert('Escreva algum conteúdo ou título primeiro');
@@ -46,21 +61,9 @@ function EditorContent() {
         }
     };
 
-    const [title, setTitle] = useState('');
-    const [slug, setSlug] = useState('');
-    const [content, setContent] = useState('');
-    const [excerpt, setExcerpt] = useState('');
-    const [socialSummary, setSocialSummary] = useState('');
-    const [instagramUrl, setInstagramUrl] = useState('');
-    const [categoryId, setCategoryId] = useState('');
-    const [featuredImageUrl, setFeaturedImageUrl] = useState('');
-    const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT');
-    const [articleLanguage, setArticleLanguage] = useState('pt');
-    const [translationGroupId, setTranslationGroupId] = useState('');
-    const [colocarHero, setColocarHero] = useState(false);
-
     async function loadInitialData() {
         setLoading(true);
+
         // Load Categories
         const { data: cats } = await supabase.from('categories').select('*').order('name');
         if (cats) {
@@ -68,10 +71,15 @@ function EditorContent() {
             setCategories(flattenCategoryTree(tree));
         }
 
+        // Load Authors
+        const { data: authorsData } = await supabase.from('profiles').select('id, name').order('name');
+        if (authorsData) setAuthors(authorsData);
+
         // Load Article if ID present
         if (articleId) {
             const { data: post } = await supabase.from('articles').select('*').eq('id', articleId).single();
             if (post) {
+                setAuthorId(post.author_id || '');
                 setTitle(post.title || '');
                 setSlug(post.slug || '');
                 setContent(post.content || '');
@@ -148,7 +156,8 @@ function EditorContent() {
             read_time: Math.ceil((content || '').split(' ').length / 200) || 1,
             language: articleLanguage,
             translation_group_id: translationGroupId || null,
-            colocar_hero: colocarHero
+            colocar_hero: colocarHero,
+            author_id: authorId || null
         };
 
         const result = await upsertArticle(payload, articleId || undefined);
@@ -325,6 +334,24 @@ function EditorContent() {
                             </div>
 
                             <div className="space-y-1">
+                                <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest flex items-center gap-2">
+                                    <User className="w-3 h-3 text-primary" /> Author
+                                </label>
+                                <select
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none font-bold appearance-none cursor-pointer"
+                                    value={authorId}
+                                    onChange={(e) => setAuthorId(e.target.value)}
+                                >
+                                    <option value="">Default (Current User)</option>
+                                    {authors.map((a: any) => (
+                                        <option key={a.id} value={a.id}>
+                                            {a.name || 'Anonymous'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="space-y-1">
                                 <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Featured Image URL</label>
                                 <input
                                     className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none"
@@ -370,4 +397,3 @@ export default function EditorPage() {
         </div>
     );
 }
-

@@ -2,9 +2,12 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { auth } from '@clerk/nextjs/server';
+import { auth, createClerkClient } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { protectAdmin } from '@/lib/admin-guard';
+
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
 
 interface AuthorPayload {
     name: string;
@@ -72,3 +75,20 @@ export async function deleteAuthor(id: string) {
     revalidatePath('/admin/authors');
     return { success: true };
 }
+
+export async function inviteAuthor(email: string) {
+    // Only admins can invite authors
+    await protectAdmin();
+
+    try {
+        await clerkClient.invitations.createInvitation({
+            emailAddress: email,
+            ignoreExisting: true
+        });
+        return { success: true };
+    } catch (error: any) {
+        console.error('Clerk Invitation Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+

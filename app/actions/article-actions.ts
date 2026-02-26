@@ -85,8 +85,10 @@ export async function upsertArticle(payload: UpdateArticlePayload, id?: string) 
         }
     }
 
-    // Force Author ID to be current user
-    const finalPayload: any = { ...payload, author_id: userId };
+    // Use provided author_id OR fallback to current user
+    const finalAuthorId = payload.author_id || userId;
+    const finalPayload: any = { ...payload, author_id: finalAuthorId };
+
 
     // Update hero_set_at if this article is becoming a hero
     if (payload.colocar_hero) {
