@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export interface Ad {
     id: string;
     title: string;
-    position: 'banner_top' | 'sidebar' | 'inline' | 'sticky_footer' | 'home_hero' | 'article_sidebar' | 'feed_interstitial';
+    position: 'banner_top' | 'sidebar' | 'inline' | 'sticky_footer' | 'home_hero' | 'article_sidebar' | 'feed_interstitial' | 'column_middle' | 'super_footer';
     image_url: string;
     link_url: string;
     category_id?: string;
