@@ -15,26 +15,36 @@ export async function protectAdmin() {
     }
 
     const userId = user.id;
+    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
+
+    console.log(`[AdminGuard] Checking Admin: User=${userId}, Master=${masterAdminId}`);
 
     // Direct check for Master Admin via env var (if set)
-    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
     if (masterAdminId && userId === masterAdminId) {
+        console.log(`[AdminGuard] Master Admin bypass granted for ${userId}`);
         return { userId, role: "ADMIN" };
     }
 
     // Check database profile
-    const { data: profile } = await (supabaseAdmin
+    const { data: profile, error } = await (supabaseAdmin
         .from('profiles')
         .select('role')
         .eq('id', userId)
         .single() as any);
 
-    if (profile?.role?.toUpperCase() !== "ADMIN") {
-        console.warn(`Unauthorized admin access attempt by user ${userId}`);
+    if (error) {
+        console.error(`[AdminGuard] Profile fetch error for ${userId}:`, error);
+    }
+
+    const role = profile?.role?.toUpperCase();
+    console.log(`[AdminGuard] User ${userId} has role: ${role}`);
+
+    if (role !== "ADMIN") {
+        console.warn(`[AdminGuard] Unauthorized admin access attempt by user ${userId} (Role: ${role})`);
         redirect("/");
     }
 
-    return { userId, role: profile.role };
+    return { userId, role };
 }
 
 /**
@@ -49,19 +59,26 @@ export async function protectEditor() {
     }
 
     const userId = user.id;
+    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
+
+    console.log(`[AdminGuard] Checking Editor: User=${userId}, Master=${masterAdminId}`);
 
     // Direct check for Master Admin via env var (if set)
-    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
     if (masterAdminId && userId === masterAdminId) {
+        console.log(`[AdminGuard] Master Admin bypass granted for ${userId}`);
         return { userId, role: "ADMIN" };
     }
 
     // Check database profile
-    const { data: profile } = await (supabaseAdmin
+    const { data: profile, error } = await (supabaseAdmin
         .from('profiles')
         .select('role')
         .eq('id', userId)
         .single() as any);
+
+    if (error) {
+        console.error(`[AdminGuard] Profile fetch error for ${userId}:`, error);
+    }
 
     const role = profile?.role?.toUpperCase();
 
