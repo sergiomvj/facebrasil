@@ -116,7 +116,7 @@ export async function inviteAuthor(email: string, role: string = 'EDITOR') {
         }
 
         const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-            redirectTo: `${siteUrl}/api/auth/callback`,
+            redirectTo: `${siteUrl}/pt/callback`,
             data: {
                 role: role.toUpperCase()
             }
