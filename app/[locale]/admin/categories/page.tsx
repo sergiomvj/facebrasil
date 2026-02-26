@@ -7,17 +7,9 @@ import {
     Plus, Edit, Trash2, Save, X, Hash, Palette, Search,
     ChevronRight, ChevronDown, Folder, CornerDownRight
 } from 'lucide-react';
+import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
 
-interface Category {
-    id: string;
-    name: string;
-    slug: string;
-    color: string;
-    blog_id?: string;
-    parent_id?: string | null;
-    escopo?: string[];
-    children?: Category[];
-}
+// Category interface moved to lib/category-utils.ts
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -35,39 +27,9 @@ export default function CategoriesPage() {
         if (error) {
             console.error('Error fetching categories:', error);
         } else if (data) {
-            buildTree(data as Category[]);
+            setCategories(buildCategoryTree(data as Category[]));
         }
         setLoading(false);
-    }
-
-    function buildTree(rawCategories: Category[]) {
-        const catMap: Record<string, Category> = {};
-        const tree: Category[] = [];
-
-        // Initialize map
-        rawCategories.forEach(cat => {
-            catMap[cat.id] = { ...cat, children: [] };
-        });
-
-        // Build hierarchy
-        rawCategories.forEach(cat => {
-            if (cat.parent_id && catMap[cat.parent_id]) {
-                catMap[cat.parent_id].children?.push(catMap[cat.id]);
-            } else {
-                tree.push(catMap[cat.id]);
-            }
-        });
-
-        // Sort children
-        const sortCats = (cats: Category[]) => {
-            cats.sort((a, b) => a.name.localeCompare(b.name));
-            cats.forEach(c => {
-                if (c.children?.length) sortCats(c.children);
-            });
-        };
-        sortCats(tree);
-
-        setCategories(tree);
     }
 
     useEffect(() => {
@@ -85,8 +47,10 @@ export default function CategoriesPage() {
             name: currentCat.name,
             slug: currentCat.slug,
             color: currentCat.color || '#3B82F6',
-            parent_id: currentCat.parent_id || null,
+            // Explicitly ensure empty strings from <select> are treated as null for Postgres
+            parent_id: currentCat.parent_id === "" ? null : (currentCat.parent_id || null),
             escopo: currentCat.escopo || [],
+            updated_at: new Date().toISOString()
         };
 
         // Ensure we have a blog_id for new categories
@@ -121,20 +85,52 @@ export default function CategoriesPage() {
         else fetchCategories();
     };
 
-    // Helper to flatten tree for displaying in parent selector
-    const getFlatCategories = (cats: Category[], depth = 0, excludeId?: string): { id: string, name: string, depth: number }[] => {
-        let flat: { id: string, name: string, depth: number }[] = [];
-        for (const cat of cats) {
-            if (cat.id === excludeId) continue; // Prevent circular reference
-            flat.push({ id: cat.id, name: cat.name, depth });
-            if (cat.children && cat.children.length > 0) {
-                flat = [...flat, ...getFlatCategories(cat.children, depth + 1, excludeId)];
+    const flatListForDropdown = flattenCategoryTree(categories, 0, currentCat.id);
+
+    // Filter categories based on search
+    const filterTree = (nodes: Category[], query: string): Category[] => {
+        if (!query) return nodes;
+
+        return nodes.reduce((acc: Category[], node) => {
+            const matchesSelf = node.name.toLowerCase().includes(query.toLowerCase()) ||
+                node.slug.toLowerCase().includes(query.toLowerCase());
+
+            const filteredChildren = node.children ? filterTree(node.children, query) : [];
+            const hasMatchingChildren = filteredChildren.length > 0;
+
+            if (matchesSelf || hasMatchingChildren) {
+                // Automatically expand parents of matches
+                if (hasMatchingChildren && !expanded[node.id]) {
+                    // This is side-effecty but helps UX
+                    // Use a timeout or a separate effect to avoid state updates during render
+                }
+                acc.push({ ...node, children: filteredChildren });
             }
-        }
-        return flat;
+            return acc;
+        }, []);
     };
 
-    const flatListForDropdown = getFlatCategories(categories, 0, currentCat.id);
+    const filteredCategories = filterTree(categories, searchQuery);
+
+    // Auto-expand parents when searching
+    useEffect(() => {
+        if (searchQuery) {
+            const expandAll = (nodes: Category[]) => {
+                const newExpands: Record<string, boolean> = {};
+                const traverse = (ns: Category[]) => {
+                    ns.forEach(n => {
+                        if (n.children?.length) {
+                            newExpands[n.id] = true;
+                            traverse(n.children);
+                        }
+                    });
+                };
+                traverse(nodes);
+                setExpanded(prev => ({ ...prev, ...newExpands }));
+            };
+            expandAll(categories);
+        }
+    }, [searchQuery, categories]);
 
     // Recursive Tree Item Component
     const CategoryItem = ({ category, level = 0 }: { category: Category, level?: number }) => {
@@ -226,14 +222,26 @@ export default function CategoriesPage() {
                     <h1 className="text-3xl font-black dark:text-white text-gray-900 mb-1">Categories Structure</h1>
                     <p className="text-slate-400 text-sm">Manage category hierarchy and organization</p>
                 </div>
-                {!isEditing && (
-                    <button
-                        onClick={() => { setCurrentCat({ color: '#3B82F6', parent_id: null }); setIsEditing(true); }}
-                        className="bg-primary text-slate-900 px-6 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all w-full md:w-auto"
-                    >
-                        <Plus className="w-5 h-5" /> New Root Category
-                    </button>
-                )}
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input
+                            type="text"
+                            placeholder="Search structure..."
+                            className="bg-slate-900/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all w-full sm:w-64"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    {!isEditing && (
+                        <button
+                            onClick={() => { setCurrentCat({ color: '#3B82F6', parent_id: null }); setIsEditing(true); }}
+                            className="bg-primary text-slate-900 px-6 py-2 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all w-full md:w-auto text-sm"
+                        >
+                            <Plus className="w-5 h-5" /> New Root Category
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Editing Form */}
@@ -368,7 +376,7 @@ export default function CategoriesPage() {
                     </div>
                 ) : (
                     <div className="space-y-1">
-                        {categories.map(cat => (
+                        {filteredCategories.map(cat => (
                             <CategoryItem key={cat.id} category={cat} />
                         ))}
                     </div>

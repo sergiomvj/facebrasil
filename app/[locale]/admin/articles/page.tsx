@@ -7,6 +7,7 @@ import { Link } from '@/i18n/routing';
 import { deleteArticle, upsertArticle } from '@/app/actions/article-actions';
 import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
+import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
 
 interface ArticleListItem {
     id: string;
@@ -27,6 +28,7 @@ interface CategoryListItem {
     slug: string;
     escopo?: string[];
     parent_id?: string | null;
+    depth?: number;
 }
 
 export default function ArticlesListPage() {
@@ -155,7 +157,10 @@ export default function ArticlesListPage() {
 
             setArticles(mappedArticles);
         }
-        if (categoriesRes.data) setCategories(categoriesRes.data);
+        if (categoriesRes.data) {
+            const tree = buildCategoryTree(categoriesRes.data as Category[]);
+            setCategories(flattenCategoryTree(tree) as unknown as CategoryListItem[]);
+        }
         setLoading(false);
     }
 
@@ -270,7 +275,9 @@ export default function ArticlesListPage() {
                                     >
                                         <option value="">Selecione uma categoria...</option>
                                         {categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                            <option key={cat.id} value={cat.id}>
+                                                {'\u00A0'.repeat((cat.depth || 0) * 4)} {cat.name}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -392,7 +399,9 @@ export default function ArticlesListPage() {
                         >
                             <option value="all">All Categories</option>
                             {categories.map(cat => (
-                                <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                                <option key={cat.id} value={cat.slug}>
+                                    {'\u00A0'.repeat((cat.depth || 0) * 4)} {cat.name}
+                                </option>
                             ))}
                         </select>
                     </div>

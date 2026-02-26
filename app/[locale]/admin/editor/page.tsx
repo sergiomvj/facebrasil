@@ -3,14 +3,14 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import EditorRichText from '@/components/EditorRichText';
-import { Save, ArrowLeft, Globe, Link as LinkIcon } from 'lucide-react';
+import { Save, ArrowLeft, Globe, Link as LinkIcon, Sparkles, MonitorPlay } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Link, routing } from '@/i18n/routing';
 import { upsertArticle } from '@/app/actions/article-actions';
 import { generateMetadata } from '@/app/actions/ai-actions';
 import { sendArticlesToTV } from '@/app/actions/tv-facebrasil-actions';
-import { Sparkles, MonitorPlay } from 'lucide-react';
+import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
 
 function EditorContent() {
     const router = useRouter();
@@ -21,7 +21,7 @@ function EditorContent() {
     const [saving, setSaving] = useState(false);
     const [generatingSlug, setGeneratingSlug] = useState(false);
     const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
-    const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const handleGenerateSlug = async () => {
         if (!content && !title) return alert('Escreva algum conteúdo ou título primeiro');
@@ -62,8 +62,11 @@ function EditorContent() {
     async function loadInitialData() {
         setLoading(true);
         // Load Categories
-        const { data: cats } = await supabase.from('categories').select('id, name').order('name');
-        if (cats) setCategories(cats);
+        const { data: cats } = await supabase.from('categories').select('*').order('name');
+        if (cats) {
+            const tree = buildCategoryTree(cats as Category[]);
+            setCategories(flattenCategoryTree(tree));
+        }
 
         // Load Article if ID present
         if (articleId) {
@@ -308,12 +311,16 @@ function EditorContent() {
                             <div className="space-y-1">
                                 <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Category</label>
                                 <select
-                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none font-bold"
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none font-bold appearance-none cursor-pointer"
                                     value={categoryId}
                                     onChange={(e) => setCategoryId(e.target.value)}
                                 >
                                     <option value="">Select Category</option>
-                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    {categories.map((c: any) => (
+                                        <option key={c.id} value={c.id}>
+                                            {'\u00A0'.repeat(c.depth * 4)} {c.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 

@@ -50,8 +50,8 @@ export default function TVFacebrasilPage() {
             if (prev.includes(id)) {
                 return prev.filter(i => i !== id);
             }
-            if (prev.length >= 5) {
-                alert('Você só pode selecionar até 5 artigos por vez.');
+            if (prev.length >= 50) {
+                alert('Você só pode selecionar até 50 artigos por vez.');
                 return prev;
             }
             return [...prev, id];
@@ -59,8 +59,8 @@ export default function TVFacebrasilPage() {
     };
 
     const handleSend = async () => {
-        if (selectedIds.length === 0 || selectedIds.length > 5) {
-            alert('Por favor, selecione entre 1 e 5 artigos.');
+        if (selectedIds.length === 0 || selectedIds.length > 50) {
+            alert('Por favor, selecione entre 1 e 50 artigos.');
             return;
         }
 
@@ -101,7 +101,7 @@ export default function TVFacebrasilPage() {
         const result = await sendArticlesToTV(selectedArticles);
 
         if (result.success) {
-            setStatus({ type: 'success', message: 'Pacote de 5 artigos enviado com sucesso para a TV Facebrasil!' });
+            setStatus({ type: 'success', message: `Pacote de ${selectedArticles.length} artigos enviado com sucesso para a TV Facebrasil!` });
             setSelectedIds([]);
         } else {
             setStatus({ type: 'error', message: `Erro ao enviar: ${result.error}` });
@@ -121,15 +121,15 @@ export default function TVFacebrasilPage() {
                         <MonitorPlay className="w-8 h-8 text-primary" />
                         TV Facebrasil
                     </h1>
-                    <p className="text-slate-400 text-sm">Selecione 5 artigos para transformar em vídeos na TV Facebrasil</p>
+                    <p className="text-slate-400 text-sm">Selecione até 50 artigos para transformar em vídeos na TV Facebrasil</p>
                 </div>
 
                 <button
                     onClick={handleSend}
-                    disabled={selectedIds.length === 0 || selectedIds.length > 5 || sending}
+                    disabled={selectedIds.length === 0 || selectedIds.length > 50 || sending}
                     className={`
                         flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg
-                        ${selectedIds.length > 0 && selectedIds.length <= 5 && !sending
+                        ${selectedIds.length > 0 && selectedIds.length <= 50 && !sending
                             ? 'bg-primary text-slate-900 hover:scale-105 shadow-primary/20'
                             : 'bg-slate-800 text-slate-500 cursor-not-allowed'}
                     `}
@@ -139,7 +139,7 @@ export default function TVFacebrasilPage() {
                     ) : (
                         <Send className="w-5 h-5" />
                     )}
-                    {sending ? 'Enviando...' : `Enviar Lote (${selectedIds.length}/5)`}
+                    {sending ? 'Enviando...' : `Enviar Lote (${selectedIds.length}/50)`}
                 </button>
             </div>
 
@@ -228,9 +228,9 @@ export default function TVFacebrasilPage() {
                 <div className="space-y-1">
                     <h4 className="text-white font-bold">Instruções de envio</h4>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                        Selecione exatamente <strong>5 artigos</strong> para formar um "Pacote de TV".
+                        Selecione até <strong>50 artigos</strong> para formar um "Pacote de TV".
                         Cada artigo será analisado pelo Editor Chefe AI para decidir se vira um Short ou Vídeo Doc.
-                        O limite de 5 artigos é para otimizar o processamento e garantir a qualidade da automação.
+                        O limite de 50 artigos é para otimizar o processamento e garantir a qualidade da automação.
                     </p>
                 </div>
             </div>
