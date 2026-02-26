@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { ClientLayout } from "@/components/ClientLayout";
 import { NextIntlClientProvider } from 'next-intl';
@@ -43,17 +42,15 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <ClerkProvider>
-      <NextIntlClientProvider messages={messages}>
-        <html lang={locale} suppressHydrationWarning>
-          <body className={`${inter.className} dark:bg-slate-950 bg-white dark:text-slate-50 text-gray-900 ethereal-bg`} suppressHydrationWarning>
-            <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet" />
-            <ClientLayout>
-              {children}
-            </ClientLayout>
-          </body>
-        </html>
-      </NextIntlClientProvider>
-    </ClerkProvider>
+    <NextIntlClientProvider messages={messages}>
+      <html lang={locale} suppressHydrationWarning>
+        <body className={`${inter.className} dark:bg-slate-950 bg-white dark:text-slate-50 text-gray-900 ethereal-bg`} suppressHydrationWarning>
+          <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet" />
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </body>
+      </html>
+    </NextIntlClientProvider>
   );
 }

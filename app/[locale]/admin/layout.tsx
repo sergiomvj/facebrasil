@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { UserButton } from '@clerk/nextjs';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, LogOut, User } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export default function AdminLayout({
     children,
@@ -28,8 +29,8 @@ export default function AdminLayout({
                             {/* Theme Toggle */}
                             <ThemeToggle />
 
-                            {/* User Profile */}
-                            <ClientOnlyUserButton />
+                            {/* User Profile / Logout */}
+                            <SupabaseUserMenu />
                         </div>
                     </div>
                 </header>
@@ -43,16 +44,45 @@ export default function AdminLayout({
     );
 }
 
-function ClientOnlyUserButton() {
-    const [mounted, setMounted] = React.useState(false);
+function SupabaseUserMenu() {
+    const supabase = createClient();
+    const router = useRouter();
+    const [user, setUser] = React.useState<any>(null);
 
     React.useEffect(() => {
-        setMounted(true);
-    }, []);
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+        getUser();
+    }, [supabase]);
 
-    if (!mounted) return <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />;
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push('/');
+        router.refresh();
+    };
 
-    return <UserButton afterSignOutUrl="/" />;
+    if (!user) return <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />;
+
+    return (
+        <div className="flex items-center gap-3 pl-4 border-l dark:border-white/10 border-gray-200">
+            <div className="hidden md:block text-right">
+                <p className="text-xs font-bold dark:text-white text-gray-900 truncate max-w-[120px]">
+                    {user.email?.split('@')[0]}
+                </p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Logado</p>
+            </div>
+
+            <button
+                onClick={handleSignOut}
+                className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all group"
+                title="Sair"
+            >
+                <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+        </div>
+    );
 }
 
 function ThemeToggle() {

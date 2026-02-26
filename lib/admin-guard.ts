@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "./supabase/server";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "./supabase-admin";
 
@@ -7,11 +7,14 @@ import { supabaseAdmin } from "./supabase-admin";
  * If not, redirects to the home page.
  */
 export async function protectAdmin() {
-    const { userId, sessionClaims } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (!user) {
         redirect("/sign-in");
     }
+
+    const userId = user.id;
 
     // Direct check for Master Admin via env var (if set)
     if (process.env.MASTER_ADMIN_CLERK_ID && userId === process.env.MASTER_ADMIN_CLERK_ID) {
@@ -37,11 +40,14 @@ export async function protectAdmin() {
  * Checks if the current user has at least the EDITOR role.
  */
 export async function protectEditor() {
-    const { userId } = await auth();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (!user) {
         redirect("/sign-in");
     }
+
+    const userId = user.id;
 
     // Direct check for Master Admin
     if (process.env.MASTER_ADMIN_CLERK_ID && userId === process.env.MASTER_ADMIN_CLERK_ID) {
@@ -60,7 +66,6 @@ export async function protectEditor() {
     if (role !== "ADMIN" && role !== "EDITOR") {
         redirect("/");
     }
-
 
     return { userId, role };
 }

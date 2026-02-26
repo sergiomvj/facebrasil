@@ -2,14 +2,9 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { auth, createClerkClient } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { protectAdmin } from '@/lib/admin-guard';
 import { isRedirectError } from 'next/dist/client/components/redirect';
-
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-
-
 
 interface AuthorPayload {
     name: string;
@@ -46,7 +41,7 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
 
     let result;
     if (!isVirtual) {
-        // Update existing (Clerk or Virtual)
+        // Update existing (Supabase Auth or Virtual)
         result = await supabaseAdmin.from('profiles').upsert([dbPayload], { onConflict: 'id' }).select();
     } else {
         // Insert new Virtual Author
@@ -103,23 +98,26 @@ export async function deleteAuthor(id: string, transferToId: string) {
 
 
 export async function inviteAuthor(email: string) {
-    // Only admins can invite authors
-    await protectAdmin();
-
     try {
-        await clerkClient.invitations.createInvitation({
-            emailAddress: email,
-            ignoreExisting: true
+        // Only admins can invite authors
+        await protectAdmin();
+
+        // Use Supabase Admin to invite the user
+        const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`,
         });
+
+        if (error) throw error;
+
         return { success: true };
     } catch (error: any) {
-        if (isRedirectError(error)) {
+        // Essential: Re-throw redirect errors so Next.js can handle them
+        if (isRedirectError(error) || error.message?.includes('NEXT_REDIRECT')) {
             throw error;
         }
-        console.error('Clerk Invitation Error:', error);
-        return { success: false, error: error.message };
+
+        console.error('Supabase Invitation Error:', error);
+
+        return { success: false, error: error.message || 'Falha ao enviar convite via Supabase.' };
     }
-
 }
-
-

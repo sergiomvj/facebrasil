@@ -88,13 +88,21 @@ export default function AuthorsPage() {
             setShowInviteModal(false);
             setInviteEmail('');
         } catch (error: any) {
-            if (error.message?.includes('NEXT_REDIRECT')) return;
-            alert('Erro ao enviar convite: ' + error.message);
+            // Se for erro de redirecionamento do Next.js, não mostramos o alerta pois o navegador vai redirecionar
+            const errorMsg = error.message || String(error);
+            if (errorMsg.includes('NEXT_REDIRECT')) {
+                console.log('Redirecting...');
+                return;
+            }
+
+            console.error('Invite error details:', error);
+            alert('Erro ao enviar convite: ' + (error.message || 'Erro desconhecido. Verifique se o email já foi convidado ou se há erros no Clerk.'));
         } finally {
             setInviting(false);
         }
 
     }
+
 
     async function handleCreateAuthor() {
         if (!formData.name) return alert('Nome é obrigatório');
@@ -207,7 +215,7 @@ export default function AuthorsPage() {
                     className="flex items-center gap-2 px-4 py-2 border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors"
                 >
                     <Mail className="w-5 h-5" />
-                    Convidar Autor (Clerk)
+                    Convidar Novo Autor
                 </button>
                 <button
                     onClick={() => setShowCreateModal(true)}
@@ -251,7 +259,7 @@ export default function AuthorsPage() {
                                     <p className="text-sm text-slate-400 mb-1 flex items-center gap-1">
                                         {author.role || 'EDITOR'}
                                         {author.id.startsWith('user_') ? (
-                                            <div title="Usuário Clerk">
+                                            <div title="Usuário Autenticado">
                                                 <Shield className="w-3 h-3 text-blue-400" />
                                             </div>
                                         ) : (
@@ -319,7 +327,7 @@ export default function AuthorsPage() {
                             {!editingAuthor && !formData.isVirtual && (
                                 <div>
                                     <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
-                                        Clerk User ID *
+                                        Email do Usuário *
                                     </label>
                                     <input
                                         type="text"
@@ -329,7 +337,7 @@ export default function AuthorsPage() {
                                         className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                     <p className="text-xs text-slate-400 mt-1">
-                                        ID do usuário no Clerk (obrigatório)
+                                        Email de login do usuário (obrigatório)
                                     </p>
                                 </div>
                             )}
@@ -436,7 +444,7 @@ export default function AuthorsPage() {
                         </div>
 
                         <p className="text-sm text-slate-400 mb-6">
-                            O Clerk enviará um convite oficial por email para que o colaborador possa criar sua conta e acessar o painel.
+                            O sistema enviará um link de ativação por email para que o colaborador possa definir sua senha e acessar o painel.
                         </p>
 
                         <div className="space-y-4">
