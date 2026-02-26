@@ -17,7 +17,8 @@ export async function protectAdmin() {
     const userId = user.id;
 
     // Direct check for Master Admin via env var (if set)
-    if (process.env.MASTER_ADMIN_ID && userId === process.env.MASTER_ADMIN_ID) {
+    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
+    if (masterAdminId && userId === masterAdminId) {
         return { userId, role: "ADMIN" };
     }
 
@@ -49,8 +50,9 @@ export async function protectEditor() {
 
     const userId = user.id;
 
-    // Direct check for Master Admin
-    if (process.env.MASTER_ADMIN_ID && userId === process.env.MASTER_ADMIN_ID) {
+    // Direct check for Master Admin via env var (if set)
+    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
+    if (masterAdminId && userId === masterAdminId) {
         return { userId, role: "ADMIN" };
     }
 

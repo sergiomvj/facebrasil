@@ -2,11 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { protectAdmin } from "@/lib/admin-guard";
+import { protectAdmin, protectEditor } from "@/lib/admin-guard";
 import { revalidatePath } from "next/cache";
 
 export async function listUsers() {
-    await protectAdmin();
+    await protectEditor();
 
     // Fetch all profiles
     const { data, error } = await supabaseAdmin

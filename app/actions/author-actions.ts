@@ -3,7 +3,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
-import { protectAdmin } from '@/lib/admin-guard';
+import { protectEditor } from '@/lib/admin-guard';
 import { isRedirectError } from 'next/dist/client/components/redirect';
 
 interface AuthorPayload {
@@ -14,8 +14,8 @@ interface AuthorPayload {
 }
 
 export async function upsertAuthor(payload: AuthorPayload, id?: string) {
-    // Only admins can manage authors
-    await protectAdmin();
+    // Both admins and editors can manage authors
+    await protectEditor();
 
     console.log('--- SERVER ACTION: UPSERT AUTHOR ---');
     console.log('Payload:', payload);
@@ -61,8 +61,8 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
 }
 
 export async function deleteAuthor(id: string, transferToId: string) {
-    // Only admins can delete authors
-    await protectAdmin();
+    // Both admins and editors can delete authors
+    await protectEditor();
 
     if (!transferToId) {
         return { success: false, error: 'A destination author is required for article transfer.' };
@@ -99,8 +99,8 @@ export async function deleteAuthor(id: string, transferToId: string) {
 
 export async function inviteAuthor(email: string, role: string = 'EDITOR') {
     try {
-        // Only admins can invite authors
-        await protectAdmin();
+        // Both admins and editors can invite authors
+        await protectEditor();
 
         // Use Supabase Admin to invite the user
         const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
