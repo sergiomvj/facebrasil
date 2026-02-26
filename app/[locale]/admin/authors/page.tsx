@@ -88,10 +88,12 @@ export default function AuthorsPage() {
             setShowInviteModal(false);
             setInviteEmail('');
         } catch (error: any) {
+            if (error.message?.includes('NEXT_REDIRECT')) return;
             alert('Erro ao enviar convite: ' + error.message);
         } finally {
             setInviting(false);
         }
+
     }
 
     async function handleCreateAuthor() {

@@ -5,8 +5,10 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 import { auth, createClerkClient } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { protectAdmin } from '@/lib/admin-guard';
+import { isRedirectError } from 'next/dist/client/components/redirect';
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
 
 
 interface AuthorPayload {
@@ -111,12 +113,13 @@ export async function inviteAuthor(email: string) {
         });
         return { success: true };
     } catch (error: any) {
-        if (error.message === 'NEXT_REDIRECT' || error.digest?.includes('NEXT_REDIRECT')) {
+        if (isRedirectError(error)) {
             throw error;
         }
         console.error('Clerk Invitation Error:', error);
         return { success: false, error: error.message };
     }
+
 }
 
 
