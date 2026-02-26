@@ -25,7 +25,7 @@ export async function protectAdmin() {
         .eq('id', userId)
         .single() as any);
 
-    if (profile?.role !== "ADMIN") {
+    if (profile?.role?.toUpperCase() !== "ADMIN") {
         console.warn(`Unauthorized admin access attempt by user ${userId}`);
         redirect("/");
     }
@@ -55,11 +55,12 @@ export async function protectEditor() {
         .eq('id', userId)
         .single() as any);
 
-    const role = profile?.role;
+    const role = profile?.role?.toUpperCase();
 
     if (role !== "ADMIN" && role !== "EDITOR") {
         redirect("/");
     }
+
 
     return { userId, role };
 }

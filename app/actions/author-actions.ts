@@ -87,8 +87,12 @@ export async function inviteAuthor(email: string) {
         });
         return { success: true };
     } catch (error: any) {
+        if (error.message === 'NEXT_REDIRECT' || error.digest?.includes('NEXT_REDIRECT')) {
+            throw error;
+        }
         console.error('Clerk Invitation Error:', error);
         return { success: false, error: error.message };
     }
 }
+
 
