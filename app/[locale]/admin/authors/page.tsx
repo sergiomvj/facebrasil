@@ -47,6 +47,7 @@ export default function AuthorsPage() {
             const { data: authorsData, error } = await supabase
                 .from('profiles')
                 .select('*')
+                .not('role', 'eq', 'VIEWER')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -96,7 +97,7 @@ export default function AuthorsPage() {
             }
 
             console.error('Invite error details:', error);
-            alert('Erro ao enviar convite: ' + (error.message || 'Erro desconhecido. Verifique se o email já foi convidado ou se há erros no Clerk.'));
+            alert('Erro ao enviar convite: ' + (error.message || 'Erro desconhecido. Verifique se o email já foi convidado ou se há erros no Supabase.'));
         } finally {
             setInviting(false);
         }
@@ -106,7 +107,7 @@ export default function AuthorsPage() {
 
     async function handleCreateAuthor() {
         if (!formData.name) return alert('Nome é obrigatório');
-        if (!formData.isVirtual && !formData.id) return alert('Clerk User ID é obrigatório para autores vinculados');
+        if (!formData.isVirtual && !formData.id) return alert('User ID do Supabase é obrigatório para autores vinculados');
 
         setLoading(true);
         try {
@@ -182,7 +183,7 @@ export default function AuthorsPage() {
             avatar_url: author.avatar_url || '',
             email: author.email || '',
             role: author.role || 'EDITOR',
-            isVirtual: !author.id.startsWith('user_')
+            isVirtual: !author.id || author.id.length > 36 // Simple check for randomUUID vs Supabase UUID (which is 36 chars) or just check metadata if available
         });
 
     }
@@ -258,7 +259,7 @@ export default function AuthorsPage() {
                                     </h3>
                                     <p className="text-sm text-slate-400 mb-1 flex items-center gap-1">
                                         {author.role || 'EDITOR'}
-                                        {author.id.startsWith('user_') ? (
+                                        {author.id && author.id.length === 36 ? (
                                             <div title="Usuário Autenticado">
                                                 <Shield className="w-3 h-3 text-blue-400" />
                                             </div>
@@ -319,7 +320,7 @@ export default function AuthorsPage() {
                                         className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                                     />
                                     <label htmlFor="isVirtual" className="text-sm font-medium dark:text-white text-gray-900 cursor-pointer">
-                                        Autor Virtual (Sem conta no Clerk)
+                                        Autor Virtual (Sem conta de usuário)
                                     </label>
                                 </div>
                             )}
@@ -327,13 +328,13 @@ export default function AuthorsPage() {
                             {!editingAuthor && !formData.isVirtual && (
                                 <div>
                                     <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
-                                        Email do Usuário *
+                                        ID do Usuário Supabase *
                                     </label>
                                     <input
                                         type="text"
                                         value={formData.id}
                                         onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                                        placeholder="user_xxxxxxxxxxxxx"
+                                        placeholder="Substitua pelo UUID do usuário"
                                         className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                     <p className="text-xs text-slate-400 mt-1">

@@ -72,7 +72,11 @@ function EditorContent() {
         }
 
         // Load Authors
-        const { data: authorsData } = await supabase.from('profiles').select('id, name').order('name');
+        const { data: authorsData } = await supabase
+            .from('profiles')
+            .select('id, name')
+            .not('role', 'eq', 'VIEWER')
+            .order('name');
         if (authorsData) setAuthors(authorsData);
 
         // Load Article if ID present

@@ -44,6 +44,7 @@ export default function LoginPage() {
                     email,
                     password,
                     options: {
+                        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/pt/dashboard`,
                         data: {
                             full_name: name,
                         },
