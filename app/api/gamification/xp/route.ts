@@ -21,21 +21,29 @@ export async function POST(req: Request) {
 
         // Define XP points based on type
         let points = 0;
+        let activityColumn = null;
+
         switch (type) {
             case 'READ_ARTICLE':
                 points = 50;
+                activityColumn = 'articles_read';
                 break;
             case 'DAILY_LOGIN':
                 points = 20;
                 break;
             case 'SHARE':
                 points = 30;
+                activityColumn = 'shares_made';
                 break;
             case 'VIEW_AD':
-                points = 1; // 1 point per ad view (limit via distinctId suggested)
+                points = 1;
                 break;
             case 'CLICK_AD':
-                points = 30; // 30 points per click
+                points = 10;
+                break;
+            case 'COMMENT':
+                points = 15;
+                activityColumn = 'comments_made';
                 break;
             default:
                 points = 10;
@@ -47,7 +55,7 @@ export async function POST(req: Request) {
                 .from('xp_logs')
                 .select('id')
                 .eq('user_id', userId)
-                .eq('type', type + ':' + distinctId)
+                .eq('type', distinctId ? `${type}:${distinctId}` : type)
                 .single();
 
             if (existing) {
@@ -56,10 +64,7 @@ export async function POST(req: Request) {
         }
 
         // Insert Log
-        // We use Clerk userId which MUST match Supabase auth.users ID for RLS to work properly usually.
-        // Assuming the sync is handled or we just insert using the service role.
-
-        const { error } = await supabase
+        const { error: logError } = await supabase
             .from('xp_logs')
             .insert({
                 user_id: userId,
@@ -67,11 +72,40 @@ export async function POST(req: Request) {
                 points: points
             });
 
-        if (error) {
-            console.error('Supabase XP Insert Error:', error);
-            // If error is related to foreign key (user not found), it means Clerk user is not in Supabase auth.users
-            // For now we log and return error.
-            return NextResponse.json({ error: 'Failed to record XP', details: error.message }, { status: 500 });
+        if (logError) {
+            console.error('Supabase XP Insert Error:', logError);
+            return NextResponse.json({ error: 'Failed to record XP', details: logError.message }, { status: 500 });
+        }
+
+        // Upsert User Reputation
+        const reputationData = {
+            user_id: userId,
+            total_points: points, // Will be incremented if using RPC or handled manually
+            last_activity_at: new Date().toISOString()
+        };
+
+        if (activityColumn) {
+            reputationData[activityColumn] = 1;
+        }
+
+        // Usando RPC para incrementar valores de forma atômica se possível,
+        // ou fazendo um select/update se não houver RPC disponível.
+        // Por agora, vamos tentar um upsert básico ou apenas confiar nos logs para o balance.
+        // Mas para performance, o ideal é o user_reputation.
+
+        const { error: repError } = await supabase.rpc('increment_user_xp', {
+            uid: userId,
+            xp_points: points,
+            activity_col: activityColumn
+        });
+
+        if (repError) {
+            console.warn('Reputation update failed, checking if function exists:', repError);
+            // Fallback: Tentamos criar o registro se não existir
+            await supabase.from('user_reputation').upsert({
+                user_id: userId,
+                last_activity_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
         }
 
         return NextResponse.json({ success: true, points });
@@ -81,4 +115,5 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
 

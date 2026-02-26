@@ -160,10 +160,12 @@ export default async function ArticlePage({ params }: PageProps) {
             </div>
 
             <SocialShareBar
+                articleId={article.id}
                 title={article.title}
                 socialSummary={article.socialSummary || article.excerpt}
                 instagramUrl={article.instagramPostUrl}
             />
+
 
             <div className="mt-16 py-12 bg-slate-100 dark:bg-slate-900/30">
                 <AdSpace position="super_footer" />

@@ -33,22 +33,22 @@ export async function GET() {
         // Nível 2: 100-299 XP (100 + 200)
         // Nível 3: 300-599 XP (100 + 200 + 300)
         // Fórmula: Nível = floor((sqrt(8 * XP / 100 + 1) - 1) / 2) + 1
-        
+
         let level = 1;
         let xpForCurrentLevel = 0;
         let xpForNextLevel = 100;
-        
+
         if (totalXP >= 100) {
             // Sistema progressivo: cada nível precisa de (nível * 100) XP
             let remainingXP = totalXP;
             let levelXP = 100; // XP necessário para nível 2
-            
+
             while (remainingXP >= levelXP) {
                 remainingXP -= levelXP;
                 level++;
                 levelXP = level * 100;
             }
-            
+
             xpForCurrentLevel = remainingXP;
             xpForNextLevel = levelXP;
         } else {
@@ -58,16 +58,16 @@ export async function GET() {
 
         const progress = Math.min(100, Math.round((xpForCurrentLevel / xpForNextLevel) * 100));
 
-        // Buscar conquistas/badges (opcional para futuro)
-        const { data: achievements, error: achievementsError } = await supabase
-            .from('user_achievements')
-            .select('achievement_id, earned_at')
+        // Buscar medalhas/badges
+        const { data: userBadges, error: badgesError } = await supabase
+            .from('user_badges')
+            .select('badge_id, earned_at')
             .eq('user_id', userId)
             .order('earned_at', { ascending: false })
             .limit(5);
 
-        if (achievementsError) {
-            console.error('[XP Balance] Error fetching achievements:', achievementsError);
+        if (badgesError) {
+            console.error('[XP Balance] Error fetching badges:', badgesError);
         }
 
         return NextResponse.json({
@@ -77,9 +77,10 @@ export async function GET() {
             xpForCurrentLevel,
             xpForNextLevel,
             progress,
-            achievements: achievements || [],
+            badges: userBadges || [],
             recentActivity: xpLogs?.slice(-5).reverse() || []
         });
+
 
     } catch (error) {
         console.error('[XP Balance] API Error:', error);

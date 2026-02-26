@@ -1,21 +1,27 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
+
 import { Instagram, Copy, Share2, Check } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Make sure this exists or replace with clsx/tailwind-merge
+import { cn } from '@/lib/utils';
+import { useXP } from '@/hooks/useXP';
+
 
 interface SocialShareBarProps {
+    articleId?: string;
     instagramUrl?: string;
     socialSummary?: string;
     title: string;
 }
 
 const SocialShareBar: React.FC<SocialShareBarProps> = ({
+    articleId,
     instagramUrl,
     socialSummary,
     title
 }) => {
     const [copied, setCopied] = useState(false);
+    const { gainXP } = useXP();
 
     const handleCopyCaption = async () => {
         if (!socialSummary) return;
@@ -23,6 +29,11 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
             await navigator.clipboard.writeText(socialSummary);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+
+            // Ganhar XP ao copiar legenda (conta como intenção de compartilhar)
+            if (articleId) {
+                gainXP('SHARE', articleId);
+            }
         } catch (err) {
             console.error('Failed to copy', err);
         }
@@ -36,6 +47,11 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
                     text: socialSummary,
                     url: window.location.href,
                 });
+
+                // Ganhar XP ao compartilhar
+                if (articleId) {
+                    gainXP('SHARE', articleId);
+                }
             } catch (err) {
                 console.log('Error sharing', err);
             }
@@ -44,6 +60,7 @@ const SocialShareBar: React.FC<SocialShareBarProps> = ({
             handleCopyCaption();
         }
     };
+
 
     return (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 lg:flex-col lg:left-8 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 lg:translate-x-0">
