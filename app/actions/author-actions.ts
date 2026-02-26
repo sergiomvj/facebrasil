@@ -98,20 +98,36 @@ export async function deleteAuthor(id: string, transferToId: string) {
 
 
 export async function inviteAuthor(email: string, role: string = 'EDITOR') {
+    console.log(`[AuthorActions] --- Starting inviteAuthor for ${email} as ${role} ---`);
     try {
         // Both admins and editors can invite authors
+        console.log('[AuthorActions] Verifying permissions...');
         await protectEditor();
+        console.log('[AuthorActions] Permissions OK.');
 
         // Use Supabase Admin to invite the user
-        const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`,
+        console.log('[AuthorActions] Calling Supabase Admin inviteUserByEmail...');
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+        console.log(`[AuthorActions] Has Service Key: ${hasServiceKey}, Redirect URL: ${siteUrl}/api/auth/callback`);
+
+        if (!hasServiceKey) {
+            throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.');
+        }
+
+        const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+            redirectTo: `${siteUrl}/api/auth/callback`,
             data: {
                 role: role.toUpperCase()
             }
         });
 
-        if (error) throw error;
+        if (error) {
+            console.error('[AuthorActions] Supabase returned error:', error);
+            throw error;
+        }
 
+        console.log('[AuthorActions] Invitation sent successfully:', data?.user?.id);
         return { success: true };
     } catch (error: any) {
         // Essential: Re-throw redirect errors so Next.js can handle them
