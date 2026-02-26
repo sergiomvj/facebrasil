@@ -11,6 +11,7 @@ interface ArticleItem {
     slug: string;
     content: string;
     created_at: string;
+    sent_to_tv: boolean;
     categories?: {
         name: string;
     };
@@ -23,15 +24,17 @@ export default function TVFacebrasilPage() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [sending, setSending] = useState(false);
     const [debugMode, setDebugMode] = useState(false);
+    const [showOnlyNotSent, setShowOnlyNotSent] = useState(true);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
 
     async function fetchArticles() {
         setLoading(true);
+        console.log('[TV-Facebrasil] Buscando artigos...');
         const { data, error } = await supabase
             .from('articles')
-            .select('id, title, slug, content, created_at, categories(name)')
+            .select('id, title, slug, content, created_at, sent_to_tv, categories(name)')
             .order('created_at', { ascending: false })
-            .limit(50);
+            .limit(100);
 
         if (error) {
             console.error('Error fetching articles:', error);
@@ -45,7 +48,11 @@ export default function TVFacebrasilPage() {
         void fetchArticles();
     }, []);
 
-    const toggleSelection = (id: string) => {
+    const toggleSelection = (id: string, alreadySent: boolean) => {
+        if (alreadySent && !confirm('Este artigo já foi enviado para a TV anteriormente. Deseja enviar novamente?')) {
+            return;
+        }
+
         setSelectedIds(prev => {
             if (prev.includes(id)) {
                 return prev.filter(i => i !== id);
@@ -103,15 +110,20 @@ export default function TVFacebrasilPage() {
         if (result.success) {
             setStatus({ type: 'success', message: `Pacote de ${selectedArticles.length} artigos enviado com sucesso para a TV Facebrasil!` });
             setSelectedIds([]);
+            // Atualiza a lista para refletir os novos status sent_to_tv
+            await fetchArticles();
         } else {
+            console.error('[TV-Facebrasil] Erro reportado no envio:', result.error);
             setStatus({ type: 'error', message: `Erro ao enviar: ${result.error}` });
         }
         setSending(false);
     };
 
-    const filteredArticles = articles.filter(a =>
-        a.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredArticles = articles.filter(a => {
+        const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSentFilter = showOnlyNotSent ? !a.sent_to_tv : true;
+        return matchesSearch && matchesSentFilter;
+    });
 
     return (
         <div className="space-y-6">
@@ -153,18 +165,32 @@ export default function TVFacebrasilPage() {
                 </div>
             )}
 
-            <div className="flex items-center gap-4 bg-slate-900/30 p-4 rounded-xl border border-white/5">
-                <div className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        id="debugMode"
-                        checked={debugMode}
-                        onChange={(e) => setDebugMode(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <label htmlFor="debugMode" className="text-sm font-medium text-slate-300 cursor-pointer">
-                        Modo de Depuração (Envia conteúdo curto para testar o n8n)
-                    </label>
+            <div className="flex flex-col md:flex-row items-center gap-4 bg-slate-900/30 p-4 rounded-xl border border-white/5">
+                <div className="flex flex-wrap items-center gap-6 pr-4 border-r border-white/10">
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="showOnlyNotSent"
+                            checked={showOnlyNotSent}
+                            onChange={(e) => setShowOnlyNotSent(e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <label htmlFor="showOnlyNotSent" className="text-sm font-medium text-slate-300 cursor-pointer">
+                            Ocultar já enviados
+                        </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="debugMode"
+                            checked={debugMode}
+                            onChange={(e) => setDebugMode(e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <label htmlFor="debugMode" className="text-sm font-medium text-slate-300 cursor-pointer">
+                            Modo de Depuração
+                        </label>
+                    </div>
                 </div>
                 <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
@@ -190,16 +216,20 @@ export default function TVFacebrasilPage() {
                 ) : filteredArticles.map((article) => (
                     <div
                         key={article.id}
-                        onClick={() => toggleSelection(article.id)}
+                        onClick={() => toggleSelection(article.id, !!article.sent_to_tv)}
                         className={`
                             relative p-5 rounded-2xl border transition-all cursor-pointer group select-none
                             ${selectedIds.includes(article.id)
                                 ? 'bg-primary/10 border-primary shadow-lg shadow-primary/5'
-                                : 'bg-slate-900/50 border-white/5 hover:border-white/20 hover:bg-slate-900'}
+                                : article.sent_to_tv
+                                    ? 'bg-slate-900/20 border-white/5 opacity-70 hover:opacity-100'
+                                    : 'bg-slate-900/50 border-white/5 hover:border-white/20 hover:bg-slate-900'}
                         `}
                     >
                         <div className="flex justify-between items-start gap-3 mb-3">
-                            <h3 className={`font-bold transition-colors line-clamp-2 ${selectedIds.includes(article.id) ? 'text-primary' : 'text-white'
+                            <h3 className={`font-bold transition-colors line-clamp-2 ${selectedIds.includes(article.id)
+                                ? 'text-primary'
+                                : article.sent_to_tv ? 'text-slate-400' : 'text-white'
                                 }`}>
                                 {article.title}
                             </h3>
@@ -213,9 +243,17 @@ export default function TVFacebrasilPage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Info className="w-3.5 h-3.5" />
-                            <span>{new Date(article.created_at).toLocaleDateString('pt-BR')}</span>
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                            <div className="flex items-center gap-2">
+                                <Info className="w-3.5 h-3.5" />
+                                <span>{new Date(article.created_at).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                            {article.sent_to_tv && (
+                                <span className="flex items-center gap-1 text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full font-bold">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    ENVIADO
+                                </span>
+                            )}
                         </div>
                     </div>
                 ))}
