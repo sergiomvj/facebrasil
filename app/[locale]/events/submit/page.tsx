@@ -3,7 +3,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
+
 import { supabase } from '@/lib/supabase';
 import { Calendar, MapPin, Clock, User, Mail, Phone, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -20,7 +21,9 @@ const US_STATES = [
 
 export default function EventSubmitPage() {
     const router = useRouter();
-    const { userId } = useAuth();
+    const { user } = useAuth();
+    const userId = user?.id;
+
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 

@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
 import { useXP } from '@/hooks/useXP';
 
 export function DailyActivityTriggers() {
-    const { isSignedIn, isLoaded } = useUser();
+    const { user, loading } = useAuth();
+    const isSignedIn = !!user;
+    const isLoaded = !loading;
+
     const { gainXP } = useXP();
     const triggeredRef = useRef(false);
 

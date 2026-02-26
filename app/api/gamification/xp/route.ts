@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@/lib/auth-server';
+
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {

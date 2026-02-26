@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 interface XPData {
   xp: number;
@@ -22,7 +23,9 @@ interface UseXPReturn {
 }
 
 export function useXP(): UseXPReturn {
-  const { isSignedIn } = useUser();
+  const { user } = useAuth();
+  const isSignedIn = !!user;
+
   const [data, setData] = useState<XPData>({
     xp: 0,
     level: 1,
@@ -43,15 +46,15 @@ export function useXP(): UseXPReturn {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('/api/gamification/xp/balance');
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch XP data');
       }
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setData({
           xp: result.xp,
@@ -86,7 +89,7 @@ export function useXP(): UseXPReturn {
       if (result.success) {
         // Atualizar dados locais
         await fetchXP();
-        
+
         // Emitir evento global
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('xp_gained', {
@@ -97,9 +100,9 @@ export function useXP(): UseXPReturn {
 
       return result;
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Network error' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Network error'
       };
     }
   }, [isSignedIn, fetchXP]);

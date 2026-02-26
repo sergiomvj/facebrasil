@@ -2,14 +2,20 @@
 
 import React from 'react';
 import Navbar from '@/components/Navbar';
-import { useUser } from '@clerk/nextjs';
-import { BookOpen, Heart, Trophy, Clock, Star } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { BookOpen, Heart, Trophy, Clock, Star, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-    const { user, isLoaded } = useUser();
+    const { user, loading } = useAuth();
 
-    if (!isLoaded) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+    if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+
+    // Redirect or show alternative if not signed in (controlled by middleware usually, but good to have)
+    if (!user) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Redirecionando...</div>;
+
+    const initials = user.email?.substring(0, 2).toUpperCase() || 'U';
+    const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário';
 
     return (
         <div className="min-h-screen bg-slate-950 text-white font-sans selection:bg-primary selection:text-white">
@@ -19,12 +25,16 @@ export default function DashboardPage() {
 
                 {/* User Profile Header */}
                 <section className="mb-12 flex flex-col md:flex-row items-center gap-8 bg-slate-900/50 p-8 rounded-2xl border border-white/5">
-                    <div className="w-24 h-24 rounded-full bg-slate-800 border-2 border-primary overflow-hidden">
-                        <img src={user?.imageUrl} alt={user?.fullName || 'User'} className="w-full h-full object-cover" />
+                    <div className="w-24 h-24 rounded-full bg-slate-800 border-2 border-primary overflow-hidden flex items-center justify-center">
+                        {user?.user_metadata?.avatar_url ? (
+                            <img src={user.user_metadata.avatar_url} alt={displayName} className="w-full h-full object-cover" />
+                        ) : (
+                            <UserIcon className="w-12 h-12 text-primary/40" />
+                        )}
                     </div>
                     <div className="text-center md:text-left flex-1">
-                        <h1 className="text-3xl font-black mb-2">{user?.fullName}</h1>
-                        <p className="text-slate-400">Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</p>
+                        <h1 className="text-3xl font-black mb-2">{displayName}</h1>
+                        <p className="text-slate-400">Member since {user?.created_at ? new Date(user.created_at).getFullYear() : '2025'}</p>
 
                         <div className="flex items-center justify-center md:justify-start gap-4 mt-4">
                             <div className="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-full text-xs font-bold text-accent-yellow border border-accent-yellow/20">

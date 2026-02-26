@@ -2,11 +2,14 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useXP } from '@/hooks/useXP';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 export default function ArticleReaderTracker({ articleId }: { articleId: string }) {
     const { grantXP } = useXP();
-    const { isSignedIn } = useUser();
+    const { user } = useAuth();
+    const isSignedIn = !!user;
+
     const awardedRef = useRef(false);
     const [showNotification, setShowNotification] = useState(false);
 

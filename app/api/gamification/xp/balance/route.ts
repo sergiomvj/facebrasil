@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@/lib/auth-server';
+
 import { supabase } from '@/lib/supabase';
 
 // GET /api/gamification/xp/balance

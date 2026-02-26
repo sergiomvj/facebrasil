@@ -1,20 +1,23 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@/contexts/AuthContext';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Star, TrendingUp } from 'lucide-react';
 
 interface XPData {
-  xp: number;
-  level: number;
-  xpForCurrentLevel: number;
-  xpForNextLevel: number;
-  progress: number;
+    xp: number;
+    level: number;
+    xpForCurrentLevel: number;
+    xpForNextLevel: number;
+    progress: number;
 }
 
 export default function XPHUD() {
-    const { isSignedIn } = useUser();
+    const { user } = useAuth();
+    const isSignedIn = !!user;
+
     const [data, setData] = useState<XPData>({
         xp: 0,
         level: 1,
@@ -32,16 +35,16 @@ export default function XPHUD() {
         try {
             const response = await fetch('/api/gamification/xp/balance');
             if (!response.ok) throw new Error('Failed to fetch');
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 // Verificar se subiu de nível
                 if (result.level > previousLevel && previousLevel !== 1) {
                     setShowLevelUp(true);
                     setTimeout(() => setShowLevelUp(false), 4000);
                 }
-                
+
                 setPreviousLevel(result.level);
                 setData({
                     xp: result.xp,
@@ -70,7 +73,7 @@ export default function XPHUD() {
         };
 
         window.addEventListener('xp_gained', handleXPGained);
-        
+
         return () => {
             clearInterval(interval);
             window.removeEventListener('xp_gained', handleXPGained);
@@ -90,7 +93,7 @@ export default function XPHUD() {
 
     return (
         <>
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-md hover:bg-white/10 transition-colors cursor-pointer group"
@@ -98,13 +101,13 @@ export default function XPHUD() {
             >
                 {/* Level Badge */}
                 <div className="relative">
-                    <motion.div 
+                    <motion.div
                         whileHover={{ scale: 1.1 }}
                         className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center font-black text-white text-xs shadow-lg shadow-orange-500/30"
                     >
                         {data.level}
                     </motion.div>
-                    
+
                     <AnimatePresence>
                         {showLevelUp && (
                             <motion.div
@@ -143,7 +146,7 @@ export default function XPHUD() {
                 </div>
 
                 {/* Total XP (hover) */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, width: 0 }}
                     whileHover={{ opacity: 1, width: 'auto' }}
                     className="hidden group-hover:flex items-center gap-1 text-xs font-bold text-yellow-400 overflow-hidden"

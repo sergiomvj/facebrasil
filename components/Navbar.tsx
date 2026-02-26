@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
-import { SignInButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import { Search, Sun, Moon, X, Trophy, LayoutDashboard } from 'lucide-react';
+import { Search, Sun, Moon, X, Trophy, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 import XPHUD from '@/components/XPHUD';
-import { generateSlug } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from '@/i18n/routing';
-// import LanguageSwitcher from './LanguageSwitcher';
+import { useAuth } from '@/contexts/AuthContext';
+import { SignedIn, SignedOut } from '@/components/auth/AuthWrappers';
 
 const Navbar: React.FC = () => {
   const t = useTranslations('Navbar');
@@ -19,6 +18,7 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,6 +44,11 @@ const Navbar: React.FC = () => {
     { key: 'lifestyle', label: t('categories.lifestyle'), href: '/category/estilo-de-vida' },
     { key: 'business', label: t('categories.business'), href: '/category/negocios' },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.refresh();
+  };
 
   return (
     <>
@@ -99,8 +104,6 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* <LanguageSwitcher /> */}
-
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -126,28 +129,54 @@ const Navbar: React.FC = () => {
             </button>
 
             <SignedOut>
-              <SignInButton mode="modal">
-                <button className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-primary/20">
-                  Entrar
-                </button>
-              </SignInButton>
+              <Link href="/login" className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-primary/20">
+                Entrar
+              </Link>
             </SignedOut>
 
             <SignedIn>
-              <UserButton appearance={{ elements: { userButtonBox: "scale-110" } }}>
-                <UserButton.MenuItems>
-                  <UserButton.Link
-                    label="Meu Dashboard"
-                    labelIcon={<LayoutDashboard className="w-4 h-4" />}
-                    href="/dashboard"
-                  />
-                  <UserButton.Link
-                    label="Painel Admin"
-                    labelIcon={<LogoSVG className="w-4 h-4 text-primary" />}
-                    href="/admin"
-                  />
-                </UserButton.MenuItems>
-              </UserButton>
+              <div className="relative group">
+                <button className="flex items-center gap-2 p-1.5 rounded-full dark:hover:bg-slate-800 hover:bg-gray-100 transition-all">
+                  <div className="size-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary">
+                    <UserIcon className="w-5 h-5" />
+                  </div>
+                </button>
+
+                {/* User Info Tooltip/Popup */}
+                <div className="absolute top-full right-0 mt-2 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4">
+                    <div className="flex items-center gap-3 mb-4 pb-4 border-b dark:border-white/5 border-gray-100">
+                      <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                        <UserIcon className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold dark:text-white text-gray-900 truncate">
+                          {user?.email?.split('@')[0]}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors">
+                        <LayoutDashboard className="w-4 h-4" />
+                        Meu Dashboard
+                      </Link>
+                      <Link href="/admin" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors">
+                        <LogoSVG className="w-4 h-4 text-primary" />
+                        Painel Admin
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sair
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </SignedIn>
           </div>
         </div>
