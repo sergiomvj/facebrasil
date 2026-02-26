@@ -8,6 +8,7 @@ import {
     ChevronRight, ChevronDown, Folder, CornerDownRight
 } from 'lucide-react';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
+import { upsertCategory, deleteCategory } from '@/app/actions/category-actions';
 
 // Category interface moved to lib/category-utils.ts
 
@@ -41,47 +42,46 @@ export default function CategoriesPage() {
     };
 
     const handleSave = async () => {
-        if (!currentCat.name || !currentCat.slug) return;
+        if (!currentCat.name || !currentCat.slug) return alert('Name and Slug are required');
 
-        const payload: any = {
+        const payload = {
             name: currentCat.name,
             slug: currentCat.slug,
             color: currentCat.color || '#3B82F6',
-            // Explicitly ensure empty strings from <select> are treated as null for Postgres
-            parent_id: currentCat.parent_id === "" ? null : (currentCat.parent_id || null),
+            parent_id: (currentCat.parent_id === "" || !currentCat.parent_id) ? null : currentCat.parent_id,
             escopo: currentCat.escopo || [],
             updated_at: new Date().toISOString()
         };
 
-        // Ensure we have a blog_id for new categories
-        if (!currentCat.id) {
-            const { data: blogs } = await supabase.from('blogs').select('id').limit(1);
-            if (blogs && blogs.length > 0) {
-                payload.blog_id = blogs[0].id;
-            }
-        }
+        console.log('--- CATEGORY SAVE ATTEMPT (SERVER ACTION) ---');
+        console.log('Mode:', currentCat.id ? 'UPDATE' : 'INSERT');
+        console.log('ID:', currentCat.id);
+        console.log('Payload:', payload);
 
-        let result;
-        if (currentCat.id) {
-            result = await supabase.from('categories').update(payload).eq('id', currentCat.id);
-        } else {
-            result = await supabase.from('categories').insert([payload]);
-        }
+        setLoading(true);
+        const result = await upsertCategory(payload, currentCat.id);
+        setLoading(false);
 
-        if (!result.error) {
+        console.log('Server Action Result:', result);
+
+        if (result.success) {
+            console.log('Successfully saved categories hierarchy');
             setIsEditing(false);
             setCurrentCat({});
             fetchCategories();
         } else {
-            console.error('Save error:', result.error);
-            alert('Error saving category: ' + result.error.message);
+            console.error('Save error details:', result.error);
+            alert('Error saving category: ' + result.error);
         }
     };
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this category? This might affect existing articles.')) return;
-        const { error } = await supabase.from('categories').delete().eq('id', id);
-        if (error) alert(error.message);
+        setLoading(true);
+        const result = await deleteCategory(id);
+        setLoading(false);
+
+        if (!result.success) alert(result.error);
         else fetchCategories();
     };
 

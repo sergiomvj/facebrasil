@@ -69,13 +69,15 @@ export async function upsertArticle(payload: UpdateArticlePayload, id?: string) 
             // Or just proceed and hope users table wasn't the issue (unlikely given FK error).
         }
 
-        // Create a basic profile for this admin user if missing
+        // Create a basic profile for this user if missing
+        // Default to EDITOR for anyone who manages to get here (protected by admin-guard)
+        // Note: New users should be authorized by an admin first.
         const { error: profileError } = await supabaseAdmin.from('profiles').insert([
             {
                 id: userId,
-                name: 'Admin User',
-                email: 'admin@facebrasil.com',
-                role: 'admin'
+                name: 'New User',
+                email: 'user@facebrasil.com',
+                role: 'EDITOR' // Default role for users created via editor
             }
         ]);
         if (profileError) {

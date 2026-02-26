@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Plus, Edit2, Trash2, Search, UserCircle } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Search, UserCircle, UserPlus, Shield } from 'lucide-react';
+import { upsertAuthor, deleteAuthor } from '@/app/actions/author-actions';
 
 interface Author {
     id: string;
@@ -23,7 +24,8 @@ export default function AuthorsPage() {
         id: '',
         name: '',
         avatar_url: '',
-        role: 'EDITOR'
+        role: 'EDITOR',
+        isVirtual: false
     });
 
 
@@ -66,48 +68,49 @@ export default function AuthorsPage() {
     }, []);
 
     async function handleCreateAuthor() {
-        try {
-            const { error } = await (supabase
-                .from('profiles') as any)
-                .insert([{
-                    id: formData.id,
-                    name: formData.name,
-                    avatar_url: formData.avatar_url || null,
-                    role: formData.role
-                }]);
+        if (!formData.name) return alert('Nome é obrigatório');
+        if (!formData.isVirtual && !formData.id) return alert('Clerk User ID é obrigatório para autores vinculados');
 
-            if (error) throw error;
+        setLoading(true);
+        try {
+            const result = await upsertAuthor({
+                name: formData.name,
+                avatar_url: formData.avatar_url || null,
+                role: formData.role
+            }, formData.isVirtual ? undefined : formData.id);
+
+            if (!result.success) throw new Error(result.error);
 
             setShowCreateModal(false);
-            setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR' });
+            setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR', isVirtual: false });
             fetchAuthors();
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            alert('Erro ao criar autor: ' + message);
+        } catch (error: any) {
+            alert('Erro ao criar autor: ' + error.message);
+        } finally {
+            setLoading(false);
         }
     }
 
     async function handleUpdateAuthor() {
         if (!editingAuthor) return;
 
+        setLoading(true);
         try {
-            const { error } = await (supabase
-                .from('profiles') as any)
-                .update({
-                    name: formData.name,
-                    avatar_url: formData.avatar_url || null,
-                    role: formData.role
-                })
-                .eq('id', editingAuthor.id);
+            const result = await upsertAuthor({
+                name: formData.name,
+                avatar_url: formData.avatar_url || null,
+                role: formData.role
+            }, editingAuthor.id);
 
-            if (error) throw error;
+            if (!result.success) throw new Error(result.error);
 
             setEditingAuthor(null);
-            setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR' });
+            setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR', isVirtual: false });
             fetchAuthors();
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            alert('Erro ao atualizar autor: ' + message);
+        } catch (error: any) {
+            alert('Erro ao atualizar autor: ' + error.message);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -122,17 +125,15 @@ export default function AuthorsPage() {
             }
         }
 
+        setLoading(true);
         try {
-            const { error } = await supabase
-                .from('profiles')
-                .delete()
-                .eq('id', author.id);
-
-            if (error) throw error;
+            const result = await deleteAuthor(author.id);
+            if (!result.success) throw new Error(result.error);
             fetchAuthors();
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            alert('Erro ao deletar autor: ' + message);
+        } catch (error: any) {
+            alert('Erro ao deletar autor: ' + error.message);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -142,7 +143,8 @@ export default function AuthorsPage() {
             id: author.id,
             name: author.name || '',
             avatar_url: author.avatar_url || '',
-            role: author.role || 'EDITOR'
+            role: author.role || 'EDITOR',
+            isVirtual: !author.id.startsWith('user_')
         });
     }
 
@@ -208,7 +210,16 @@ export default function AuthorsPage() {
                                     <h3 className="font-bold dark:text-white text-gray-900 truncate">
                                         {author.name || 'Sem nome'}
                                     </h3>
-                                    <p className="text-sm text-slate-400 mb-2">{author.role || 'EDITOR'}</p>
+                                    <p className="text-sm text-slate-400 mb-1 flex items-center gap-1">
+                                        {author.role || 'EDITOR'}
+                                        {author.id.startsWith('user_') ? (
+                                            <div title="Usuário Clerk">
+                                                <Shield className="w-3 h-3 text-blue-400" />
+                                            </div>
+                                        ) : (
+                                            <div className="w-2 h-2 rounded-full bg-amber-500" title="Autor Virtual" />
+                                        )}
+                                    </p>
                                     <p className="text-xs text-slate-500">
                                         {author.article_count || 0} artigo(s)
                                     </p>
@@ -246,6 +257,21 @@ export default function AuthorsPage() {
 
                         <div className="space-y-4">
                             {!editingAuthor && (
+                                <div className="flex items-center gap-3 p-3 dark:bg-slate-900/50 bg-gray-50 rounded-lg border dark:border-white/5 border-gray-100 mb-4">
+                                    <input
+                                        type="checkbox"
+                                        id="isVirtual"
+                                        checked={formData.isVirtual}
+                                        onChange={(e) => setFormData({ ...formData, isVirtual: e.target.checked })}
+                                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                    />
+                                    <label htmlFor="isVirtual" className="text-sm font-medium dark:text-white text-gray-900 cursor-pointer">
+                                        Autor Virtual (Sem conta no Clerk)
+                                    </label>
+                                </div>
+                            )}
+
+                            {!editingAuthor && !formData.isVirtual && (
                                 <div>
                                     <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
                                         Clerk User ID *
@@ -311,7 +337,7 @@ export default function AuthorsPage() {
                                 onClick={() => {
                                     setShowCreateModal(false);
                                     setEditingAuthor(null);
-                                    setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR' });
+                                    setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR', isVirtual: false });
                                 }}
                                 className="flex-1 px-4 py-2 dark:bg-slate-700 bg-gray-100 dark:text-white text-gray-900 rounded-lg hover:bg-slate-600 transition-colors"
                             >
@@ -319,10 +345,14 @@ export default function AuthorsPage() {
                             </button>
                             <button
                                 onClick={editingAuthor ? handleUpdateAuthor : handleCreateAuthor}
-                                disabled={!formData.name || (!editingAuthor && !formData.id)}
-                                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!formData.name || (!editingAuthor && !formData.isVirtual && !formData.id) || loading}
+                                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
-                                {editingAuthor ? 'Atualizar' : 'Criar'}
+                                {loading ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    editingAuthor ? 'Atualizar' : 'Criar'
+                                )}
                             </button>
                         </div>
                     </div>
