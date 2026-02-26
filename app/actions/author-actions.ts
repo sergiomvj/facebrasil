@@ -36,9 +36,11 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
         id: finalId,
         name: payload.name,
         avatar_url: payload.avatar_url || null,
+        email: payload.email || null,
         role: payload.role || 'EDITOR',
         updated_at: new Date().toISOString()
     };
+
 
     let result;
     if (!isVirtual) {
@@ -61,10 +63,30 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
     return { success: true, data: result.data };
 }
 
-export async function deleteAuthor(id: string) {
+export async function deleteAuthor(id: string, transferToId: string) {
     // Only admins can delete authors
     await protectAdmin();
 
+    if (!transferToId) {
+        return { success: false, error: 'A destination author is required for article transfer.' };
+    }
+
+    if (id === transferToId) {
+        return { success: false, error: 'Cannot transfer articles to the same author being deleted.' };
+    }
+
+    // 1. Transfer articles to the new author
+    const { error: transferError } = await supabaseAdmin
+        .from('articles')
+        .update({ author_id: transferToId })
+        .eq('author_id', id);
+
+    if (transferError) {
+        console.error('Error transferring articles:', transferError);
+        return { success: false, error: 'Failed to transfer articles: ' + transferError.message };
+    }
+
+    // 2. Delete the author profile
     const { error } = await supabaseAdmin.from('profiles').delete().eq('id', id);
 
     if (error) {
@@ -73,8 +95,10 @@ export async function deleteAuthor(id: string) {
     }
 
     revalidatePath('/admin/authors');
+    revalidatePath('/admin/articles');
     return { success: true };
 }
+
 
 export async function inviteAuthor(email: string) {
     // Only admins can invite authors

@@ -9,7 +9,9 @@ interface Author {
     id: string;
     name: string | null;
     avatar_url: string | null;
+    email: string | null;
     role: string | null;
+
     created_at: string;
     article_count?: number;
 }
@@ -23,13 +25,19 @@ export default function AuthorsPage() {
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviting, setInviting] = useState(false);
     const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
+    const [authorToDelete, setAuthorToDelete] = useState<Author | null>(null);
+    const [transferToId, setTransferToId] = useState('');
+    const [deleting, setDeleting] = useState(false);
     const [formData, setFormData] = useState({
         id: '',
         name: '',
         avatar_url: '',
+        email: '',
         role: 'EDITOR',
         isVirtual: false
     });
+
+
 
 
     async function fetchAuthors() {
@@ -95,14 +103,17 @@ export default function AuthorsPage() {
             const result = await upsertAuthor({
                 name: formData.name,
                 avatar_url: formData.avatar_url || null,
+                email: formData.email || null,
                 role: formData.role
             }, formData.isVirtual ? undefined : formData.id);
+
 
             if (!result.success) throw new Error(result.error);
 
             setShowCreateModal(false);
-            setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR', isVirtual: false });
+            setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false });
             fetchAuthors();
+
         } catch (error: any) {
             alert('Erro ao criar autor: ' + error.message);
         } finally {
@@ -118,13 +129,15 @@ export default function AuthorsPage() {
             const result = await upsertAuthor({
                 name: formData.name,
                 avatar_url: formData.avatar_url || null,
+                email: formData.email || null,
                 role: formData.role
             }, editingAuthor.id);
+
 
             if (!result.success) throw new Error(result.error);
 
             setEditingAuthor(null);
-            setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR', isVirtual: false });
+            setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false });
             fetchAuthors();
         } catch (error: any) {
             alert('Erro ao atualizar autor: ' + error.message);
@@ -133,28 +146,23 @@ export default function AuthorsPage() {
         }
     }
 
-    async function handleDeleteAuthor(author: Author) {
-        if (author.article_count && author.article_count > 0) {
-            if (!confirm(`Este autor tem ${author.article_count} artigo(s). Tem certeza que deseja deletar?`)) {
-                return;
-            }
-        } else {
-            if (!confirm(`Tem certeza que deseja deletar ${author.name}?`)) {
-                return;
-            }
-        }
+    async function handleDeleteAuthor() {
+        if (!authorToDelete || !transferToId) return;
 
-        setLoading(true);
+        setDeleting(true);
         try {
-            const result = await deleteAuthor(author.id);
+            const result = await deleteAuthor(authorToDelete.id, transferToId);
             if (!result.success) throw new Error(result.error);
+            setAuthorToDelete(null);
+            setTransferToId('');
             fetchAuthors();
         } catch (error: any) {
             alert('Erro ao deletar autor: ' + error.message);
         } finally {
-            setLoading(false);
+            setDeleting(false);
         }
     }
+
 
     function openEditModal(author: Author) {
         setEditingAuthor(author);
@@ -162,9 +170,11 @@ export default function AuthorsPage() {
             id: author.id,
             name: author.name || '',
             avatar_url: author.avatar_url || '',
+            email: author.email || '',
             role: author.role || 'EDITOR',
             isVirtual: !author.id.startsWith('user_')
         });
+
     }
 
     const filteredAuthors = authors.filter(author =>
@@ -246,9 +256,16 @@ export default function AuthorsPage() {
                                             <div className="w-2 h-2 rounded-full bg-amber-500" title="Autor Virtual" />
                                         )}
                                     </p>
+                                    {author.email && (
+                                        <p className="text-xs text-slate-400 truncate flex items-center gap-1 mb-1">
+                                            <Mail className="w-3 h-3 text-slate-500" />
+                                            {author.email}
+                                        </p>
+                                    )}
                                     <p className="text-xs text-slate-500">
                                         {author.article_count || 0} artigo(s)
                                     </p>
+
                                 </div>
                             </div>
 
@@ -261,7 +278,7 @@ export default function AuthorsPage() {
                                     Editar
                                 </button>
                                 <button
-                                    onClick={() => handleDeleteAuthor(author)}
+                                    onClick={() => setAuthorToDelete(author)}
                                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors text-sm"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -330,8 +347,25 @@ export default function AuthorsPage() {
 
                             <div>
                                 <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    placeholder="email@exemplo.com"
+                                    className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <p className="text-xs text-slate-400 mt-1">
+                                    Email de contato (opcional)
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
                                     Avatar URL
                                 </label>
+
                                 <input
                                     type="text"
                                     value={formData.avatar_url}
@@ -363,8 +397,9 @@ export default function AuthorsPage() {
                                 onClick={() => {
                                     setShowCreateModal(false);
                                     setEditingAuthor(null);
-                                    setFormData({ id: '', name: '', avatar_url: '', role: 'EDITOR', isVirtual: false });
+                                    setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false });
                                 }}
+
                                 className="flex-1 px-4 py-2 dark:bg-slate-700 bg-gray-100 dark:text-white text-gray-900 rounded-lg hover:bg-slate-600 transition-colors"
                             >
                                 Cancelar
@@ -442,6 +477,78 @@ export default function AuthorsPage() {
                     </div>
                 </div>
             )}
+
+            {/* Delete / Transfer Modal */}
+            {authorToDelete && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="dark:bg-slate-800 bg-white rounded-lg max-w-md w-full p-6 border dark:border-red-500/20 shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4 text-red-500">
+                            <Trash2 className="w-6 h-6" />
+                            <h2 className="text-2xl font-bold">Excluir Autor</h2>
+                        </div>
+
+                        <div className="space-y-4">
+                            <p className="text-sm dark:text-slate-300 text-gray-600">
+                                Você está prestes a excluir o autor <strong className="dark:text-white text-gray-900">{authorToDelete.name}</strong>.
+                            </p>
+
+                            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                <p className="text-xs text-amber-500 font-bold mb-2">TRANSFERÊNCIA OBRIGATÓRIA</p>
+                                <p className="text-xs dark:text-slate-400 text-gray-500">
+                                    Este autor possui <strong>{authorToDelete.article_count}</strong> artigo(s).
+                                    Selecione um autor de destino para receber este conteúdo:
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
+                                    Transferir artigos para:
+                                </label>
+                                <select
+                                    value={transferToId}
+                                    onChange={(e) => setTransferToId(e.target.value)}
+                                    className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                >
+                                    <option value="">Selecione um autor...</option>
+                                    {authors
+                                        .filter(a => a.id !== authorToDelete.id)
+                                        .map(a => (
+                                            <option key={a.id} value={a.id}>
+                                                {a.name} ({a.role || 'EDITOR'})
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-8">
+                            <button
+                                onClick={() => {
+                                    setAuthorToDelete(null);
+                                    setTransferToId('');
+                                }}
+                                disabled={deleting}
+                                className="flex-1 px-4 py-2 dark:bg-slate-700 bg-gray-100 dark:text-white text-gray-900 rounded-lg hover:bg-slate-600 transition-colors font-bold"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleDeleteAuthor}
+                                disabled={!transferToId || deleting}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-bold"
+                            >
+                                {deleting ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    'Confirmar Exclusão'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </>
     );
 }
