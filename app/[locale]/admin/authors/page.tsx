@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Users, Plus, Edit2, Trash2, Search, UserCircle, UserPlus, Shield, Mail } from 'lucide-react';
+import { Users, Plus, Edit2, Trash2, Search, UserCircle, UserPlus, Shield, Mail, Check, Loader2 } from 'lucide-react';
 import { upsertAuthor, deleteAuthor, inviteAuthor } from '@/app/actions/author-actions';
+import { listUsers, updateUserRole } from '@/app/actions/user-actions';
 
 interface Author {
     id: string;
@@ -18,8 +19,11 @@ interface Author {
 
 export default function AuthorsPage() {
     const [authors, setAuthors] = useState<Author[]>([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingUsers, setLoadingUsers] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [userSearchTerm, setUserSearchTerm] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [inviteEmail, setInviteEmail] = useState('');
@@ -75,17 +79,30 @@ export default function AuthorsPage() {
         }
     }
 
+    async function fetchUsers() {
+        setLoadingUsers(true);
+        try {
+            const data = await listUsers();
+            setAllUsers(data || []);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoadingUsers(false);
+        }
+    }
+
     useEffect(() => {
         void fetchAuthors();
+        void fetchUsers();
     }, []);
 
     async function handleInviteAuthor() {
         if (!inviteEmail) return alert('Email é obrigatório');
         setInviting(true);
         try {
-            const result = await inviteAuthor(inviteEmail);
+            const result = await inviteAuthor(inviteEmail, formData.role);
             if (!result.success) throw new Error(result.error);
-            alert('Convite enviado com sucesso para ' + inviteEmail);
+            alert('Convite enviado com sucesso para ' + inviteEmail + ' com cargo ' + formData.role);
             setShowInviteModal(false);
             setInviteEmail('');
         } catch (error: any) {
@@ -326,19 +343,55 @@ export default function AuthorsPage() {
                             )}
 
                             {!editingAuthor && !formData.isVirtual && (
-                                <div>
-                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
-                                        ID do Usuário Supabase *
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900">
+                                        Vincular Usuário Registrado *
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={formData.id}
-                                        onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                                        placeholder="Substitua pelo UUID do usuário"
-                                        className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                                    />
-                                    <p className="text-xs text-slate-400 mt-1">
-                                        Email de login do usuário (obrigatório)
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <input
+                                            type="text"
+                                            value={userSearchTerm}
+                                            onChange={(e) => setUserSearchTerm(e.target.value)}
+                                            placeholder="Buscar por nome ou email..."
+                                            className="w-full pl-10 pr-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="max-h-40 overflow-y-auto border dark:border-white/10 border-gray-200 rounded-lg bg-slate-900/30">
+                                        {allUsers
+                                            .filter(u =>
+                                                !authors.some(a => a.id === u.id) &&
+                                                (u.name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                                                    u.email?.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                                            )
+                                            .slice(0, 5)
+                                            .map(user => (
+                                                <button
+                                                    key={user.id}
+                                                    onClick={() => {
+                                                        setFormData({
+                                                            ...formData,
+                                                            id: user.id,
+                                                            name: user.name || '',
+                                                            email: user.email || ''
+                                                        });
+                                                        setUserSearchTerm(user.email || user.name || '');
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-primary/10 transition-colors flex items-center justify-between ${formData.id === user.id ? 'bg-primary/20 text-primary' : 'dark:text-slate-300 text-gray-600'}`}
+                                                >
+                                                    <div className="truncate">
+                                                        <div className="font-medium truncate">{user.name || 'Sem nome'}</div>
+                                                        <div className="text-xs opacity-60 truncate">{user.email}</div>
+                                                    </div>
+                                                    {formData.id === user.id && <Check className="w-4 h-4" />}
+                                                </button>
+                                            ))
+                                        }
+                                        {allUsers.length === 0 && <div className="p-3 text-xs text-center text-slate-500">Carregando usuários...</div>}
+                                    </div>
+                                    <p className="text-[10px] text-slate-400">
+                                        Selecione um usuário acima para vinculá-lo como autor.
                                     </p>
                                 </div>
                             )}
@@ -460,6 +513,22 @@ export default function AuthorsPage() {
                                     placeholder="email@exemplo.com"
                                     className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
+                                    Cargo Inicial
+                                </label>
+                                <select
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                >
+                                    <option value="EDITOR">Editor</option>
+                                    <option value="ADMIN">Admin</option>
+                                    <option value="CONTRIBUTOR">Contribuidor</option>
+                                    <option value="WRITER">Escritor</option>
+                                </select>
                             </div>
                         </div>
 

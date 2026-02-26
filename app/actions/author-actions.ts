@@ -97,7 +97,7 @@ export async function deleteAuthor(id: string, transferToId: string) {
 }
 
 
-export async function inviteAuthor(email: string) {
+export async function inviteAuthor(email: string, role: string = 'EDITOR') {
     try {
         // Only admins can invite authors
         await protectAdmin();
@@ -105,6 +105,9 @@ export async function inviteAuthor(email: string) {
         // Use Supabase Admin to invite the user
         const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
             redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`,
+            data: {
+                role: role.toUpperCase()
+            }
         });
 
         if (error) throw error;
