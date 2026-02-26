@@ -4,7 +4,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { protectEditor } from '@/lib/admin-guard';
-import { isRedirectError } from 'next/dist/client/components/redirect';
+import { isRedirectError } from 'next/navigation';
 
 interface AuthorPayload {
     name: string;
@@ -116,11 +116,20 @@ export async function inviteAuthor(email: string, role: string = 'EDITOR') {
     } catch (error: any) {
         // Essential: Re-throw redirect errors so Next.js can handle them
         if (isRedirectError(error) || error.message?.includes('NEXT_REDIRECT')) {
+            console.log('[AuthorActions] Identifying redirect error, re-throwing...');
             throw error;
         }
 
-        console.error('Supabase Invitation Error:', error);
+        console.error('[AuthorActions] Supabase Invitation Error:', error);
 
-        return { success: false, error: error.message || 'Falha ao enviar convite via Supabase.' };
+        // Detailed error logging
+        if (error instanceof Error) {
+            console.error('[AuthorActions] Error Stack:', error.stack);
+        }
+
+        return {
+            success: false,
+            error: error.message || 'Falha ao enviar convite via Supabase. Verifique se o email é válido.'
+        };
     }
 }
