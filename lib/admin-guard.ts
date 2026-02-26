@@ -41,7 +41,7 @@ export async function protectAdmin() {
 
     if (role !== "ADMIN") {
         console.warn(`[AdminGuard] Unauthorized admin access attempt by user ${userId} (Role: ${role})`);
-        redirect("/");
+        throw new Error("Não autorizado. Você precisa ser Administrador para realizar esta ação.");
     }
 
     return { userId, role };
@@ -83,7 +83,7 @@ export async function protectEditor() {
     const role = profile?.role?.toUpperCase();
 
     if (role !== "ADMIN" && role !== "EDITOR") {
-        redirect("/");
+        throw new Error("Não autorizado. Você precisa ser Editor ou Administrador para realizar esta ação.");
     }
 
     return { userId, role };

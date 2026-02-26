@@ -130,22 +130,18 @@ export async function inviteAuthor(email: string, role: string = 'EDITOR') {
         console.log('[AuthorActions] Invitation sent successfully:', data?.user?.id);
         return { success: true };
     } catch (error: any) {
-        // Essential: Re-throw redirect errors so Next.js can handle them
-        if (isRedirectError(error) || error.message?.includes('NEXT_REDIRECT')) {
-            console.log('[AuthorActions] Identifying redirect error, re-throwing...');
-            throw error;
-        }
-
-        console.error('[AuthorActions] Supabase Invitation Error:', error);
+        console.error('[AuthorActions] inviteAuthor caught error:', error);
 
         // Detailed error logging
         if (error instanceof Error) {
+            console.error('[AuthorActions] Error Name:', error.name);
+            console.error('[AuthorActions] Error Message:', error.message);
             console.error('[AuthorActions] Error Stack:', error.stack);
         }
 
         return {
             success: false,
-            error: error.message || 'Falha ao enviar convite via Supabase. Verifique se o email é válido.'
+            error: error.message || 'Falha ao enviar convite via Supabase.'
         };
     }
 }
