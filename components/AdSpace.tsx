@@ -35,6 +35,17 @@ const AdSpace: React.FC<AdSpaceProps> = ({
     const viewTimerRef = useRef<NodeJS.Timeout | null>(null);
     const curiosityTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     useEffect(() => {
         const fetchAds = async () => {
             try {
@@ -58,6 +69,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({
     }, [position, categoryId, publicationName]);
 
     const activeAd = adsPool[currentIndex];
+    const adImageUrl = isMobile && activeAd?.mobile_image_url ? activeAd.mobile_image_url : activeAd?.image_url;
 
     // Reset tracking when ad changes
     useEffect(() => {
@@ -132,7 +144,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({
     let sizeClasses = '';
     switch (position) {
         case 'super_hero':
-            sizeClasses = 'max-w-[1240px] w-full min-h-[50px] md:h-[150px]';
+            sizeClasses = 'max-w-[1240px] w-full aspect-[300/50] md:aspect-[1240/150] h-auto';
             break;
         case 'sidebar':
             sizeClasses = 'w-[300px] h-[300px] md:w-[350px] md:h-[350px]';
@@ -141,7 +153,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({
             sizeClasses = 'w-[300px] h-[300px]';
             break;
         case 'super_footer':
-            sizeClasses = 'max-w-[1240px] w-full min-h-[150px] md:h-[250px]';
+            sizeClasses = 'max-w-[1240px] w-full aspect-[300/150] md:aspect-[1240/250] h-auto';
             break;
     }
 
@@ -154,9 +166,9 @@ const AdSpace: React.FC<AdSpaceProps> = ({
         >
             {/* Ad Content */}
             <div className="absolute inset-0 cursor-pointer transition-transform duration-700 group-hover:scale-105">
-                {activeAd.image_url ? (
+                {adImageUrl ? (
                     <img
-                        src={activeAd.image_url}
+                        src={adImageUrl}
                         alt={activeAd.title}
                         className="w-full h-full object-cover"
                     />

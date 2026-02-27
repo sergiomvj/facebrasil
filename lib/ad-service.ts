@@ -6,6 +6,7 @@ export interface Ad {
     title: string;
     position: 'super_hero' | 'sidebar' | 'column' | 'super_footer';
     image_url: string;
+    mobile_image_url?: string;
     link_url: string;
     category_id?: string;
     is_active: boolean;

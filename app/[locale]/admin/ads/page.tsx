@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Image as ImageIcon, Trash2, Edit, Save, BarChart, ExternalLink, X, Globe, MapPin, Hash, CheckCircle2 } from 'lucide-react';
+import { Plus, Image as ImageIcon, Trash2, Edit, Save, BarChart, ExternalLink, X, Globe, MapPin, Hash, CheckCircle2, Wand2 } from 'lucide-react';
 import { Ad } from '@/lib/ad-service';
 import { upsertAd, deleteAd, toggleAdStatus, fetchPublications, fetchAdPublications } from '@/app/actions/ad-actions';
 import { uploadAdImage } from '@/app/actions/ad-image-actions';
+import { toast } from 'sonner';
 
 type GeoMode = 'global' | 'region' | 'local';
 
@@ -54,7 +55,7 @@ export default function AdManagerPage() {
         void fetchData();
     }, []);
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, deviceType: 'desktop' | 'mobile' = 'desktop') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -62,18 +63,29 @@ export default function AdManagerPage() {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('placement', currentAd.position || 'super_hero');
+        formData.append('deviceType', deviceType);
         formData.append('advertiserName', currentAd.title || 'anunciante');
 
         try {
             const result = await uploadAdImage(formData);
             if (result.success) {
-                setCurrentAd(prev => ({ ...prev, image_url: result.url }));
+                if (deviceType === 'desktop') {
+                    setCurrentAd(prev => ({ ...prev, image_url: result.url }));
+                } else {
+                    setCurrentAd(prev => ({ ...prev, mobile_image_url: result.url }));
+                }
+
+                if (result.wasConverted) {
+                    toast.info(result.message, { duration: 5000 });
+                } else {
+                    toast.success(result.message);
+                }
             } else {
-                alert(result.error);
+                toast.error(result.error);
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            alert('Falha ao enviar imagem.');
+            toast.error('Falha ao enviar imagem.');
         } finally {
             setIsUploading(false);
         }
@@ -92,9 +104,10 @@ export default function AdManagerPage() {
 
         const payload = {
             title: currentAd.title,
-            position: currentAd.position as any,
-            image_url: currentAd.image_url,
             link_url: currentAd.link_url,
+            image_url: currentAd.image_url,
+            mobile_image_url: currentAd.mobile_image_url,
+            position: currentAd.position,
             is_active: currentAd.is_active || false,
             category_id: currentAd.category_id || null,
             target_countries: geoMode === 'region' ? currentAd.target_countries : [],
@@ -110,7 +123,6 @@ export default function AdManagerPage() {
         } else {
             setIsEditing(false);
             resetForm();
-            fetchData();
         }
     };
 
@@ -355,41 +367,76 @@ export default function AdManagerPage() {
 
                         {/* Coluna 2: Media & Controls */}
                         <div className="space-y-6">
-                            <div>
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem do Anúncio (SVG / WebP)</label>
-                                <div className="flex flex-col gap-3 mb-4">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="https://... ou selecione um arquivo"
-                                            className="flex-1 bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs outline-none focus:border-accent-yellow/30"
-                                            value={currentAd.image_url || ''}
-                                            onChange={e => setCurrentAd({ ...currentAd, image_url: e.target.value })}
-                                        />
-                                        <label className={`cursor-pointer flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-white/10 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                            {isUploading ? (
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            ) : (
-                                                <ImageIcon className="w-4 h-4 text-accent-yellow" />
-                                            )}
-                                            <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={isUploading} />
-                                        </label>
-                                    </div>
-                                    <p className="text-[9px] text-slate-600 italic">
-                                        * Formatos: SVG, WebP, PNG, JPG. PNG/JPG serão convertidos para SVG auto.
-                                    </p>
-                                </div>
-                                <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-square border-dashed relative overflow-hidden group shadow-inner">
-                                    {currentAd.image_url ? (
-                                        <img src={currentAd.image_url} alt="Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="text-center text-slate-700">
-                                            <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                            <span className="text-[10px] font-bold uppercase tracking-widest">Preview Indisponível</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Slot Desktop */}
+                                <div className="space-y-4">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Desktop (SVG / WebP)</label>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="URL Desktop"
+                                                className="flex-1 bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs outline-none focus:border-accent-yellow/30"
+                                                value={currentAd.image_url || ''}
+                                                onChange={e => setCurrentAd({ ...currentAd, image_url: e.target.value })}
+                                            />
+                                            <label className={`cursor-pointer flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-white/10 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                {isUploading ? (
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <ImageIcon className="w-4 h-4 text-accent-yellow" />
+                                                )}
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'desktop')} disabled={isUploading} />
+                                            </label>
                                         </div>
-                                    )}
+                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner">
+                                            {currentAd.image_url ? (
+                                                <img src={currentAd.image_url} alt="Desktop Preview" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <div className="text-center text-slate-700">
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest">Desktop Preview</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Slot Mobile */}
+                                <div className="space-y-4">
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Mobile (SVG / WebP)</label>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="URL Mobile"
+                                                className="flex-1 bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs outline-none focus:border-accent-yellow/30"
+                                                value={currentAd.mobile_image_url || ''}
+                                                onChange={e => setCurrentAd({ ...currentAd, mobile_image_url: e.target.value })}
+                                            />
+                                            <label className={`cursor-pointer flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-white/10 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                {isUploading ? (
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <ImageIcon className="w-4 h-4 text-accent-yellow" />
+                                                )}
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'mobile')} disabled={isUploading} />
+                                            </label>
+                                        </div>
+                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner">
+                                            {currentAd.mobile_image_url ? (
+                                                <img src={currentAd.mobile_image_url} alt="Mobile Preview" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <div className="text-center text-slate-700">
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest">Mobile Preview</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            <p className="text-[9px] text-slate-600 italic mt-4 text-center">
+                                * PNG/JPG serão convertidos para SVG auto respeitando as dimensões desktop/mobile da posição.
+                            </p>
 
                             <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5">
                                 <div className="flex items-center justify-between">

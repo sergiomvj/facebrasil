@@ -136,7 +136,7 @@ export default function AdminShopPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-4xl font-black italic uppercase tracking-tighter dark:text-white text-gray-900 mb-1">FabrasilShop</h1>
+                    <h1 className="text-4xl font-black italic uppercase tracking-tighter dark:text-white text-gray-900 mb-1">FacebrasilShop</h1>
                     <p className="text-slate-500 font-bold text-sm tracking-wide">Gestão de parceiros comerciais e troca de Facetas ($FC).</p>
                 </div>
                 <div className="flex gap-3">
@@ -163,8 +163,8 @@ export default function AdminShopPage() {
                                 key={partner.id}
                                 onClick={() => handlePartnerSelect(partner.id)}
                                 className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPartnerId === partner.id
-                                        ? 'bg-primary/10 border-primary shadow-sm shadow-primary/10'
-                                        : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-white/5 opacity-60 hover:opacity-100'
+                                    ? 'bg-primary/10 border-primary shadow-sm shadow-primary/10'
+                                    : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-white/5 opacity-60 hover:opacity-100'
                                     }`}
                             >
                                 <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/10">

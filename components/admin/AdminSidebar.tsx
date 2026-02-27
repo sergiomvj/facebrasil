@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
     LayoutDashboard,
     FileText,
-    Image,
+    Image as AdImageIcon,
     FolderOpen,
     Video,
     Star,
@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Artigos', href: '/admin/articles', icon: FileText },
     { name: 'TV Facebrasil', href: '/admin/tv-facebrasil', icon: MonitorPlay },
-    { name: 'Mídia', href: '/admin/media', icon: Image },
+    { name: 'Mídia', href: '/admin/media', icon: AdImageIcon },
     { name: 'Categorias', href: '/admin/categories', icon: FolderOpen },
     { name: 'Autores', href: '/admin/authors', icon: Users },
     { name: 'Eventos', href: '/admin/events', icon: Calendar },
@@ -41,7 +41,8 @@ const navItems: NavItem[] = [
     { name: 'Anúncios', href: '/admin/ads', icon: DollarSign },
     { name: 'Páginas', href: '/admin/pages', icon: FileText },
     { name: 'Gamificação', href: '/admin/gamification', icon: Trophy },
-    { name: 'FabrasilShop', href: '/admin/shop', icon: Star },
+    { name: 'FacebrasilShop', href: '/admin/shop', icon: Star },
+    { name: 'Conversor de Imagens', href: '/admin/tools/image-converter', icon: AdImageIcon },
     { name: 'Configurações', href: '/admin/settings', icon: Settings },
 ];
 
