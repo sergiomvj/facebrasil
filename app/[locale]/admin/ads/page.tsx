@@ -45,7 +45,10 @@ export default function AdManagerPage() {
             fetchPublications()
         ]);
 
-        if (adsRes.data) setAds(adsRes.data);
+        if (adsRes.data) {
+            console.log('[AdManager] Loaded ads:', adsRes.data.map((ad: any) => ({ id: ad.id, title: ad.title, image_url: ad.image_url })));
+            setAds(adsRes.data);
+        }
         if (catsRes.data) setCategories(catsRes.data);
         if (pubsRes) setPublications(pubsRes);
         setIsLoading(false);
@@ -186,6 +189,17 @@ export default function AdManagerPage() {
                     </h1>
                     <p className="text-slate-400">Controle total de veiculação, publicações e geolocalização.</p>
                 </div>
+
+                {/* Debug Info */}
+                <div className="bg-slate-900/50 p-2 rounded border border-white/5 overflow-auto max-h-20 max-w-md hidden md:block">
+                    <p className="text-[8px] font-mono text-slate-500">Debug URLs:</p>
+                    {ads.map(ad => (
+                        <p key={ad.id} className="text-[8px] font-mono text-slate-400 truncate">
+                            {ad.title}: {ad.image_url} | {ad.mobile_image_url}
+                        </p>
+                    ))}
+                </div>
+
                 {!isEditing && (
                     <button
                         onClick={() => { resetForm(); setIsEditing(true); }}
