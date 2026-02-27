@@ -1,157 +1,215 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useXP } from '@/hooks/useXP';
 import { adService, Ad } from '@/lib/ad-service';
 import { detectLocation } from '@/lib/geo-utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AdSpaceProps {
-    position: 'banner_top' | 'sidebar' | 'inline' | 'sticky_footer' | 'home_hero' | 'article_sidebar' | 'feed_interstitial' | 'column_middle' | 'super_footer';
+    position: 'super_hero' | 'sidebar' | 'column' | 'super_footer';
     className?: string;
     categoryId?: string;
+    publicationName?: 'Facebrasil' | 'TVFacebrasil';
 }
 
-const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId }) => {
+const AdSpace: React.FC<AdSpaceProps> = ({
+    position,
+    className = '',
+    categoryId,
+    publicationName = 'Facebrasil'
+}) => {
     const { grantXP } = useXP();
-    const [ad, setAd] = useState<Ad | null>(null);
+    const [adsPool, setAdsPool] = useState<Ad[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [viewRecorded, setViewRecorded] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
 
+    // Tracking states for current ad
+    const [statsLogged, setStatsLogged] = useState({
+        view: false,
+        curiosity: false
+    });
+    const [isHovering, setIsHovering] = useState(false);
+
+    const viewTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const curiosityTimerRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
-        const fetchAd = async () => {
+        const fetchAds = async () => {
             try {
-                // Detect user location
                 const location = await detectLocation();
+                const pool = await adService.getAdsByPosition(position, publicationName, categoryId, location || undefined);
 
-                // Fetch a real ad from the database with location filtering
-                const fetchedAd = await adService.getAdByPosition(position, categoryId, location || undefined);
-
-                if (fetchedAd) {
-                    setAd(fetchedAd);
+                if (pool && pool.length > 0) {
+                    setAdsPool(pool);
                 } else {
-                    // No active ad for this position
                     setIsVisible(false);
                 }
             } catch (error) {
-                console.error("Failed to fetch ad", error);
+                console.error("Failed to fetch ads", error);
                 setIsVisible(false);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAd();
-    }, [position, categoryId]);
+        fetchAds();
+    }, [position, categoryId, publicationName]);
 
-    const handleClose = (e: React.MouseEvent) => {
+    const activeAd = adsPool[currentIndex];
+
+    // Reset tracking when ad changes
+    useEffect(() => {
+        setStatsLogged({ view: false, curiosity: false });
+
+        // Clear old timers
+        if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+        if (curiosityTimerRef.current) clearTimeout(curiosityTimerRef.current);
+
+        if (activeAd && isVisible) {
+            // 📊 1. Visualização (20s)
+            viewTimerRef.current = setTimeout(() => {
+                adService.trackView(activeAd.id);
+                setStatsLogged(prev => ({ ...prev, view: true }));
+            }, 20000);
+        }
+
+        return () => {
+            if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+            if (curiosityTimerRef.current) clearTimeout(curiosityTimerRef.current);
+        };
+    }, [activeAd, isVisible, currentIndex]);
+
+    // 📊 2. Curiosidade (MouseOver + 10s)
+    useEffect(() => {
+        if (isHovering && !statsLogged.curiosity && activeAd) {
+            curiosityTimerRef.current = setTimeout(() => {
+                adService.trackCuriosity(activeAd.id);
+                setStatsLogged(prev => ({ ...prev, curiosity: true }));
+            }, 10000);
+        } else {
+            if (curiosityTimerRef.current) clearTimeout(curiosityTimerRef.current);
+        }
+
+        return () => {
+            if (curiosityTimerRef.current) clearTimeout(curiosityTimerRef.current);
+        };
+    }, [isHovering, statsLogged.curiosity, activeAd]);
+
+    // Carousel Rotation (Auto)
+    useEffect(() => {
+        if (adsPool.length > 1) {
+            const interval = setInterval(() => {
+                setCurrentIndex(prev => (prev + 1) % adsPool.length);
+            }, 15000); // Rotate every 15s
+            return () => clearInterval(interval);
+        }
+    }, [adsPool.length]);
+
+    const handleNext = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsVisible(false);
+        setCurrentIndex(prev => (prev + 1) % adsPool.length);
     };
 
-    useEffect(() => {
-        if (ad && isVisible && !viewRecorded && !loading) {
-            const timer = setTimeout(() => {
-                grantXP('VIEW_AD', ad.id);
-                adService.trackView(ad.id);
-                setViewRecorded(true);
-            }, 3000); // 3 seconds view time to count
-            return () => clearTimeout(timer);
-        }
-    }, [viewRecorded, ad, isVisible, loading, position, grantXP]);
+    const handlePrev = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setCurrentIndex(prev => (prev - 1 + adsPool.length) % adsPool.length);
+    };
 
     const handleClick = () => {
-        if (!ad) return;
-        grantXP('CLICK_AD', ad.id + '_click_' + new Date().toISOString().split('T')[0]); // Unique per day
-        adService.trackClick(ad.id);
-
-        // Open link if available
-        if (ad.link_url) {
-            window.open(ad.link_url, '_blank');
+        if (!activeAd) return;
+        adService.trackClick(activeAd.id);
+        if (activeAd.link_url) {
+            window.open(activeAd.link_url, '_blank');
         }
     };
 
-    // If hidden or loading, we might want to return nothing or a placeholder.
-    if (!isVisible) return null;
+    if (!isVisible || (loading && !activeAd)) return null;
+    if (!activeAd) return null;
 
-    if (loading) {
-        return <div className={`w-full h-24 bg-slate-900/10 animate-pulse rounded-lg ${className}`} />;
-    }
-
-    if (!ad) return null;
-
-    // Base classes based on Position (Desktop Sizes)
+    // Size mappings from requirements
     let sizeClasses = '';
     switch (position) {
-        case 'banner_top':
-            sizeClasses = 'max-w-[1024px] h-[150px]';
+        case 'super_hero':
+            sizeClasses = 'max-w-[1240px] w-full min-h-[50px] md:h-[150px]';
             break;
         case 'sidebar':
-        case 'article_sidebar':
-            sizeClasses = 'w-[350px] h-[350px]';
+            sizeClasses = 'w-[300px] h-[300px] md:w-[350px] md:h-[350px]';
             break;
-        case 'column_middle':
+        case 'column':
             sizeClasses = 'w-[300px] h-[300px]';
             break;
         case 'super_footer':
-            sizeClasses = 'max-w-[1240px] h-[200px]';
+            sizeClasses = 'max-w-[1240px] w-full min-h-[150px] md:h-[250px]';
             break;
-        default:
-            sizeClasses = 'w-full'; // Default fallback
     }
 
     return (
         <div
+            className={`relative group bg-slate-950 overflow-hidden border border-white/5 shadow-2xl ${sizeClasses} ${className}`}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
             onClick={handleClick}
-            className={`relative flex flex-col items-center justify-center p-4 rounded-lg overflow-hidden group cursor-pointer transition-all hover:opacity-95 shadow-md mx-auto ${sizeClasses} ${className}`}
         >
-            {/* Background Image or Fallback Color */}
-            {
-                ad.image_url ? (
-                    <div
-                        className="absolute inset-0 bg-cover bg-center z-0 transition-transform duration-700 group-hover:scale-105"
-                        style={{ backgroundImage: `url(${ad.image_url})` }}
+            {/* Ad Content */}
+            <div className="absolute inset-0 cursor-pointer transition-transform duration-700 group-hover:scale-105">
+                {activeAd.image_url ? (
+                    <img
+                        src={activeAd.image_url}
+                        alt={activeAd.title}
+                        className="w-full h-full object-cover"
                     />
                 ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 z-0" />
-                )
-            }
-
-            {/* Overlay for text readability if image exists */}
-            {ad.image_url && <div className="absolute inset-0 bg-black/40 z-0 transition-opacity group-hover:bg-black/30" />}
-
-            {/* Content */}
-            <div className="relative z-10 text-center w-full">
-                <span className="absolute top-0 right-0 py-0.5 px-2 bg-black/50 text-[9px] uppercase tracking-widest text-white/70 rounded-bl-lg font-black tracking-tighter italic">
-                    Patrocinado
-                </span>
-
-                {position === 'sticky_footer' && (
-                    <button
-                        onClick={handleClose}
-                        className="absolute -top-3 -left-3 p-1 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors"
-                    >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                )}
-
-                {!ad.image_url && (
-                    <div className="py-2">
-                        <h3 className="text-lg font-bold text-white mb-1 uppercase italic tracking-tighter">{ad.title}</h3>
-                        <p className="text-[10px] text-white/70 font-mono break-all">{ad.link_url}</p>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-center">
+                        <h3 className="text-xl font-black text-white italic uppercase tracking-tighter mb-2">{activeAd.title}</h3>
+                        <p className="text-xs text-accent-yellow font-bold uppercase tracking-widest">Saiba Mais</p>
                     </div>
                 )}
             </div>
 
-            {/* Click Indicator */}
-            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                <span className="text-[10px] font-black uppercase text-slate-900 bg-primary px-3 py-1 rounded-full shadow-lg">
-                    Ver Mais &rarr;
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+            {/* Labels */}
+            <div className="absolute top-0 right-0 p-1 bg-black/80">
+                <span className="text-[10px] font-black uppercase text-white/50 tracking-tighter italic px-2">Anúncio</span>
+            </div>
+
+            {/* Carousel Controls (if multiple) */}
+            {adsPool.length > 1 && (
+                <>
+                    <button
+                        onClick={handlePrev}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-accent-yellow text-white hover:text-slate-950 rounded-full opacity-0 group-hover:opacity-100 transition-all z-20"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={handleNext}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/40 hover:bg-accent-yellow text-white hover:text-slate-950 rounded-full opacity-0 group-hover:opacity-100 transition-all z-20"
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </button>
+                    {/* Dots */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+                        {adsPool.map((_, idx) => (
+                            <div
+                                key={idx}
+                                className={`w-1.5 h-1.5 rounded-full transition-all ${idx === currentIndex ? 'bg-accent-yellow scale-125' : 'bg-white/30'}`}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
+
+            {/* Performance Indicators (Only for visual feedback in dev/testing if needed, but here it's production) */}
+            <div className="absolute bottom-4 left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="bg-accent-yellow text-slate-950 font-black text-[10px] uppercase px-4 py-2 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                    {activeAd.title} &rarr;
                 </span>
             </div>
-        </div >
+        </div>
     );
 };
 
