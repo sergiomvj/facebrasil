@@ -3,7 +3,6 @@
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { auth } from '@/lib/auth-server';
-
 import { revalidatePath } from 'next/cache';
 
 interface AdPayload {
@@ -13,6 +12,8 @@ interface AdPayload {
     link_url: string;
     is_active: boolean;
     category_id?: string | null;
+    target_countries?: string[];
+    target_regions?: string[];
 }
 
 export async function upsertAd(payload: AdPayload, id?: string) {
@@ -48,7 +49,7 @@ export async function toggleAdStatus(id: string, isActive: boolean) {
     }
 
     revalidatePath('/admin/ads');
-    revalidatePath('/'); // Revalidate home as ads appear there
+    revalidatePath('/');
     return { success: true };
 }
 
@@ -67,4 +68,3 @@ export async function deleteAd(id: string) {
     revalidatePath('/');
     return { success: true };
 }
-

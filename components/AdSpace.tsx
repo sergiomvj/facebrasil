@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useXP } from '@/hooks/useXP';
 import { adService, Ad } from '@/lib/ad-service';
+import { detectLocation } from '@/lib/geo-utils';
 
 interface AdSpaceProps {
     position: 'banner_top' | 'sidebar' | 'inline' | 'sticky_footer' | 'home_hero' | 'article_sidebar' | 'feed_interstitial' | 'column_middle' | 'super_footer';
@@ -20,8 +21,11 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
     useEffect(() => {
         const fetchAd = async () => {
             try {
-                // Fetch a real ad from the database
-                const fetchedAd = await adService.getAdByPosition(position);
+                // Detect user location
+                const location = await detectLocation();
+
+                // Fetch a real ad from the database with location filtering
+                const fetchedAd = await adService.getAdByPosition(position, categoryId, location || undefined);
 
                 if (fetchedAd) {
                     setAd(fetchedAd);
@@ -38,7 +42,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
         };
 
         fetchAd();
-    }, [position]);
+    }, [position, categoryId]);
 
     const handleClose = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -48,13 +52,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
     useEffect(() => {
         if (ad && isVisible && !viewRecorded && !loading) {
             const timer = setTimeout(() => {
-                // Determine XP reward based on position
-                const rewardType = 'VIEW_AD';
-                if (position === 'sticky_footer' || position === 'inline') {
-                    // Maybe different XP for different types? Defaulting to generic view for now.
-                }
-
-                grantXP(rewardType, ad.id);
+                grantXP('VIEW_AD', ad.id);
                 adService.trackView(ad.id);
                 setViewRecorded(true);
             }, 3000); // 3 seconds view time to count
@@ -74,11 +72,9 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
     };
 
     // If hidden or loading, we might want to return nothing or a placeholder.
-    // Returning null removes it from DOM.
     if (!isVisible) return null;
 
     if (loading) {
-        // Optional: Skeleton loader or just null
         return <div className={`w-full h-24 bg-slate-900/10 animate-pulse rounded-lg ${className}`} />;
     }
 
@@ -104,9 +100,6 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
             sizeClasses = 'w-full'; // Default fallback
     }
 
-    // Merge custom className, but ensure size classes take precedence or are additive
-    // standard className prop might override width/height if passed explicitly, which is fine.
-
     return (
         <div
             onClick={handleClick}
@@ -116,7 +109,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
             {
                 ad.image_url ? (
                     <div
-                        className="absolute inset-0 bg-cover bg-center z-0"
+                        className="absolute inset-0 bg-cover bg-center z-0 transition-transform duration-700 group-hover:scale-105"
                         style={{ backgroundImage: `url(${ad.image_url})` }}
                     />
                 ) : (
@@ -129,11 +122,10 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
 
             {/* Content */}
             <div className="relative z-10 text-center w-full">
-                <span className="absolute top-0 right-0 py-0.5 px-2 bg-black/50 text-[9px] uppercase tracking-widest text-white/70 rounded-bl-lg">
-                    Advertisement
+                <span className="absolute top-0 right-0 py-0.5 px-2 bg-black/50 text-[9px] uppercase tracking-widest text-white/70 rounded-bl-lg font-black tracking-tighter italic">
+                    Patrocinado
                 </span>
 
-                {/* Close Button implementation if needed (interstitials) */}
                 {position === 'sticky_footer' && (
                     <button
                         onClick={handleClose}
@@ -147,16 +139,16 @@ const AdSpace: React.FC<AdSpaceProps> = ({ position, className = '', categoryId 
 
                 {!ad.image_url && (
                     <div className="py-2">
-                        <h3 className="text-lg font-bold text-white mb-1">{ad.title}</h3>
-                        <p className="text-xs text-white/70 font-mono break-all">{ad.link_url}</p>
+                        <h3 className="text-lg font-bold text-white mb-1 uppercase italic tracking-tighter">{ad.title}</h3>
+                        <p className="text-[10px] text-white/70 font-mono break-all">{ad.link_url}</p>
                     </div>
                 )}
             </div>
 
             {/* Click Indicator */}
             <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                <span className="text-[10px] text-white bg-blue-600/80 px-2 py-1 rounded-full">
-                    Open Link &rarr;
+                <span className="text-[10px] font-black uppercase text-slate-900 bg-primary px-3 py-1 rounded-full shadow-lg">
+                    Ver Mais &rarr;
                 </span>
             </div>
         </div >

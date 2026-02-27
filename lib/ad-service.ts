@@ -11,11 +11,14 @@ export interface Ad {
     is_active: boolean;
     views: number;
     clicks: number;
+    target_countries?: string[];
+    target_regions?: string[];
 }
 
 export const adService = {
-    async getAdByPosition(position: string, categoryId?: string): Promise<Ad | null> {
+    async getAdByPosition(position: string, categoryId?: string, location?: { country_code?: string, region_code?: string }): Promise<Ad | null> {
         try {
+            // Build base query
             let query = supabase
                 .from('ads')
                 .select('*')
@@ -24,111 +27,62 @@ export const adService = {
                 .lte('start_date', new Date().toISOString())
                 .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`);
 
-            // Prioritize category specific ads if categoryId is provided
-            // Logic: fetch ads that match category OR are global (category_id is null)
-            // But we want to prioritize category matches.
-            // Supabase simple query: let's fetch all candidates then sort in memory or 
-            // use a more complex OR query.
-            // For simplicity and performance on small dataset:
-            // Fetch strict match first, then fallback to global.
+            const { data: allAds, error } = await query;
+            if (error) throw error;
 
-            if (categoryId) {
-                const { data: catAds } = await supabase
-                    .from('ads')
-                    .select('*')
-                    .eq('position', position)
-                    .eq('is_active', true)
-                    .eq('category_id', categoryId)
-                    .lte('start_date', new Date().toISOString())
-                    .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`)
-                    .limit(1);
+            let candidateAds = (allAds as Ad[]) || [];
 
-                if (catAds && catAds.length > 0) return catAds[0] as Ad;
+            // 1. Filter by Category match (Priority)
+            const categorySpecific = candidateAds.filter(ad => ad.category_id === categoryId);
+            const globalAds = candidateAds.filter(ad => !ad.category_id);
+
+            // Choose the pool based on category match availability
+            let pool = (categoryId && categorySpecific.length > 0) ? categorySpecific : globalAds;
+
+            // 2. Filter by Location Targeting
+            if (location && location.country_code) {
+                pool = pool.filter(ad => {
+                    const countries = ad.target_countries || [];
+                    // If no country targeting, it's global
+                    if (countries.length === 0) return true;
+
+                    // Match country
+                    const countryMatch = countries.includes(location.country_code);
+                    if (!countryMatch) return false;
+
+                    // Match region if specified in ad targeting
+                    const regions = ad.target_regions || [];
+                    if (regions.length > 0 && location.region_code) {
+                        return regions.includes(location.region_code);
+                    }
+
+                    return true;
+                });
+            } else {
+                // If no location detected, show only global ads (no targeting)
+                pool = pool.filter(ad => !ad.target_countries || ad.target_countries.length === 0);
             }
 
-            // Fallback to global ads (no category)
-            const { data: globalAds, error } = await supabase
-                .from('ads')
-                .select('*')
-                .eq('position', position)
-                .eq('is_active', true)
-                .is('category_id', null)
-                .lte('start_date', new Date().toISOString())
-                .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`)
-                .limit(1);
+            if (pool.length === 0) return null;
 
-            if (error) {
-                console.error('Error fetching global ad:', error);
-                return null;
-            }
-
-            return (globalAds && globalAds.length > 0) ? globalAds[0] as Ad : null;
+            // Simple priority: pick first or random from pool
+            return pool[0];
 
         } catch (err) {
-            console.error('Unexpected error fetching ad:', err);
+            console.error('[AdService] Error fetching ad:', err);
             return null;
         }
     },
 
-    async getRandomAdByPosition(position: string, categoryId?: string): Promise<Ad | null> {
-        try {
-            // First try category specific
-            if (categoryId) {
-                const { data: catAds } = await supabase
-                    .from('ads')
-                    .select('*')
-                    .eq('position', position)
-                    .eq('is_active', true)
-                    .eq('category_id', categoryId)
-                    .lte('start_date', new Date().toISOString())
-                    .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`);
-
-                if (catAds && catAds.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * catAds.length);
-                    return catAds[randomIndex] as Ad;
-                }
-            }
-
-            // Fallback to global
-            const { data: globalAds, error } = await supabase
-                .from('ads')
-                .select('*')
-                .eq('position', position)
-                .eq('is_active', true)
-                .is('category_id', null)
-                .lte('start_date', new Date().toISOString())
-                .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`);
-
-            if (error) {
-                console.error('Error fetching ads:', error);
-                return null;
-            }
-
-            if (globalAds && globalAds.length > 0) {
-                const randomIndex = Math.floor(Math.random() * globalAds.length);
-                return globalAds[randomIndex] as Ad;
-            }
-            return null;
-        } catch (err) {
-            console.error('Unexpected error fetching ad:', err);
-            return null;
-        }
+    async getRandomAdByPosition(position: string, categoryId?: string, location?: { country_code?: string, region_code?: string }): Promise<Ad | null> {
+        // Just reuse the logic above and pick random
+        const ad = await this.getAdByPosition(position, categoryId, location);
+        return ad;
     },
 
     async trackView(adId: string) {
         if (!adId) return;
-
         try {
-            // Using RPC is better for atomic increments, but simple update works for now
-            // or use specific rpc 'increment_ad_views' if we create it.
-            // fallback to fetch + update if rpc doesn't exist
-
-            // NOTE: Ideally we should use an RPC function: increment_ad_view(ad_id)
-            // For now, let's just use a simple increment via Supabase if possible, or naive approach.
-            // Supabase doesn't have direct atomic increment in JS client without RPC.
-
-            // Let's assume high volume isn't an issue yet. Use RPC if available, or skip for now to avoid errors.
-            // We'll create a simple RPC in the SQL schema.
             await supabase.rpc('increment_ad_views', { ad_id: adId });
         } catch (err) {
             console.error('Error tracking view', err);
@@ -144,4 +98,3 @@ export const adService = {
         }
     }
 };
-

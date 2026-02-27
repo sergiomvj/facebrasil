@@ -212,6 +212,29 @@ export default function AdManagerPage() {
                                 </div>
                             </div>
 
+                            <div className="grid grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Target Countries (ISO)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. BR, US, ES"
+                                        className="w-full bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs focus:border-accent-yellow/50 outline-none transition-all"
+                                        value={currentAd.target_countries?.join(', ') || ''}
+                                        onChange={e => setCurrentAd({ ...currentAd, target_countries: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Target Regions/States</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. FL, NY, SP"
+                                        className="w-full bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs focus:border-accent-yellow/50 outline-none transition-all"
+                                        value={currentAd.target_regions?.join(', ') || ''}
+                                        onChange={e => setCurrentAd({ ...currentAd, target_regions: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) })}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="flex items-center gap-2 pt-2">
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" className="sr-only peer" checked={currentAd.is_active || false} onChange={e => setCurrentAd({ ...currentAd, is_active: e.target.checked })} />

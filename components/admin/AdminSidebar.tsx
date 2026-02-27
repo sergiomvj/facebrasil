@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import {
     LayoutDashboard,
     FileText,
@@ -40,6 +41,7 @@ const navItems: NavItem[] = [
     { name: 'Anúncios', href: '/admin/ads', icon: DollarSign },
     { name: 'Páginas', href: '/admin/pages', icon: FileText },
     { name: 'Gamificação', href: '/admin/gamification', icon: Trophy },
+    { name: 'FabrasilShop', href: '/admin/shop', icon: Star },
     { name: 'Configurações', href: '/admin/settings', icon: Settings },
 ];
 
