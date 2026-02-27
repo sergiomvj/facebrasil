@@ -287,11 +287,17 @@ export default function AdminShopPage() {
 
             {/* Partner Modal */}
             {showPartnerForm && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in active:scale-100 scale-95 duration-200">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-white/10 w-full max-w-lg overflow-hidden shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-hidden">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-white/10 w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
                         <div className="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                             <h3 className="text-xl font-black italic uppercase tracking-tighter">{partnerFormData.id ? 'Editar Parceiro' : 'Cadastrar Parceiro'}</h3>
-                            <button onClick={() => setShowPartnerForm(false)}><X className="w-5 h-5 text-slate-400" /></button>
+                            <button
+                                onClick={() => setShowPartnerForm(false)}
+                                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                aria-label="Fechar"
+                            >
+                                <X className="w-5 h-5 text-slate-400" />
+                            </button>
                         </div>
                         <div className="p-8 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
