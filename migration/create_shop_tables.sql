@@ -31,13 +31,38 @@ ALTER TABLE public.partners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_offers ENABLE ROW LEVEL SECURITY;
 
 -- Policies for partners
+DROP POLICY IF EXISTS "Allow public read access to partners" ON public.partners;
 CREATE POLICY "Allow public read access to partners" ON public.partners FOR SELECT TO public USING (true);
+
+DROP POLICY IF EXISTS "Allow service_role full access to partners" ON public.partners;
 CREATE POLICY "Allow service_role full access to partners" ON public.partners FOR ALL TO service_role USING (true);
 
 -- Policies for partner_offers
+DROP POLICY IF EXISTS "Allow public read access to partner_offers" ON public.partner_offers;
 CREATE POLICY "Allow public read access to partner_offers" ON public.partner_offers FOR SELECT TO public USING (true);
+
+DROP POLICY IF EXISTS "Allow service_role full access to partner_offers" ON public.partner_offers;
 CREATE POLICY "Allow service_role full access to partner_offers" ON public.partner_offers FOR ALL TO service_role USING (true);
 
 -- Add to real-time (optional but helpful)
-ALTER PUBLICATION supabase_realtime ADD TABLE public.partners;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.partner_offers;
+-- Note: ALTER PUBLICATION doesn't have IF NOT EXISTS for tables, so we use a safe block if needed or just handle manually
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'partners'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.partners;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'partner_offers'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.partner_offers;
+    END IF;
+END $$;

@@ -121,29 +121,21 @@ export async function uploadAdImage(formData: FormData) {
         let publicUrl = '';
         let wasConverted = false;
 
-        // 2. Format Handling & Conversion
-        const supportedDirect = ['.svg', '.webp'];
-        if (supportedDirect.includes(extension)) {
-            finalPath = path.join(UPLOAD_DIR, `${fileName}${extension}`);
-            await fs.writeFile(finalPath, buffer);
-            publicUrl = `/ads/${fileName}${extension}`;
-        } else {
-            // Automatic Conversion to WebP (Cleaner and more compatible than SVG-wrapping)
-            const webpBuffer = await sharp(buffer)
-                .webp({ quality: 90 })
-                .toBuffer();
+        // 2. Format Handling & Conversion - FORCING PNG FOR MAXIMUM COMPATIBILITY
+        const pngBuffer = await sharp(buffer)
+            .png()
+            .toBuffer();
 
-            finalPath = path.join(UPLOAD_DIR, `${fileName}.webp`);
-            await fs.writeFile(finalPath, webpBuffer);
-            publicUrl = `/ads/${fileName}.webp`;
-            wasConverted = true;
-        }
+        finalPath = path.join(UPLOAD_DIR, `${fileName}.png`);
+        await fs.writeFile(finalPath, pngBuffer);
+        publicUrl = `/ads/${fileName}.png`;
+        wasConverted = true;
 
         return {
             success: true,
             url: publicUrl,
             wasConverted,
-            message: wasConverted ? `Imagem (${deviceType}) convertida automaticamente para SVG.` : `Upload (${deviceType}) concluído.`
+            message: `Upload (${deviceType}) concluído e convertido para PNG para compatibilidade.`
         };
 
     } catch (err: any) {
