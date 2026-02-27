@@ -142,7 +142,7 @@ export default function AdminShopPage() {
                 <div className="flex gap-3">
                     <button
                         onClick={() => {
-                            setTab('partners');
+                            setActiveTab('partners');
                             setPartnerFormData({ name: '', description: '', is_active: true, category: 'Varejo' });
                             setShowPartnerForm(true);
                         }}
