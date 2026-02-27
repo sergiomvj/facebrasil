@@ -120,9 +120,11 @@ const Navbar: React.FC = () => {
             </button>
 
             <SignedIn>
-              <Link href="/gamification">
-                <XPHUD />
-              </Link>
+              <div className="hidden md:block">
+                <Link href="/gamification">
+                  <XPHUD />
+                </Link>
+              </div>
             </SignedIn>
 
             <button
