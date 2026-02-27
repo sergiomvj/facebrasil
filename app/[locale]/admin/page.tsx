@@ -40,75 +40,47 @@ export default function AdminDashboard() {
         setLoading(true);
         console.log('[Dashboard] Fetching data...');
 
-        // Fetch article stats
-        const { data: articles, error: articlesError } = await supabase
-            .from('articles')
-            .select('id, status, views');
+        try {
+            // Fetch total, published, and draft counts correctly (handling > 1000 items)
+            const [
+                { count: totalCount },
+                { count: publishedCount },
+                { count: draftCount },
+                { data: viewsData },
+                { data: videos },
+                { data: categories },
+                { data: recent }
+            ] = await Promise.all([
+                supabase.from('articles').select('*', { count: 'exact', head: true }),
+                supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'PUBLISHED'),
+                supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'DRAFT'),
+                supabase.from('articles').select('views'),
+                supabase.from('user_video_reports').select('id').eq('status', 'PENDING'),
+                supabase.from('categories').select('id'),
+                supabase.from('articles').select(`
+                    id, title, slug, status, created_at,
+                    author:profiles(name)
+                `).order('created_at', { ascending: false }).limit(5)
+            ]);
 
-        if (articlesError) {
-            console.error('[Dashboard] Error fetching articles:', articlesError);
-        } else {
-            console.log('[Dashboard] Articles fetched:', articles?.length || 0);
+            const totalViews = viewsData?.reduce((sum, a) => sum + (a.views || 0), 0) || 0;
+
+            const finalStats = {
+                totalArticles: totalCount || 0,
+                publishedArticles: publishedCount || 0,
+                draftArticles: draftCount || 0,
+                totalViews,
+                pendingVideos: videos?.length || 0,
+                activeCategories: categories?.length || 0,
+            };
+
+            setStats(finalStats);
+            setRecentArticles((recent as unknown as RecentArticle[]) || []);
+        } catch (error) {
+            console.error('[Dashboard] Error fetching dashboard data:', error);
+        } finally {
+            setLoading(false);
         }
-
-        const totalArticles = articles?.length || 0;
-        const publishedArticles = articles?.filter(a => a.status === 'PUBLISHED').length || 0;
-        const draftArticles = articles?.filter(a => a.status === 'DRAFT').length || 0;
-        const totalViews = articles?.reduce((sum, a) => sum + (a.views || 0), 0) || 0;
-
-        // Fetch pending videos
-        const { data: videos, error: videosError } = await supabase
-            .from('user_video_reports')
-            .select('id')
-            .eq('status', 'PENDING');
-
-        if (videosError) {
-            console.error('[Dashboard] Error fetching videos:', videosError);
-        }
-
-        const pendingVideos = videos?.length || 0;
-
-        // Fetch categories
-        const { data: categories, error: categoriesError } = await supabase
-            .from('categories')
-            .select('id');
-
-        if (categoriesError) {
-            console.error('[Dashboard] Error fetching categories:', categoriesError);
-        }
-
-        const activeCategories = categories?.length || 0;
-
-        // Fetch recent articles
-        const { data: recent, error: recentError } = await supabase
-            .from('articles')
-            .select(`
-        id, title, slug, status, created_at,
-        author:profiles(name)
-      `)
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-        if (recentError) {
-            console.error('[Dashboard] Error fetching recent articles:', recentError);
-        }
-
-        const finalStats = {
-            totalArticles,
-            publishedArticles,
-            draftArticles,
-            totalViews,
-            pendingVideos,
-            activeCategories,
-        };
-
-        console.log('[Dashboard] Final stats:', finalStats);
-
-        setStats(finalStats);
-
-
-        setRecentArticles((recent as unknown as RecentArticle[]) || []);
-        setLoading(false);
     }
 
     useEffect(() => {
@@ -202,6 +174,29 @@ export default function AdminDashboard() {
                 })}
             </div>
 
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Link
+                    href="/admin/editor"
+                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group"
+                >
+                    <FileText className="w-12 h-12 text-primary mb-4" />
+                    <h3 className="text-xl font-black dark:text-white text-gray-900 mb-2">Novo Artigo</h3>
+                    <p className="dark:text-slate-400 text-gray-600">Criar um novo artigo ou editorial</p>
+                </Link>
+
+                <Link
+                    href="/admin/video-reports"
+                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group"
+                >
+                    <Video className="w-12 h-12 text-primary mb-4" />
+                    <h3 className="text-xl font-black dark:text-white text-gray-900 mb-2">Moderar Vídeos</h3>
+                    <p className="dark:text-slate-400 text-gray-600">
+                        {stats.pendingVideos} vídeo{stats.pendingVideos !== 1 ? 's' : ''} aguardando aprovação
+                    </p>
+                </Link>
+            </div>
+
             {/* Recent Activity */}
             <div className="dark:bg-slate-900 bg-white rounded-xl border dark:border-white/10 border-gray-200 overflow-hidden">
                 <div className="p-6 border-b dark:border-white/10 border-gray-200">
@@ -228,7 +223,7 @@ export default function AdminDashboard() {
                                     : 'bg-amber-500/10 text-amber-500'
                                     }`}
                             >
-                                {article.status}
+                                {article.status === 'PUBLISHED' ? 'PUBLICADO' : 'RASCUNHO'}
                             </span>
                         </Link>
                     ))}
@@ -238,29 +233,6 @@ export default function AdminDashboard() {
                         </div>
                     )}
                 </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Link
-                    href="/admin/editor"
-                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group"
-                >
-                    <FileText className="w-12 h-12 text-primary mb-4" />
-                    <h3 className="text-xl font-black dark:text-white text-gray-900 mb-2">Novo Artigo</h3>
-                    <p className="dark:text-slate-400 text-gray-600">Criar um novo artigo ou editorial</p>
-                </Link>
-
-                <Link
-                    href="/admin/video-reports"
-                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group"
-                >
-                    <Video className="w-12 h-12 text-primary mb-4" />
-                    <h3 className="text-xl font-black dark:text-white text-gray-900 mb-2">Moderar Vídeos</h3>
-                    <p className="dark:text-slate-400 text-gray-600">
-                        {stats.pendingVideos} vídeo{stats.pendingVideos !== 1 ? 's' : ''} aguardando aprovação
-                    </p>
-                </Link>
             </div>
         </div>
     );

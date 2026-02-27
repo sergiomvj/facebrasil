@@ -18,7 +18,9 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const displayName = profile?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuário';
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -137,8 +139,12 @@ const Navbar: React.FC = () => {
             <SignedIn>
               <div className="relative group">
                 <button className="flex items-center gap-2 p-1.5 rounded-full dark:hover:bg-slate-800 hover:bg-gray-100 transition-all">
-                  <div className="size-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary">
-                    <UserIcon className="w-5 h-5" />
+                  <div className="size-8 rounded-full bg-slate-800 border border-primary/30 overflow-hidden flex items-center justify-center text-primary">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-5 h-5" />
+                    )}
                   </div>
                 </button>
 
@@ -146,12 +152,16 @@ const Navbar: React.FC = () => {
                 <div className="absolute top-full right-0 mt-2 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4">
                     <div className="flex items-center gap-3 mb-4 pb-4 border-b dark:border-white/5 border-gray-100">
-                      <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                        <UserIcon className="w-6 h-6" />
+                      <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                        ) : (
+                          <UserIcon className="w-6 h-6" />
+                        )}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold dark:text-white text-gray-900 truncate">
-                          {user?.email?.split('@')[0]}
+                          {displayName}
                         </p>
                         <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                       </div>
