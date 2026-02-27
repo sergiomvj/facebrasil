@@ -17,7 +17,8 @@ import {
     X,
     ChevronLeft,
     Calendar,
-    Users
+    Users,
+    Trophy
 } from 'lucide-react';
 
 interface NavItem {
@@ -38,11 +39,13 @@ const navItems: NavItem[] = [
     { name: 'Hero Diário', href: '/admin/daily-hero', icon: Star },
     { name: 'Anúncios', href: '/admin/ads', icon: DollarSign },
     { name: 'Páginas', href: '/admin/pages', icon: FileText },
+    { name: 'Gamificação', href: '/admin/gamification', icon: Trophy },
     { name: 'Configurações', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminSidebar() {
     const pathname = usePathname();
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -121,7 +124,7 @@ export default function AdminSidebar() {
                     </nav>
 
                     {/* Footer */}
-                    <div className="p-4 border-t dark:border-white/10 border-gray-200">
+                    <div className="p-4 border-t dark:border-white/10 border-gray-200 space-y-2">
                         <Link
                             href="/"
                             className="flex items-center gap-3 px-4 py-3 rounded-lg dark:text-slate-400 text-gray-600 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors"
@@ -131,6 +134,25 @@ export default function AdminSidebar() {
                             </svg>
                             {!isCollapsed && <span className="font-medium">Voltar ao Site</span>}
                         </Link>
+
+                        {/* User Profile Section */}
+                        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-white/5 ${isCollapsed ? 'justify-center p-2' : ''}`}>
+                            <div className="size-8 rounded-full bg-slate-800 shrink-0 overflow-hidden border border-primary/30 flex items-center justify-center">
+                                {user?.user_metadata?.avatar_url ? (
+                                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <Users className="w-4 h-4 text-primary" />
+                                )}
+                            </div>
+                            {!isCollapsed && (
+                                <div className="min-w-0">
+                                    <p className="text-xs font-black dark:text-white text-gray-900 truncate uppercase tracking-tighter italic">
+                                        {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 font-bold truncate">Administrador</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </aside>

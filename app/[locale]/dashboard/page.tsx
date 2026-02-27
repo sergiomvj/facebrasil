@@ -263,9 +263,12 @@ export default function DashboardPage() {
                                         ></div>
                                     </div>
                                 </div>
-                                <button className="w-full py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20">
+                                <Link
+                                    href="/pt/gamification"
+                                    className="w-full py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 text-center block"
+                                >
                                     Ver Todos os Desafios
-                                </button>
+                                </Link>
                             </div>
                         </div>
 

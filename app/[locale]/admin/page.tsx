@@ -151,6 +151,37 @@ export default function AdminDashboard() {
                 <p className="dark:text-slate-400 text-gray-600">Visão geral do seu conteúdo</p>
             </div>
 
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Link
+                    href="/admin/editor"
+                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group lg:flex lg:items-center lg:gap-8 hover:scale-[1.01] active:scale-[0.99]"
+                >
+                    <div className="p-4 bg-primary/10 rounded-2xl group-hover:bg-primary transition-colors">
+                        <FileText className="w-10 h-10 text-primary group-hover:text-white" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black dark:text-white text-gray-900 mb-1">Novo Artigo</h3>
+                        <p className="dark:text-slate-400 text-gray-600 text-sm">Criar um novo artigo ou editorial para o portal</p>
+                    </div>
+                </Link>
+
+                <Link
+                    href="/admin/video-reports"
+                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group lg:flex lg:items-center lg:gap-8 hover:scale-[1.01] active:scale-[0.99]"
+                >
+                    <div className="p-4 bg-primary/10 rounded-2xl group-hover:bg-primary transition-colors">
+                        <Video className="w-10 h-10 text-primary group-hover:text-white" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black dark:text-white text-gray-900 mb-1">Moderar Vídeos</h3>
+                        <p className="dark:text-slate-400 text-gray-600 text-sm">
+                            {stats.pendingVideos} vídeo{stats.pendingVideos !== 1 ? 's' : ''} aguardando aprovação
+                        </p>
+                    </div>
+                </Link>
+            </div>
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {statCards.map((card) => {
@@ -172,29 +203,6 @@ export default function AdminDashboard() {
                         </div>
                     );
                 })}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Link
-                    href="/admin/editor"
-                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group"
-                >
-                    <FileText className="w-12 h-12 text-primary mb-4" />
-                    <h3 className="text-xl font-black dark:text-white text-gray-900 mb-2">Novo Artigo</h3>
-                    <p className="dark:text-slate-400 text-gray-600">Criar um novo artigo ou editorial</p>
-                </Link>
-
-                <Link
-                    href="/admin/video-reports"
-                    className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group"
-                >
-                    <Video className="w-12 h-12 text-primary mb-4" />
-                    <h3 className="text-xl font-black dark:text-white text-gray-900 mb-2">Moderar Vídeos</h3>
-                    <p className="dark:text-slate-400 text-gray-600">
-                        {stats.pendingVideos} vídeo{stats.pendingVideos !== 1 ? 's' : ''} aguardando aprovação
-                    </p>
-                </Link>
             </div>
 
             {/* Recent Activity */}

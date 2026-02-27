@@ -28,6 +28,7 @@ export default function CategoriesPage() {
         if (error) {
             console.error('Error fetching categories:', error);
         } else if (data) {
+            console.log('[Categories] Fetched:', data.length, 'items');
             setCategories(buildCategoryTree(data as Category[]));
         }
         setLoading(false);

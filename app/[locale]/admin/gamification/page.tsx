@@ -1,192 +1,274 @@
+// @ts-nocheck
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import XPHUD from '@/components/XPHUD';
-import AchievementsPanel from '@/components/AchievementsPanel';
-import { useXP } from '@/hooks/useXP';
-import { 
-  Trophy, 
-  Target, 
-  Flame, 
-  Crown,
-  Gamepad2,
-  BarChart3
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import {
+  Plus, Trophy, Star, Target, Gift, Edit2, Trash2,
+  Save, X, Loader2, CheckCircle2, AlertCircle
 } from 'lucide-react';
 
-export default function GamificationPage() {
-  const { data: xpData, loading: xpLoading } = useXP();
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  points_reward: number;
+  facets_reward: number;
+  icon: string;
+  type: 'reading' | 'sharing' | 'engagement' | 'special';
+  target_value: number;
+  is_active: boolean;
+}
+
+export default function AdminGamificationPage() {
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentChallenge, setCurrentChallenge] = useState<Partial<Challenge>>({});
+  const [saving, setSaving] = useState(false);
+
+  async function fetchChallenges() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) console.error('Error fetching challenges:', error);
+    else setChallenges(data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    const payload = {
+      title: currentChallenge.title,
+      description: currentChallenge.description,
+      points_reward: currentChallenge.points_reward || 0,
+      facets_reward: currentChallenge.facets_reward || 0,
+      icon: currentChallenge.icon || 'Star',
+      type: currentChallenge.type || 'reading',
+      target_value: currentChallenge.target_value || 1,
+      is_active: currentChallenge.is_active ?? true
+    };
+
+    if (currentChallenge.id) {
+      const { error: err } = await supabase
+        .from('challenges')
+        .update(payload)
+        .eq('id', currentChallenge.id);
+      if (err) alert('Erro ao salvar desafio: ' + err.message);
+    } else {
+      const { error: err } = await supabase
+        .from('challenges')
+        .insert([payload]);
+      if (err) alert('Erro ao salvar desafio: ' + err.message);
+    }
+
+    setIsEditing(false);
+    setCurrentChallenge({});
+    fetchChallenges();
+    setSaving(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este desafio?')) return;
+    const { error } = await supabase.from('challenges').delete().eq('id', id);
+    if (error) alert(error.message);
+    else fetchChallenges();
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-8 p-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
-            <Gamepad2 className="w-8 h-8 text-primary" />
-            Gamificação
-          </h1>
-          <p className="text-slate-400">Acompanhe seu progresso, conquistas e nível</p>
+          <h1 className="text-3xl font-black dark:text-white text-gray-900 mb-1 uppercase italic tracking-tighter">Sistema de Gamificação</h1>
+          <p className="text-slate-500 text-sm font-medium">Gerencie os desafios, recompensas e estímulos para os usuários.</p>
         </div>
-        
-        {/* XP HUD Preview */}
-        <div className="bg-slate-900 rounded-2xl p-4 border border-white/5">
-          <p className="text-xs text-slate-500 mb-2">Preview do seu status</p>
-          <XPHUD />
-        </div>
+        <button
+          onClick={() => { setCurrentChallenge({ is_active: true, type: 'reading', icon: 'Star' }); setIsEditing(true); }}
+          className="flex items-center gap-2 bg-primary text-slate-900 px-6 py-3 rounded-xl font-black uppercase text-sm shadow-lg hover:shadow-primary/20 transition-all hover:scale-[1.02]"
+        >
+          <Plus className="w-5 h-5" /> Novo Desafio
+        </button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-2xl p-6 border border-primary/20"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/20 rounded-xl">
-              <Crown className="w-8 h-8 text-primary" />
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm">Nível Atual</p>
-              <p className="text-3xl font-black text-white">
-                {xpLoading ? '...' : xpData?.level || 1}
-              </p>
-            </div>
-          </div>
-        </motion.div>
+      {isEditing && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-white/10 p-8 shadow-2xl animate-in fade-in zoom-in duration-200 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-500/20"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-yellow-500/20 rounded-xl">
-              <Trophy className="w-8 h-8 text-yellow-400" />
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm">XP Total</p>
-              <p className="text-3xl font-black text-white">
-                {xpLoading ? '...' : (xpData?.xp || 0).toLocaleString()}
-              </p>
-            </div>
+          <div className="flex justify-between items-center mb-8 relative">
+            <h2 className="text-2xl font-black dark:text-white uppercase italic tracking-tighter flex items-center gap-3">
+              <Trophy className="text-primary" />
+              {currentChallenge.id ? 'Editar Desafio' : 'Novo Desafio'}
+            </h2>
+            <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+              <X className="w-6 h-6 text-slate-500" />
+            </button>
           </div>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-500/20"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-500/20 rounded-xl">
-              <Target className="w-8 h-8 text-green-400" />
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm">Progresso</p>
-              <p className="text-3xl font-black text-white">
-                {xpLoading ? '...' : `${xpData?.progress || 0}%`}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Progress to Next Level */}
-      {!xpLoading && xpData && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-slate-900 rounded-2xl p-6 border border-white/5"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Flame className="w-6 h-6 text-orange-400" />
+          <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+            <div className="space-y-6">
               <div>
-                <h3 className="font-bold text-white">Progresso para o Próximo Nível</h3>
-                <p className="text-sm text-slate-400">
-                  {xpData.xpForNextLevel - xpData.xpForCurrentLevel} XP restantes para o nível {xpData.level + 1}
-                </p>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Título do Desafio</label>
+                <input
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-bold focus:border-primary outline-none transition-all"
+                  value={currentChallenge.title || ''}
+                  onChange={e => setCurrentChallenge({ ...currentChallenge, title: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Descrição</label>
+                <textarea
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm focus:border-primary outline-none transition-all min-h-[100px] resize-none"
+                  value={currentChallenge.description || ''}
+                  onChange={e => setCurrentChallenge({ ...currentChallenge, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Icone (Lucide Name)</label>
+                  <input
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-mono focus:border-primary outline-none"
+                    value={currentChallenge.icon || ''}
+                    onChange={e => setCurrentChallenge({ ...currentChallenge, icon: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Tipo</label>
+                  <select
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-bold focus:border-primary outline-none"
+                    value={currentChallenge.type || 'reading'}
+                    onChange={e => setCurrentChallenge({ ...currentChallenge, type: e.target.value as any })}
+                  >
+                    <option value="reading">Leitura</option>
+                    <option value="sharing">Compartilhamento</option>
+                    <option value="engagement">Engajamento</option>
+                    <option value="special">Especial</option>
+                  </select>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-2xl font-black text-white">{xpData.level}</span>
-              <span className="text-slate-500 mx-2">→</span>
-              <span className="text-2xl font-black text-primary">{xpData.level + 1}</span>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">XP (Pontos)</label>
+                  <input
+                    type="number"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-bold focus:border-primary outline-none"
+                    value={currentChallenge.points_reward || 0}
+                    onChange={e => setCurrentChallenge({ ...currentChallenge, points_reward: parseInt(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Facetas ($FC)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-bold focus:border-primary outline-none"
+                    value={currentChallenge.facets_reward || 0}
+                    onChange={e => setCurrentChallenge({ ...currentChallenge, facets_reward: parseFloat(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Valor Alvo (Meta)</label>
+                <input
+                  type="number"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-bold focus:border-primary outline-none"
+                  value={currentChallenge.target_value || 1}
+                  onChange={e => setCurrentChallenge({ ...currentChallenge, target_value: parseInt(e.target.value) })}
+                />
+              </div>
+              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-gray-200 dark:border-white/10 mt-8">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={currentChallenge.is_active}
+                  onChange={e => setCurrentChallenge({ ...currentChallenge, is_active: e.target.checked })}
+                  className="w-5 h-5 accent-primary cursor-pointer"
+                />
+                <label htmlFor="is_active" className="text-sm font-bold cursor-pointer">Desafio Ativo</label>
+              </div>
             </div>
-          </div>
-          
-          <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${xpData.progress}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-primary via-purple-500 to-orange-500 rounded-full"
-            />
-          </div>
-          
-          <div className="flex justify-between mt-2 text-sm text-slate-500">
-            <span>{xpData.xpForCurrentLevel} XP</span>
-            <span>{xpData.xpForNextLevel} XP</span>
-          </div>
-        </motion.div>
+
+            <div className="md:col-span-2 flex justify-end gap-4 pt-8 border-t border-gray-200 dark:border-white/5">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="px-8 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all font-black uppercase text-xs"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="bg-green-500 hover:bg-green-600 text-white px-10 py-3 rounded-xl font-black uppercase text-sm shadow-xl shadow-green-500/20 transition-all flex items-center gap-2"
+              >
+                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                Salvar Desafio
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      {/* How to Earn XP */}
-      <div className="bg-slate-900 rounded-2xl p-6 border border-white/5">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-primary" />
-          Como Ganhar XP
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { action: 'Ler artigo', xp: 50, icon: '📖', desc: 'Por cada artigo lido (15s+)' },
-            { action: 'Login diário', xp: 20, icon: '📅', desc: 'Uma vez por dia' },
-            { action: 'Compartilhar', xp: 30, icon: '📤', desc: 'Cada compartilhamento' },
-            { action: 'Clicar em anúncio', xp: 30, icon: '🎯', desc: 'Por clique válido' },
-            { action: 'Comentar', xp: 15, icon: '💬', desc: 'Por comentário' },
-            { action: 'Curtir', xp: 5, icon: '❤️', desc: 'Por curtida' },
-            { action: 'Ver anúncio', xp: 1, icon: '👁️', desc: 'Por visualização' },
-            { action: 'Conquistas', xp: '50-500', icon: '🏆', desc: 'Por badge obtido' }
-          ].map((item, index) => (
-            <motion.div
-              key={item.action}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              className="p-4 bg-slate-800/50 rounded-xl hover:bg-slate-800 transition-colors"
-            >
-              <div className="text-2xl mb-2">{item.icon}</div>
-              <p className="font-medium text-white">{item.action}</p>
-              <p className="text-sm text-primary font-bold">+{item.xp} XP</p>
-              <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          <div className="col-span-full py-20 text-center animate-pulse text-slate-500 font-bold uppercase tracking-widest">
+            Carregando desafios...
+          </div>
+        ) : challenges.length === 0 ? (
+          <div className="col-span-full py-20 text-center border-2 border-dashed border-gray-200 dark:border-white/5 rounded-2xl text-slate-500 font-medium font-bold italic">
+            Nenhum desafio encontrado. Comece criando um.
+          </div>
+        ) : (
+          challenges.map(ch => (
+            <div key={ch.id} className={`bg-white dark:bg-slate-900 rounded-2xl border ${ch.is_active ? 'border-gray-200 dark:border-white/10' : 'border-red-500/20 opacity-60'} p-6 group transition-all hover:shadow-2xl`}>
+              <div className="flex items-start justify-between mb-6">
+                <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                  <Target className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <button onClick={() => { setCurrentChallenge(ch); setIsEditing(true); }} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Edit2 className="w-4 h-4" /></button>
+                  <button onClick={() => handleDelete(ch.id)} className="p-2 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400 transition-all"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+              <h3 className="text-xl font-black mb-2 uppercase italic tracking-tighter truncate">{ch.title}</h3>
+              <p className="text-sm text-slate-500 mb-6 line-clamp-2 min-h-[40px] leading-relaxed font-medium">{ch.description}</p>
 
-      {/* Achievements Panel */}
-      <div className="bg-slate-900 rounded-2xl p-6 border border-white/5">
-        <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-400" />
-          Conquistas
-        </h3>
-        <AchievementsPanel />
-      </div>
+              <div className="grid grid-cols-2 gap-3 pb-6 border-b border-gray-200 dark:border-white/5 mb-6">
+                <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-gray-200 dark:border-white/5">
+                  <div className="text-[10px] font-black uppercase text-slate-500 mb-1">XP</div>
+                  <div className="text-lg font-black text-primary">+{ch.points_reward}</div>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-gray-200 dark:border-white/5">
+                  <div className="text-[10px] font-black uppercase text-slate-500 mb-1">Facetas</div>
+                  <div className="text-lg font-black text-accent-yellow">+{ch.facets_reward}</div>
+                </div>
+              </div>
 
-      {/* Leaderboard Preview */}
-      <div className="bg-slate-900 rounded-2xl p-6 border border-white/5">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Crown className="w-5 h-5 text-yellow-400" />
-          Top Leitores
-        </h3>
-        <p className="text-slate-500 text-sm">
-          Em breve: Ranking dos leitores mais engajados do portal!
-        </p>
+              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className={`px-2 py-1 rounded ${ch.type === 'reading' ? 'bg-blue-500/10 text-blue-500' :
+                  ch.type === 'sharing' ? 'bg-purple-500/10 text-purple-500' :
+                    ch.type === 'engagement' ? 'bg-orange-500/10 text-orange-500' :
+                      'bg-green-500/10 text-green-500'
+                  }`}>
+                  {ch.type}
+                </span>
+                <span className="text-slate-500">Meta: {ch.target_value} {ch.type === 'reading' ? 'Artigos' : 'Ações'}</span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
