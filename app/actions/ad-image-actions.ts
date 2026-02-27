@@ -122,16 +122,20 @@ export async function uploadAdImage(formData: FormData) {
         let wasConverted = false;
 
         // 2. Format Handling & Conversion
-        if (extension === '.svg' || extension === '.webp') {
+        const supportedDirect = ['.svg', '.webp'];
+        if (supportedDirect.includes(extension)) {
             finalPath = path.join(UPLOAD_DIR, `${fileName}${extension}`);
             await fs.writeFile(finalPath, buffer);
             publicUrl = `/ads/${fileName}${extension}`;
         } else {
-            // Automatic Conversion with Notification Flag
-            const svgContent = await convertToSvgWrapper(buffer, metadata.width as number, metadata.height as number);
-            finalPath = path.join(UPLOAD_DIR, `${fileName}.svg`);
-            await fs.writeFile(finalPath, svgContent);
-            publicUrl = `/ads/${fileName}.svg`;
+            // Automatic Conversion to WebP (Cleaner and more compatible than SVG-wrapping)
+            const webpBuffer = await sharp(buffer)
+                .webp({ quality: 90 })
+                .toBuffer();
+
+            finalPath = path.join(UPLOAD_DIR, `${fileName}.webp`);
+            await fs.writeFile(finalPath, webpBuffer);
+            publicUrl = `/ads/${fileName}.webp`;
             wasConverted = true;
         }
 
