@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
-import { Search, Sun, Moon, X, Trophy, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
+import { Search, Sun, Moon, X, Trophy, LayoutDashboard, LogOut, User as UserIcon, ChevronRight } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 import XPHUD from '@/components/XPHUD';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -15,6 +15,8 @@ const Navbar: React.FC = () => {
   const t = useTranslations('Navbar');
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
@@ -26,9 +28,22 @@ const Navbar: React.FC = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isProfileOpen || isMobileMenuOpen) {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.profile-menu-container') && !target.closest('.mobile-menu-container')) {
+          setIsProfileOpen(false);
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileOpen, isMobileMenuOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,12 +72,28 @@ const Navbar: React.FC = () => {
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-header h-16' : 'bg-transparent h-20'}`}>
         <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-10">
-            <Link href="/" className="flex items-center gap-3 cursor-pointer group">
-              <div className="size-8 text-primary group-hover:scale-110 transition-transform">
-                <LogoSVG />
-              </div>
-              <h2 className="text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
-            </Link>
+            <div className="flex items-center gap-4 lg:gap-0">
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-lg dark:hover:bg-slate-800 hover:bg-gray-100 transition-all mobile-menu-container"
+              >
+                {isMobileMenuOpen ? <X className="size-6 text-primary" /> : (
+                  <div className="flex flex-col gap-1.5 w-6">
+                    <div className="h-0.5 w-full bg-slate-400 rounded-full" />
+                    <div className="h-0.5 w-full bg-slate-400 rounded-full" />
+                    <div className="h-0.5 w-full bg-slate-400 rounded-full" />
+                  </div>
+                )}
+              </button>
+
+              <Link href="/" className="flex items-center gap-3 cursor-pointer group">
+                <div className="size-8 text-primary group-hover:scale-110 transition-transform">
+                  <LogoSVG />
+                </div>
+                <h2 className="text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
+              </Link>
+            </div>
             <nav className="hidden lg:flex items-center gap-8">
               {navItems.map((item) => (
                 <Link key={item.key} className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors" href={item.href}>
@@ -135,14 +166,17 @@ const Navbar: React.FC = () => {
             </button>
 
             <SignedOut>
-              <Link href="/login" className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-primary/20">
+              <Link href="/login" className="bg-primary hover:bg-primary-dark text-white px-4 md:px-6 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-primary/20 text-sm md:text-base">
                 Entrar
               </Link>
             </SignedOut>
 
             <SignedIn>
-              <div className="relative group">
-                <button className="flex items-center gap-2 p-1.5 rounded-full dark:hover:bg-slate-800 hover:bg-gray-100 transition-all">
+              <div className="relative profile-menu-container">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 p-1.5 rounded-full dark:hover:bg-slate-800 hover:bg-gray-100 transition-all border border-transparent hover:border-primary/20"
+                >
                   <div className="size-8 rounded-full bg-slate-800 border border-primary/30 overflow-hidden flex items-center justify-center text-primary">
                     {avatarUrl ? (
                       <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
@@ -153,7 +187,7 @@ const Navbar: React.FC = () => {
                 </button>
 
                 {/* User Info Tooltip/Popup */}
-                <div className="absolute top-full right-0 mt-2 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className={`absolute top-full right-0 mt-2 w-64 transition-all duration-200 z-50 ${isProfileOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
                   <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4">
                     <div className="flex items-center gap-3 mb-4 pb-4 border-b dark:border-white/5 border-gray-100">
                       <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
@@ -172,16 +206,19 @@ const Navbar: React.FC = () => {
                     </div>
 
                     <div className="space-y-1">
-                      <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors">
+                      <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors" onClick={() => setIsProfileOpen(false)}>
                         <LayoutDashboard className="w-4 h-4" />
                         Meu Dashboard
                       </Link>
-                      <Link href="/admin" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors">
+                      <Link href="/admin" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors" onClick={() => setIsProfileOpen(false)}>
                         <LogoSVG className="w-4 h-4 text-primary" />
                         Painel Admin
                       </Link>
                       <button
-                        onClick={handleSignOut}
+                        onClick={() => {
+                          handleSignOut();
+                          setIsProfileOpen(false);
+                        }}
                         className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
@@ -195,6 +232,75 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {/* Mobile Sidebar Menu */}
+      <div className={`fixed inset-0 z-[60] lg:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+        <div className={`absolute top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="p-6 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+              <div className="size-8 text-primary">
+                <LogoSVG />
+              </div>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-1 overflow-y-auto pr-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-4 py-3 rounded-xl text-sm font-bold dark:text-slate-300 text-gray-700 hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between"
+                >
+                  {item.label}
+                  <ChevronRight className="size-4 opacity-30" />
+                </Link>
+              ))}
+
+              <div className="my-4 h-px bg-gray-100 dark:bg-white/5" />
+
+              <Link
+                href="/gamification"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-bold dark:text-slate-300 text-gray-700 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center gap-3"
+              >
+                <Trophy className="size-5 text-amber-500" />
+                Comunidade
+              </Link>
+            </nav>
+
+            <div className="mt-auto pt-6 border-t dark:border-white/5 border-gray-100">
+              <SignedIn>
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/50">
+                  <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold dark:text-white text-gray-900 truncate">{displayName}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
+                  </div>
+                </div>
+              </SignedIn>
+              <SignedOut>
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full bg-primary hover:bg-primary-dark text-white py-4 rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-2"
+                >
+                  Entrar na Conta
+                </Link>
+              </SignedOut>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Search Overlay */}
       {isSearchOpen && (
