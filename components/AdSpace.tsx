@@ -171,13 +171,18 @@ const AdSpace: React.FC<AdSpaceProps> = ({
                         src={adImageUrl}
                         alt={activeAd.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                            // If the image fails to load (404, etc), we hide the img element to show the fallback below
+                            (e.target as HTMLImageElement).style.display = 'none';
+                        }}
                     />
-                ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-center">
-                        <h3 className="text-xl font-black text-white italic uppercase tracking-tighter mb-2">{activeAd.title}</h3>
-                        <p className="text-xs text-accent-yellow font-bold uppercase tracking-widest">Saiba Mais</p>
-                    </div>
-                )}
+                ) : null}
+
+                {/* Fallback displayed when no image or image fails */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-center -z-10">
+                    <h3 className="text-xl font-black text-white italic uppercase tracking-tighter mb-2">{activeAd.title}</h3>
+                    <p className="text-xs text-accent-yellow font-bold uppercase tracking-widest">Saiba Mais</p>
+                </div>
             </div>
 
             {/* Overlay Gradient */}

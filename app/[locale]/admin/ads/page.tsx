@@ -403,9 +403,16 @@ export default function AdManagerPage() {
                                                 <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'desktop')} disabled={isUploading} />
                                             </label>
                                         </div>
-                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner">
+                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner bg-grid-slate-800/[0.05]">
                                             {currentAd.image_url ? (
-                                                <img src={currentAd.image_url} alt="Desktop Preview" className="w-full h-full object-contain" />
+                                                <img
+                                                    src={currentAd.image_url}
+                                                    alt="Desktop Preview"
+                                                    className="w-full h-full object-contain"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/1240x150/0f172a/64748b?text=Erro+no+SVG';
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="text-center text-slate-700">
                                                     <span className="text-[9px] font-bold uppercase tracking-widest">Desktop Preview</span>
@@ -436,9 +443,16 @@ export default function AdManagerPage() {
                                                 <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'mobile')} disabled={isUploading} />
                                             </label>
                                         </div>
-                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner">
+                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner bg-grid-slate-800/[0.05]">
                                             {currentAd.mobile_image_url ? (
-                                                <img src={currentAd.mobile_image_url} alt="Mobile Preview" className="w-full h-full object-contain" />
+                                                <img
+                                                    src={currentAd.mobile_image_url}
+                                                    alt="Mobile Preview"
+                                                    className="w-full h-full object-contain"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/300x50/0f172a/64748b?text=Erro+no+SVG';
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="text-center text-slate-700">
                                                     <span className="text-[9px] font-bold uppercase tracking-widest">Mobile Preview</span>
@@ -503,9 +517,16 @@ export default function AdManagerPage() {
                             <div className="absolute top-0 left-0 w-1 h-full bg-accent-yellow opacity-40 group-hover:opacity-100 transition-opacity" />
 
                             {/* Visual Preview */}
-                            <div className="w-full lg:w-48 h-28 bg-slate-950 rounded-xl overflow-hidden border border-white/5 flex-shrink-0 relative shadow-lg">
+                            <div className="w-full lg:w-48 h-28 bg-slate-950 rounded-xl overflow-hidden border border-white/5 flex-shrink-0 relative shadow-lg bg-grid-slate-800/[0.05]">
                                 {ad.image_url ? (
-                                    <img src={ad.image_url} alt={ad.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                    <img
+                                        src={ad.image_url}
+                                        alt={ad.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://placehold.co/300x200/0f172a/ef4444?text=Falha+no+Carregamento';
+                                        }}
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-slate-950">
                                         <ImageIcon className="w-8 h-8 text-slate-800" />

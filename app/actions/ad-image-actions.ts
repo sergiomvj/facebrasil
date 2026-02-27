@@ -38,8 +38,8 @@ async function convertToSvgWrapper(buffer: Buffer, width: number, height: number
     const base64 = webpBuffer.toString('base64');
 
     return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <image href="data:image/webp;base64,${base64}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <image href="data:image/webp;base64,${base64}" xlink:href="data:image/webp;base64,${base64}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
 </svg>`.trim();
 }
 
