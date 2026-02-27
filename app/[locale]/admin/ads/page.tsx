@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Plus, Image as ImageIcon, Trash2, Edit, Save, BarChart, ExternalLink, X, Globe, MapPin, Hash, CheckCircle2 } from 'lucide-react';
 import { Ad } from '@/lib/ad-service';
 import { upsertAd, deleteAd, toggleAdStatus, fetchPublications, fetchAdPublications } from '@/app/actions/ad-actions';
+import { uploadAdImage } from '@/app/actions/ad-image-actions';
 
 type GeoMode = 'global' | 'region' | 'local';
 
@@ -21,6 +22,7 @@ export default function AdManagerPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [geoMode, setGeoMode] = useState<GeoMode>('global');
     const [selectedPubs, setSelectedPubs] = useState<string[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
 
     const [currentAd, setCurrentAd] = useState<Partial<Ad>>({
         position: 'super_hero',
@@ -51,6 +53,31 @@ export default function AdManagerPage() {
     useEffect(() => {
         void fetchData();
     }, []);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('placement', currentAd.position || 'super_hero');
+        formData.append('advertiserName', currentAd.title || 'anunciante');
+
+        try {
+            const result = await uploadAdImage(formData);
+            if (result.success) {
+                setCurrentAd(prev => ({ ...prev, image_url: result.url }));
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            alert('Falha ao enviar imagem.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     const handleSave = async () => {
         if (!currentAd.title || !currentAd.link_url || !currentAd.position) {
@@ -244,8 +271,8 @@ export default function AdManagerPage() {
                                             key={pub.id}
                                             onClick={() => togglePub(pub.id)}
                                             className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all ${selectedPubs.includes(pub.id)
-                                                    ? 'bg-accent-yellow/20 border-accent-yellow text-accent-yellow'
-                                                    : 'bg-slate-900 border-white/10 text-slate-500'
+                                                ? 'bg-accent-yellow/20 border-accent-yellow text-accent-yellow'
+                                                : 'bg-slate-900 border-white/10 text-slate-500'
                                                 }`}
                                         >
                                             <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${selectedPubs.includes(pub.id) ? 'bg-accent-yellow border-accent-yellow' : 'bg-transparent border-white/20'
@@ -329,14 +356,29 @@ export default function AdManagerPage() {
                         {/* Coluna 2: Media & Controls */}
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">URL da Imagem Banner</label>
-                                <input
-                                    type="text"
-                                    placeholder="https://..."
-                                    className="w-full bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs mb-4"
-                                    value={currentAd.image_url || ''}
-                                    onChange={e => setCurrentAd({ ...currentAd, image_url: e.target.value })}
-                                />
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem do Anúncio (SVG / WebP)</label>
+                                <div className="flex flex-col gap-3 mb-4">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="https://... ou selecione um arquivo"
+                                            className="flex-1 bg-slate-950 border border-white/10 p-3 rounded-xl text-white text-xs outline-none focus:border-accent-yellow/30"
+                                            value={currentAd.image_url || ''}
+                                            onChange={e => setCurrentAd({ ...currentAd, image_url: e.target.value })}
+                                        />
+                                        <label className={`cursor-pointer flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-all border border-white/10 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                            {isUploading ? (
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <ImageIcon className="w-4 h-4 text-accent-yellow" />
+                                            )}
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={isUploading} />
+                                        </label>
+                                    </div>
+                                    <p className="text-[9px] text-slate-600 italic">
+                                        * Formatos: SVG, WebP, PNG, JPG. PNG/JPG serão convertidos para SVG auto.
+                                    </p>
+                                </div>
                                 <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-square border-dashed relative overflow-hidden group shadow-inner">
                                     {currentAd.image_url ? (
                                         <img src={currentAd.image_url} alt="Preview" className="w-full h-full object-cover" />
