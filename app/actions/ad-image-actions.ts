@@ -19,7 +19,7 @@ const PLACEMENT_SIZES = {
     },
     column: {
         desktop: { width: 300, height: 300 },
-        mobile: { width: 300, height: 300 }
+        mobile: { width: 300, height: 150 }
     },
     super_footer: {
         desktop: { width: 1240, height: 250 },

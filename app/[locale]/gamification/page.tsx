@@ -29,13 +29,33 @@ interface UserProgress {
     status: 'ongoing' | 'completed';
 }
 
+interface Partner {
+    id: string;
+    name: string;
+    logo_url: string;
+    category: string;
+    description: string;
+}
+
+interface Offer {
+    id: string;
+    partner_id: string;
+    title: string;
+    description: string;
+    facetas_price: number;
+    offer_type: 'product' | 'service' | 'discount';
+}
+
 export default function GamificationLandingPage() {
     const { user, profile } = useAuth();
     const [stats, setStats] = useState({ total_points: 0, facets_balance: 0, level: 1, level_name: 'Leitor Casual' });
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [userProgress, setUserProgress] = useState<Record<string, UserProgress>>({});
+    const [partners, setPartners] = useState<Partner[]>([]);
+    const [offers, setOffers] = useState<Offer[]>([]);
     const [loading, setLoading] = useState(true);
     const [converting, setConverting] = useState(false);
+    const [redeeming, setRedeeming] = useState<string | null>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -44,14 +64,20 @@ export default function GamificationLandingPage() {
                 // parallel fetch
                 const [
                     { data: challengesData },
-                    { data: reputationData }
+                    { data: reputationData },
+                    { data: partnersData },
+                    { data: offersData }
                 ] = await Promise.all([
                     supabase.from('challenges').select('*').eq('is_active', true),
-                    user ? supabase.from('user_reputation').select('*').eq('user_id', user.id).single() : Promise.resolve({ data: null })
+                    user ? supabase.from('user_reputation').select('*').eq('user_id', user.id).single() : Promise.resolve({ data: null }),
+                    supabase.from('partners').select('*').eq('is_active', true).limit(6),
+                    supabase.from('partner_offers').select('*').eq('is_active', true).limit(6)
                 ]);
 
                 if (challengesData) setChallenges(challengesData);
                 if (reputationData) setStats(reputationData);
+                if (partnersData) setPartners(partnersData);
+                if (offersData) setOffers(offersData);
 
                 if (user) {
                     const { data: progressData } = await supabase
@@ -80,7 +106,7 @@ export default function GamificationLandingPage() {
         if (!user) return;
         setConverting(true);
         try {
-            const result = await convertPointsToFacets(user.id, amount);
+            const result = await import('@/app/actions/gamification-actions').then(m => m.convertPointsToFacets(user.id, amount));
             if (result.success) {
                 setStats(prev => ({
                     ...prev,
@@ -93,6 +119,30 @@ export default function GamificationLandingPage() {
             alert(error.message);
         } finally {
             setConverting(false);
+        }
+    };
+
+    const handleRedeem = async (offer: Offer) => {
+        if (!user) {
+            alert('Faça login para resgatar ofertas!');
+            return;
+        }
+        if (stats.facets_balance < offer.facetas_price) {
+            alert('Saldo de Facetas ($FC) insuficiente!');
+            return;
+        }
+
+        setRedeeming(offer.id);
+        try {
+            const result = await import('@/app/actions/gamification-actions').then(m => m.redeemPartnerOffer(user.id, offer.id));
+            if (result.success) {
+                setStats(prev => ({ ...prev, facets_balance: result.newBalance }));
+                alert(result.message);
+            }
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setRedeeming(null);
         }
     };
 
@@ -276,24 +326,71 @@ export default function GamificationLandingPage() {
                     </motion.div>
                 </motion.div>
 
-                {/* Footer Engagement */}
+                {/* Marketplace Section */}
                 <section className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-[3rem] p-12 text-center border border-white/5 relative overflow-hidden">
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-primary/5 rounded-full blur-[120px] -mt-32"></div>
-                    <Gift className="w-16 h-16 text-primary mx-auto mb-8 animate-bounce" />
-                    <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-6">Em Breve Marketplace</h2>
-                    <p className="text-slate-400 max-w-xl mx-auto mb-10 font-bold">
-                        Estamos fechando parcerias exclusivas onde você poderá usar suas Facetas ($FC) para benefícios em restaurantes, serviços de imigração, lazer e muito mais nos EUA.
-                    </p>
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-                        <div className="px-8 py-4 bg-white/5 rounded-2xl border border-white/10 grayscale opacity-40 flex items-center gap-3">
-                            <Lock className="w-4 h-4" />
-                            <span className="text-xs font-black uppercase tracking-widest">Cupom de Desconto</span>
-                        </div>
-                        <div className="px-8 py-4 bg-white/5 rounded-2xl border border-white/10 grayscale opacity-40 flex items-center gap-3">
-                            <Lock className="w-4 h-4" />
-                            <span className="text-xs font-black uppercase tracking-widest">Ingresso VIP</span>
-                        </div>
+
+                    <div className="flex flex-col items-center mb-12">
+                        <Gift className="w-16 h-16 text-primary mb-8 animate-bounce" />
+                        <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter mb-4">Marketplace Facebrasil</h2>
+                        <p className="text-slate-400 max-w-xl mx-auto font-bold opacity-80">
+                            Use suas Facetas ($FC) para benefícios exclusivos em nossos parceiros.
+                        </p>
                     </div>
+
+                    {offers.length === 0 ? (
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                            <div className="px-8 py-4 bg-white/5 rounded-2xl border border-white/10 grayscale opacity-40 flex items-center gap-3">
+                                <Lock className="w-4 h-4" />
+                                <span className="text-xs font-black uppercase tracking-widest">Cupom de Desconto</span>
+                            </div>
+                            <div className="px-8 py-4 bg-white/5 rounded-2xl border border-white/10 grayscale opacity-40 flex items-center gap-3">
+                                <Lock className="w-4 h-4" />
+                                <span className="text-xs font-black uppercase tracking-widest">Ingresso VIP</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {offers.map(offer => {
+                                const partner = partners.find(p => p.id === offer.partner_id);
+                                return (
+                                    <div key={offer.id} className="bg-slate-950 p-8 rounded-[2rem] border border-white/5 text-left group hover:border-accent-yellow/30 transition-all flex flex-col justify-between">
+                                        <div>
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <div className="size-12 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10">
+                                                    {partner?.logo_url ? (
+                                                        <img src={partner.logo_url} alt={partner.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <Sparkles className="w-6 h-6 text-accent-yellow" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-black uppercase text-accent-yellow tracking-widest">{partner?.category || 'Parceiro'}</p>
+                                                    <h4 className="font-black text-white uppercase italic">{partner?.name || 'Facebrasil'}</h4>
+                                                </div>
+                                            </div>
+                                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">{offer.title}</h3>
+                                            <p className="text-xs text-slate-500 font-bold line-clamp-2 mb-8">{offer.description}</p>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-6 border-t border-white/5">
+                                            <div className="flex items-center gap-2">
+                                                <Coins className="w-4 h-4 text-accent-yellow" />
+                                                <span className="text-lg font-black font-mono">{offer.facetas_price} <span className="text-[10px] uppercase tracking-widest">$FC</span></span>
+                                            </div>
+                                            <button
+                                                onClick={() => handleRedeem(offer)}
+                                                disabled={redeeming === offer.id || stats.facets_balance < offer.facetas_price}
+                                                className="px-6 py-2 rounded-xl bg-accent-yellow text-slate-950 font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
+                                            >
+                                                {redeeming === offer.id ? 'Processando...' : 'Resgatar'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </section>
 
             </main>

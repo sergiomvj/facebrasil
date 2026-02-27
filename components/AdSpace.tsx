@@ -150,7 +150,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({
             sizeClasses = 'w-[300px] h-[300px] md:w-[350px] md:h-[350px]';
             break;
         case 'column':
-            sizeClasses = 'w-[300px] h-[300px]';
+            sizeClasses = 'w-[300px] aspect-[300/150] md:aspect-[300/300] h-auto md:h-[300px]';
             break;
         case 'super_footer':
             sizeClasses = 'max-w-[1240px] w-full aspect-[300/150] md:aspect-[1240/250] h-auto';

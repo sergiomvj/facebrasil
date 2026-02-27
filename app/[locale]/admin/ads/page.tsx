@@ -239,7 +239,7 @@ export default function AdManagerPage() {
                                     >
                                         <option value="super_hero">SuperHero (1240x150 / 300x50)</option>
                                         <option value="sidebar">Sidebar (350x350 / 300x300)</option>
-                                        <option value="column">Columm (300x300 / 300x300)</option>
+                                        <option value="column">Columm (300x300 / 300x150)</option>
                                         <option value="super_footer">SuperFooter (1240x250 / 300x150)</option>
                                     </select>
                                 </div>
