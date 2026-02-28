@@ -34,12 +34,18 @@ ALTER TABLE public.partner_offers ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public read access to partners" ON public.partners;
 CREATE POLICY "Allow public read access to partners" ON public.partners FOR SELECT TO public USING (true);
 
+DROP POLICY IF EXISTS "Allow authenticated full access to partners" ON public.partners;
+CREATE POLICY "Allow authenticated full access to partners" ON public.partners FOR ALL TO authenticated USING (true);
+
 DROP POLICY IF EXISTS "Allow service_role full access to partners" ON public.partners;
 CREATE POLICY "Allow service_role full access to partners" ON public.partners FOR ALL TO service_role USING (true);
 
 -- Policies for partner_offers
 DROP POLICY IF EXISTS "Allow public read access to partner_offers" ON public.partner_offers;
 CREATE POLICY "Allow public read access to partner_offers" ON public.partner_offers FOR SELECT TO public USING (true);
+
+DROP POLICY IF EXISTS "Allow authenticated full access to partner_offers" ON public.partner_offers;
+CREATE POLICY "Allow authenticated full access to partner_offers" ON public.partner_offers FOR ALL TO authenticated USING (true);
 
 DROP POLICY IF EXISTS "Allow service_role full access to partner_offers" ON public.partner_offers;
 CREATE POLICY "Allow service_role full access to partner_offers" ON public.partner_offers FOR ALL TO service_role USING (true);
