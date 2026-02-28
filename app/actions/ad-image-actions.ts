@@ -1,12 +1,8 @@
-// @ts-nocheck
 'use server';
 
 import { auth } from '@/lib/auth-server';
-import { promises as fs } from 'fs';
-import path from 'path';
 import sharp from 'sharp';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'ads');
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const PLACEMENT_SIZES = {
     super_hero: {
@@ -25,23 +21,7 @@ const PLACEMENT_SIZES = {
         desktop: { width: 1240, height: 250 },
         mobile: { width: 300, height: 150 }
     }
-};
-
-/**
- * Generic Image to SVG Converter Logic
- */
-async function convertToSvgWrapper(buffer: Buffer, width: number, height: number): Promise<string> {
-    const webpBuffer = await sharp(buffer)
-        .webp({ quality: 90 })
-        .toBuffer();
-
-    const base64 = webpBuffer.toString('base64');
-
-    return `
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <image href="data:image/webp;base64,${base64}" xlink:href="data:image/webp;base64,${base64}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
-</svg>`.trim();
-}
+} as const;
 
 /**
  * Standalone Conversion Action for the Tools section
@@ -58,17 +38,29 @@ export async function standaloneConvertImage(formData: FormData) {
         const image = sharp(buffer);
         const metadata = await image.metadata();
 
-        const svgContent = await convertToSvgWrapper(buffer, metadata.width as number, metadata.height as number);
-        const fileName = `converted-${Date.now()}.svg`;
-        const finalPath = path.join(UPLOAD_DIR, fileName);
+        const pngBuffer = await image.png().toBuffer();
+        const fileName = `converted-${Date.now()}.png`;
 
-        await fs.mkdir(UPLOAD_DIR, { recursive: true });
-        await fs.writeFile(finalPath, svgContent);
+        const supabaseAdmin = getSupabaseAdmin();
+        const { error: uploadError } = await supabaseAdmin
+            .storage
+            .from('ads')
+            .upload(fileName, pngBuffer, {
+                contentType: 'image/png',
+                upsert: true
+            });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabaseAdmin
+            .storage
+            .from('ads')
+            .getPublicUrl(fileName);
 
         return {
             success: true,
-            url: `/ads/${fileName}`,
-            info: `Convertido de ${path.extname(file.name)} para SVG (${metadata.width}x${metadata.height})`
+            url: publicUrl,
+            info: `Convertido para PNG (${metadata.width}x${metadata.height}) e salvo no Storage.`
         };
     } catch (err: any) {
         return { success: false, error: 'Erro na conversão: ' + err.message };
@@ -92,15 +84,12 @@ export async function uploadAdImage(formData: FormData) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const extension = path.extname(file.name).toLowerCase();
 
     try {
-        await fs.mkdir(UPLOAD_DIR, { recursive: true });
-
         const image = sharp(buffer);
         const metadata = await image.metadata();
 
-        const config = PLACEMENT_SIZES[placement];
+        const config = PLACEMENT_SIZES[placement as keyof typeof PLACEMENT_SIZES];
         if (!config) {
             return { success: false, error: 'Posicionamento inválido.' };
         }
@@ -116,26 +105,39 @@ export async function uploadAdImage(formData: FormData) {
         }
 
         const safeAdvertiser = advertiserName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const fileName = `${safeAdvertiser}-${placement}-${deviceType}-${Date.now()}`;
-        let finalPath = '';
-        let publicUrl = '';
-        let wasConverted = false;
+        const fileName = `${safeAdvertiser}-${placement}-${deviceType}-${Date.now()}.png`;
 
         // 2. Format Handling & Conversion - FORCING PNG FOR MAXIMUM COMPATIBILITY
-        const pngBuffer = await sharp(buffer)
+        const pngBuffer = await image
             .png()
             .toBuffer();
 
-        finalPath = path.join(UPLOAD_DIR, `${fileName}.png`);
-        await fs.writeFile(finalPath, pngBuffer);
-        publicUrl = `/ads/${fileName}.png`;
-        wasConverted = true;
+        // 3. Upload to Supabase Storage
+        const supabaseAdmin = getSupabaseAdmin();
+        const { error: uploadError } = await supabaseAdmin
+            .storage
+            .from('ads')
+            .upload(fileName, pngBuffer, {
+                contentType: 'image/png',
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('[uploadAdImage] Storage upload error:', uploadError);
+            throw new Error(`Falha ao subir imagem para o storage: ${uploadError.message}`);
+        }
+
+        // 4. Get Public URL
+        const { data: { publicUrl: storageUrl } } = supabaseAdmin
+            .storage
+            .from('ads')
+            .getPublicUrl(fileName);
 
         return {
             success: true,
-            url: publicUrl,
-            wasConverted,
-            message: `Upload (${deviceType}) concluído e convertido para PNG para compatibilidade.`
+            url: storageUrl,
+            wasConverted: true,
+            message: `Upload (${deviceType}) concluído via Supabase Storage.`
         };
 
     } catch (err: any) {
