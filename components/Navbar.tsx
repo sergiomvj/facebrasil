@@ -214,6 +214,10 @@ const Navbar: React.FC = () => {
                         <LogoSVG className="w-4 h-4 text-primary" />
                         Painel Admin
                       </Link>
+                      <Link href="/settings" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors" onClick={() => setIsProfileOpen(false)}>
+                        <UserIcon className="w-4 h-4" />
+                        Configurações
+                      </Link>
                       <button
                         onClick={() => {
                           handleSignOut();
@@ -274,18 +278,50 @@ const Navbar: React.FC = () => {
 
             <div className="mt-auto pt-6 border-t dark:border-white/5 border-gray-100">
               <SignedIn>
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/50">
-                  <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-                    ) : (
-                      <UserIcon className="w-6 h-6" />
-                    )}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/50">
+                    <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                      ) : (
+                        <UserIcon className="w-6 h-6" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold dark:text-white text-gray-900 truncate">{displayName}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold dark:text-white text-gray-900 truncate">{displayName}</p>
-                    <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-gray-50 dark:bg-slate-800/50 text-xs font-bold dark:text-slate-300 text-gray-700 hover:bg-primary/10 hover:text-primary transition-all"
+                    >
+                      <LayoutDashboard className="size-5" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-gray-50 dark:bg-slate-800/50 text-xs font-bold dark:text-slate-300 text-gray-700 hover:bg-primary/10 hover:text-primary transition-all"
+                    >
+                      <LogoSVG className="size-5" />
+                      Admin
+                    </Link>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 p-3 rounded-xl text-sm font-bold text-red-500 bg-red-500/5 border border-red-500/10 hover:bg-red-500/10 transition-all"
+                  >
+                    <LogOut className="size-4" />
+                    Sair da Conta
+                  </button>
                 </div>
               </SignedIn>
               <SignedOut>
