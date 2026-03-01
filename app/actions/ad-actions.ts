@@ -9,9 +9,12 @@ interface AdPayload {
     title: string;
     position: 'super_hero' | 'sidebar' | 'column' | 'super_footer';
     image_url?: string;
+    mobile_image_url?: string;
     link_url: string;
     is_active: boolean;
     category_id?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
     target_countries?: string[];
     target_regions?: string[];
     target_zip_codes?: string[];

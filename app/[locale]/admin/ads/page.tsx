@@ -112,6 +112,8 @@ export default function AdManagerPage() {
             position: currentAd.position,
             is_active: currentAd.is_active || false,
             category_id: currentAd.category_id || null,
+            start_date: currentAd.start_date || new Date().toISOString(),
+            end_date: currentAd.end_date || null,
             target_countries: geoMode === 'region' ? currentAd.target_countries : [],
             target_regions: geoMode === 'region' ? currentAd.target_regions : [],
             target_zip_codes: geoMode === 'local' ? currentAd.target_zip_codes : [],
@@ -275,6 +277,30 @@ export default function AdManagerPage() {
                                             <option key={cat.id} value={cat.id}>{cat.name}</option>
                                         ))}
                                     </select>
+                                </div>
+                            </div>
+
+                            {/* Date Range */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Início da Campanha</label>
+                                    <input
+                                        type="datetime-local"
+                                        className="w-full bg-slate-950 border border-white/10 p-3 rounded-xl text-white focus:border-accent-yellow/50 outline-none transition-all font-mono text-xs"
+                                        value={currentAd.start_date ? new Date(currentAd.start_date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)}
+                                        onChange={e => setCurrentAd({ ...currentAd, start_date: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                                    />
+                                    <p className="text-[9px] text-slate-600 mt-1">Padrão: agora</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Fim da Campanha</label>
+                                    <input
+                                        type="datetime-local"
+                                        className="w-full bg-slate-950 border border-white/10 p-3 rounded-xl text-white focus:border-accent-yellow/50 outline-none transition-all font-mono text-xs"
+                                        value={currentAd.end_date ? new Date(currentAd.end_date).toISOString().slice(0, 16) : ''}
+                                        onChange={e => setCurrentAd({ ...currentAd, end_date: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                                    />
+                                    <p className="text-[9px] text-slate-600 mt-1">Deixe em branco = sem expiração</p>
                                 </div>
                             </div>
 

@@ -10,6 +10,8 @@ export interface Ad {
     link_url: string;
     category_id?: string;
     is_active: boolean;
+    start_date?: string;
+    end_date?: string;
     views: number;
     clicks: number;
     curiosity_count: number;
