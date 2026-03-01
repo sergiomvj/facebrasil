@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe, Sparkles, X, BrainCircuit, Type, FileText, Languages } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe, Sparkles, X, BrainCircuit, Type, FileText, Languages, BarChart2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { deleteArticle, upsertArticle } from '@/app/actions/article-actions';
 import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
+import ArticleStatsModal from '@/components/admin/ArticleStatsModal';
 
 interface ArticleListItem {
     id: string;
@@ -38,6 +39,7 @@ export default function ArticlesListPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLanguage, setSelectedLanguage] = useState('all');
+    const [selectedStatsArticle, setSelectedStatsArticle] = useState<{ id: string; title: string } | null>(null);
 
     // AI Generation Modal State
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -473,6 +475,13 @@ export default function ArticlesListPage() {
                                         </td>
                                         <td className="p-4 text-right pr-6">
                                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                                                <button
+                                                    onClick={() => setSelectedStatsArticle({ id: post.id, title: post.title })}
+                                                    className="p-2 text-slate-400 hover:text-accent-yellow rounded-lg hover:bg-accent-yellow/10 transition-colors"
+                                                    title="Analytics"
+                                                >
+                                                    <BarChart2 className="w-4 h-4" />
+                                                </button>
                                                 <Link href={`/article/${post.slug}`} target="_blank" className="p-2 text-slate-400 hover:text-blue-400 rounded-lg hover:bg-blue-400/10 transition-colors" title="View">
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
@@ -491,6 +500,15 @@ export default function ArticlesListPage() {
                     </div>
                 )}
             </div>
+
+            {/* Article Stats Modal */}
+            {selectedStatsArticle && (
+                <ArticleStatsModal
+                    articleId={selectedStatsArticle.id}
+                    articleTitle={selectedStatsArticle.title}
+                    onClose={() => setSelectedStatsArticle(null)}
+                />
+            )}
         </>
     );
 }

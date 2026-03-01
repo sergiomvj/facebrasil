@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import AIAssistant from '@/components/AIAssistant';
 import ArticleReaderTracker from '@/components/ArticleReaderTracker';
+import ArticleTranslator from '@/components/ArticleTranslator';
 import AdSpace from '@/components/AdSpace';
 import ContentRenderer from '@/components/ContentRenderer';
 import SocialShareBar from '@/components/SocialShareBar';
@@ -101,6 +102,10 @@ export default async function ArticlePage({ params }: PageProps) {
                                 <Calendar className="w-4 h-4" />
                                 <span>{new Date(article.publishedAt).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US')}</span>
                             </div>
+                        </div>
+                        {/* Translator */}
+                        <div className="ml-auto">
+                            <ArticleTranslator articleId={article.id} />
                         </div>
                     </div>
                 </div>
