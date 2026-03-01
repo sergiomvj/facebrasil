@@ -3,14 +3,16 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ArticleCard from '@/components/ArticleCard';
 import { fetchPosts } from '@/lib/blog-service';
+import { createClient } from '@/lib/supabase/server';
 import { Newspaper, TrendingUp, Zap } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function FbrNewsPage() {
+    const supabase = await createClient();
     const [newsData, trendingData] = await Promise.all([
-        fetchPosts({ category: 'fbr-news', limit: 12 }),
-        fetchPosts({ limit: 5, sort: 'popular' })
+        fetchPosts({ category: 'fbr-news', limit: 12 }, supabase),
+        fetchPosts({ limit: 5, sort: 'popular' }, supabase)
     ]);
 
     const news = newsData.data || [];

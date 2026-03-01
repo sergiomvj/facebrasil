@@ -9,6 +9,7 @@ import EuReporterSection from '@/components/EuReporterSection';
 import EditionsSection from '@/components/EditionsSection';
 import FBRNewsSection from '@/components/FBRNewsSection';
 import { fetchPosts, fetchFeaturedPosts, fetchVideoReports, fetchMainHero } from '@/lib/blog-service';
+import { createClient } from '@/lib/supabase/server';
 import { Link } from '@/i18n/routing';
 import { TrendingUp, Clock, BookOpen } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -27,6 +28,8 @@ export default async function Home({
   const t = await getTranslations('Home');
   const tNav = await getTranslations('Navbar');
 
+  const supabase = await createClient();
+
   // Fetch Latest, Popular, Editorial, Featured (Highlights), Video Reports, and Main Hero
   const [
     latestData,
@@ -43,16 +46,16 @@ export default async function Home({
     fetchPosts({
       limit: 8,
       category: ['noticias', 'saude', 'bem-estar', 'estilo-de-vida', 'negocios', 'comunidade']
-    }),
-    fetchPosts({ limit: 3, sort: 'popular' }),
-    fetchPosts({ category: ['editorial', 'opiniao', 'opinião'], limit: 3 }),
-    fetchPosts({ category: 'fbr-news', limit: 6 }),
-    fetchFeaturedPosts(),
-    fetchVideoReports(),
-    fetchMainHero(),
-    fetchPosts({ category: ['face-brasileira', 'face-brasil-na-america', 'face-do-brasil'], limit: 1 }),
-    fetchPosts({ category: ['imigracao', 'imigração'], limit: 1 }),
-    fetchPosts({ category: ['aconteceu', 'eventos'], limit: 1 })
+    }, supabase),
+    fetchPosts({ limit: 3, sort: 'popular' }, supabase),
+    fetchPosts({ category: ['editorial', 'opiniao', 'opinião'], limit: 3 }, supabase),
+    fetchPosts({ category: 'fbr-news', limit: 6 }, supabase),
+    fetchFeaturedPosts(5, undefined, supabase),
+    fetchVideoReports(4, supabase),
+    fetchMainHero(undefined, supabase),
+    fetchPosts({ category: ['face-brasileira', 'face-brasil-na-america', 'face-do-brasil'], limit: 1 }, supabase),
+    fetchPosts({ category: ['imigracao', 'imigração'], limit: 1 }, supabase),
+    fetchPosts({ category: ['aconteceu', 'eventos'], limit: 1 }, supabase)
   ]);
 
   const allLatest = latestData.data || [];

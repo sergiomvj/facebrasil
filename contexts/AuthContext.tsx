@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 
@@ -27,6 +27,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profile, setProfile] = useState<any | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
+    // Ref to track the current user ID without creating a stale closure
+    // in the onAuthStateChange callback (which is set up once with [] deps).
+    const userIdRef = useRef<string | undefined>(undefined);
 
     const fetchProfile = async (uid: string) => {
         try {
@@ -54,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (mounted) {
                     setSession(currentSession);
                     const currentUser = currentSession?.user ?? null;
+                    userIdRef.current = currentUser?.id;
                     setUser(currentUser);
                     if (currentUser) {
                         await fetchProfile(currentUser.id);
@@ -69,10 +73,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, currentSession: Session | null) => {
             if (!mounted) return;
 
-            // Only update if the user ID changed or explicitly signed out
-            if (currentSession?.user?.id !== user?.id || event === 'SIGNED_OUT') {
-                setSession(currentSession);
+            // Only update if the user ID changed or explicitly signed out.
+            // userIdRef.current is used instead of user?.id to avoid a stale
+            // closure — the callback is registered once with [] deps, so the
+            // `user` state variable would always read its initial value (null).
+            if (currentSession?.user?.id !== userIdRef.current || event === 'SIGNED_OUT') {
                 const currentUser = currentSession?.user ?? null;
+                userIdRef.current = currentUser?.id;
+                setSession(currentSession);
                 setUser(currentUser);
                 if (currentUser) {
                     await fetchProfile(currentUser.id);

@@ -1,10 +1,10 @@
 // @ts-nocheck
 import React from 'react';
 import ArticleCard from '@/components/ArticleCard';
-import { supabase } from '@/lib/supabase';
 import { notFound, redirect } from 'next/navigation';
 import { Tag } from 'lucide-react';
 import { fetchPosts } from '@/lib/blog-service';
+import { createClient } from '@/lib/supabase/server';
 import { getTranslations } from 'next-intl/server';
 
 // Force dynamic since we use DB
@@ -15,12 +15,6 @@ interface CategoryPageProps {
         locale: string;
         slug: string;
     }>;
-}
-
-// Fetch category by slug
-async function getCategory(slug: string) {
-    const { data } = await supabase.from('categories').select('*').eq('slug', slug).single();
-    return data;
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -38,8 +32,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         redirect('/category/face-brasil-na-america');
     }
 
+    const supabase = await createClient();
+
     // Fetch Category Title/Details independently
-    const category = await getCategory(slug);
+    const { data: category } = await supabase.from('categories').select('*').eq('slug', slug).single();
 
     if (!category) {
         notFound();
@@ -50,7 +46,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         category: slug,
         limit: 50,
         language: locale
-    });
+    }, supabase);
 
     return (
         <div className="min-h-screen dark:bg-slate-950 bg-slate-50 selection:bg-primary selection:text-white pt-[100px]">

@@ -1,7 +1,16 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import { BlogPost, FetchPostsParams, PaginatedResponse, VideoReport } from './fbr-types';
-import { supabase } from './supabase';
+import { supabase as browserClient } from './supabase';
 
-export async function fetchPosts(params?: FetchPostsParams): Promise<PaginatedResponse<BlogPost>> {
+// Allow callers (e.g. Server Components) to supply a pre-built server client so
+// that cookie-based auth is forwarded to Supabase and RLS policies evaluate
+// correctly.  Client Components that don't pass a client fall back to the
+// shared browser singleton.
+function db(client?: SupabaseClient): SupabaseClient {
+    return client ?? browserClient;
+}
+
+export async function fetchPosts(params?: FetchPostsParams, client?: SupabaseClient): Promise<PaginatedResponse<BlogPost>> {
     // Base select - use !inner if we might filter by category, otherwise left join is fine.
     let selectString = `
         *,
@@ -18,7 +27,7 @@ export async function fetchPosts(params?: FetchPostsParams): Promise<PaginatedRe
         `;
     }
 
-    let query = supabase
+    let query = db(client)
         .from('articles')
         .select(selectString, { count: 'exact' });
 
@@ -87,12 +96,12 @@ export async function fetchPosts(params?: FetchPostsParams): Promise<PaginatedRe
     };
 }
 
-export async function fetchMainHero(language?: string): Promise<BlogPost | null> {
+export async function fetchMainHero(language?: string, client?: SupabaseClient): Promise<BlogPost | null> {
     try {
         // Priority 1: Check 'colocar_hero'
         // Wrap in internal try-catch so if column doesn't exist (user didn't run SQL), we fall through to latest
         try {
-            let heroQuery = supabase
+            let heroQuery = db(client)
                 .from('articles')
                 .select(`
                     *,
@@ -118,7 +127,7 @@ export async function fetchMainHero(language?: string): Promise<BlogPost | null>
         }
 
         // Priority 2: Fallback to latest published article
-        let latestQuery = supabase
+        let latestQuery = db(client)
             .from('articles')
             .select(`
                 *,
@@ -146,8 +155,8 @@ export async function fetchMainHero(language?: string): Promise<BlogPost | null>
     }
 }
 
-export async function fetchFeaturedPosts(limit: number = 5, language?: string): Promise<BlogPost[]> {
-    let query = supabase
+export async function fetchFeaturedPosts(limit: number = 5, language?: string, client?: SupabaseClient): Promise<BlogPost[]> {
+    let query = db(client)
         .from('articles')
         .select(`
             *,
@@ -166,8 +175,8 @@ export async function fetchFeaturedPosts(limit: number = 5, language?: string): 
     return (data || []).map(mapRowToBlogPost);
 }
 
-export async function fetchVideoReports(limit: number = 4): Promise<VideoReport[]> {
-    const { data } = await supabase
+export async function fetchVideoReports(limit: number = 4, client?: SupabaseClient): Promise<VideoReport[]> {
+    const { data } = await db(client)
         .from('user_video_reports')
         .select('*')
         .eq('status', 'APPROVED')
@@ -177,8 +186,8 @@ export async function fetchVideoReports(limit: number = 4): Promise<VideoReport[
     return (data || []) as VideoReport[];
 }
 
-export async function fetchPost(slug: string, language?: string): Promise<BlogPost | null> {
-    let query = supabase
+export async function fetchPost(slug: string, language?: string, client?: SupabaseClient): Promise<BlogPost | null> {
+    let query = db(client)
         .from('articles')
         .select(`
             *,

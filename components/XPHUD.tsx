@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,8 +26,10 @@ export default function XPHUD() {
         progress: 0
     });
     const [showLevelUp, setShowLevelUp] = useState(false);
-    const [previousLevel, setPreviousLevel] = useState(1);
     const [loading, setLoading] = useState(true);
+    // Ref instead of state so that updating it doesn't recreate the fetchXP
+    // callback and trigger an unnecessary effect re-run + double API call.
+    const previousLevelRef = useRef(1);
 
     const fetchXP = useCallback(async () => {
         if (!isSignedIn) return;
@@ -40,12 +42,12 @@ export default function XPHUD() {
 
             if (result.success) {
                 // Verificar se subiu de nível
-                if (result.level > previousLevel && previousLevel !== 1) {
+                if (result.level > previousLevelRef.current && previousLevelRef.current !== 1) {
                     setShowLevelUp(true);
                     setTimeout(() => setShowLevelUp(false), 4000);
                 }
 
-                setPreviousLevel(result.level);
+                previousLevelRef.current = result.level;
                 setData({
                     xp: result.xp,
                     level: result.level,
@@ -59,7 +61,7 @@ export default function XPHUD() {
         } finally {
             setLoading(false);
         }
-    }, [isSignedIn, previousLevel]);
+    }, [isSignedIn]);
 
     useEffect(() => {
         fetchXP();

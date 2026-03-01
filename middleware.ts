@@ -30,7 +30,13 @@ export async function middleware(request: NextRequest) {
     // Handle internationalization
     // We apply intl middleware if it's not an API route
     if (!path.startsWith('/api')) {
-        return intlMiddleware(request)
+        const intlResponse = intlMiddleware(request)
+        // Preserve session cookies from updateSession so the access token
+        // is properly refreshed in the browser on every request.
+        response.headers.getSetCookie().forEach(cookie => {
+            intlResponse.headers.append('Set-Cookie', cookie)
+        })
+        return intlResponse
     }
 
     return response

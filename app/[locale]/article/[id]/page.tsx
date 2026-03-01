@@ -8,6 +8,7 @@ import AdSpace from '@/components/AdSpace';
 import ContentRenderer from '@/components/ContentRenderer';
 import SocialShareBar from '@/components/SocialShareBar';
 import { fetchPost, fetchPosts } from '@/lib/blog-service';
+import { createClient } from '@/lib/supabase/server';
 import { getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
@@ -45,7 +46,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArticlePage({ params }: PageProps) {
     const { id, locale } = await params;
-    const article = await fetchPost(id, locale);
+    const supabase = await createClient();
+    const article = await fetchPost(id, locale, supabase);
     const t = await getTranslations('Home');
 
     if (!article) {
