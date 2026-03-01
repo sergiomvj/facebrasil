@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -10,14 +10,16 @@ export default function AuthCallbackPage() {
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [errorMessage, setErrorMessage] = useState('');
+    // Guard para garantir que o callback só executa UMA vez
+    const hasExecuted = useRef(false);
 
     useEffect(() => {
+        // Evita dupla execução (Strict Mode, re-renders, etc.)
+        if (hasExecuted.current) return;
+        hasExecuted.current = true;
+
         const handleCallback = async () => {
             try {
-                // Supabase Auth will automatically parse the #access_token fragment from the URL
-                // if it's an implicit flow link.
-
-                // For PKCE flow (which is default in SSR/new projects), we get a ?code= parameter.
                 const code = searchParams.get('code');
                 const next = searchParams.get('next') || '/pt/dashboard';
                 const errorDesc = searchParams.get('error_description');
@@ -27,19 +29,18 @@ export default function AuthCallbackPage() {
                 }
 
                 if (code) {
-                    // Exchange the code for a session
+                    // Exchange the code for a session (PKCE flow)
                     const { error } = await supabase.auth.exchangeCodeForSession(code);
                     if (error) throw error;
                 }
 
-                // Check if we effectively got a session either via fragment or PKCE
+                // Verificar sessão resultante
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
                 if (sessionError) throw sessionError;
 
                 if (session) {
                     setStatus('success');
-                    // Add a small delay so the user sees the success message before redirecting
                     setTimeout(() => {
                         window.location.href = next;
                     }, 2000);
@@ -55,7 +56,8 @@ export default function AuthCallbackPage() {
         };
 
         handleCallback();
-    }, [searchParams, router]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Executa apenas 1x — searchParams é lido de forma estável via closure
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4">

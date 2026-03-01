@@ -4,7 +4,7 @@ import React from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function AdminLayout({
@@ -45,17 +45,19 @@ export default function AdminLayout({
 }
 
 function SupabaseUserMenu() {
-    const supabase = createClient();
     const router = useRouter();
     const [user, setUser] = React.useState<any>(null);
 
     React.useEffect(() => {
+        let mounted = true;
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
+            if (mounted) setUser(user);
         };
         getUser();
-    }, [supabase]);
+        // Sem [supabase] na lista de deps — o singleton nunca muda de referência
+        return () => { mounted = false; };
+    }, []);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
