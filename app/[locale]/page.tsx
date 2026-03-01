@@ -74,9 +74,8 @@ export default async function Home({
 
   return (
     <div className="flex flex-col min-h-screen dark:bg-slate-950 bg-slate-50 pt-[100px]">
-      <AdSpace position="banner_top" className="mb-[20px] max-w-[1024px] h-[150px] mx-auto w-full" />
+      <AdSpace position="super_hero" className="mb-[20px] mx-auto" />
       <Hero post={mainHero} />
-      <AdSpace position="home_hero" className="max-w-[1400px] mx-auto -mt-8 mb-12 relative z-20" />
       <FeaturedCarousel posts={carouselPosts} />
 
       <div className="max-w-[1400px] mx-auto w-full px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 py-16">
@@ -95,7 +94,10 @@ export default async function Home({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {latestNews.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+                <div key={article.id} className="flex flex-col gap-4">
+                  <ArticleCard article={article} />
+                  <AdSpace position="column" className="mx-auto" />
+                </div>
               ))}
             </div>
 
@@ -110,8 +112,8 @@ export default async function Home({
                   </h2>
                 </div>
               </div>
-              <InfiniteFeed 
-                initialArticles={allLatest.slice(3)} 
+              <InfiniteFeed
+                initialArticles={allLatest.slice(3)}
                 postsPerPage={6}
               />
             </section>
@@ -167,6 +169,9 @@ export default async function Home({
 
         {/* Sidebar Column */}
         <div className="lg:col-span-4 space-y-12">
+          {/* Sidebar Ad */}
+          <AdSpace position="sidebar" className="mx-auto" />
+
           {/* FBR-News Headlines */}
           <section className="dark:bg-slate-900/50 bg-white rounded-3xl p-8 border dark:border-white/5 border-gray-200">
             <div className="flex items-center justify-between mb-8">

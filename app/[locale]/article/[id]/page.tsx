@@ -58,7 +58,7 @@ export default async function ArticlePage({ params }: PageProps) {
         <article className="min-h-screen pb-20 pt-[100px]">
             {/* Ad Space Banner Top */}
             <div className="max-w-[1024px] mx-auto w-full px-6 mb-8">
-                <AdSpace position="banner_top" className="h-[150px] w-full" />
+                <AdSpace position="super_hero" className="w-full" />
             </div>
 
             {/* Article Header / Hero */}
