@@ -13,6 +13,7 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const [rememberMe, setRememberMe] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -34,6 +35,15 @@ export default function LoginPage() {
                 });
 
                 if (error) throw error;
+
+                // Se "Não lembrar", definir sessão como temporária
+                if (!rememberMe) {
+                    // Supabase persiste por padrão — ao desmarcar, sinalizamos via localStorage
+                    // para o AuthContext encerrar a sessão ao fechar o browser
+                    sessionStorage.setItem('fbr_session_only', '1');
+                } else {
+                    sessionStorage.removeItem('fbr_session_only');
+                }
 
                 // Redirecionar baseado no perfil (verificado via middleware após o login)
                 router.push('/dashboard');
@@ -153,6 +163,39 @@ export default function LoginPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Remember me / Forgot password */}
+                        {mode === 'login' && (
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2.5 cursor-pointer group select-none">
+                                    <div
+                                        onClick={() => setRememberMe(v => !v)}
+                                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0
+                                            ${rememberMe
+                                                ? 'bg-primary border-primary'
+                                                : 'bg-transparent border-slate-600 group-hover:border-slate-400'
+                                            }`
+                                        }
+                                    >
+                                        {rememberMe && (
+                                            <svg className="w-3 h-3 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                                        Lembrar de mim
+                                    </span>
+                                </label>
+
+                                <a
+                                    href="/forgot-password"
+                                    className="text-sm text-slate-400 hover:text-primary transition-colors underline underline-offset-4"
+                                >
+                                    Esqueci a senha
+                                </a>
+                            </div>
+                        )}
 
                         {error && (
                             <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-start gap-3 animate-in shake duration-300">
