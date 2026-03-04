@@ -38,7 +38,8 @@ export default function AuthorsPage() {
         avatar_url: '',
         email: '',
         role: 'EDITOR',
-        isVirtual: false
+        isVirtual: false,
+        password: ''
     });
 
 
@@ -132,14 +133,16 @@ export default function AuthorsPage() {
                 name: formData.name,
                 avatar_url: formData.avatar_url || null,
                 email: formData.email || null,
-                role: formData.role
+                role: formData.role,
+                password: formData.password || undefined,
+                isVirtualOverride: formData.isVirtual
             }, formData.isVirtual ? undefined : formData.id);
 
 
             if (!result.success) throw new Error(result.error);
 
             setShowCreateModal(false);
-            setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false });
+            setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false, password: '' });
             fetchAuthors();
 
         } catch (error: any) {
@@ -158,14 +161,15 @@ export default function AuthorsPage() {
                 name: formData.name,
                 avatar_url: formData.avatar_url || null,
                 email: formData.email || null,
-                role: formData.role
+                role: formData.role,
+                password: formData.password || undefined
             }, editingAuthor.id);
 
 
             if (!result.success) throw new Error(result.error);
 
             setEditingAuthor(null);
-            setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false });
+            setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false, password: '' });
             fetchAuthors();
         } catch (error: any) {
             alert('Erro ao atualizar autor: ' + error.message);
@@ -200,7 +204,8 @@ export default function AuthorsPage() {
             avatar_url: author.avatar_url || '',
             email: author.email || '',
             role: author.role || 'EDITOR',
-            isVirtual: !author.id || author.id.length > 36 // Simple check for randomUUID vs Supabase UUID (which is 36 chars) or just check metadata if available
+            isVirtual: !author.id || author.id.length > 36, // Simple check for randomUUID vs Supabase UUID (which is 36 chars) or just check metadata if available
+            password: ''
         });
 
     }
@@ -421,9 +426,27 @@ export default function AuthorsPage() {
                                     className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                                 <p className="text-xs text-slate-400 mt-1">
-                                    Email de contato (opcional)
+                                    Email de contato {formData.isVirtual ? '(opcional)' : (editingAuthor ? '' : '*')}
                                 </p>
                             </div>
+
+                            {(!formData.isVirtual) && (
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
+                                        Senha {editingAuthor ? '(deixe em branco para manter a atual)' : '*'}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        placeholder={editingAuthor ? "••••••••" : "Mínimo 6 caracteres"}
+                                        className="w-full px-4 py-2 dark:bg-slate-700 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        Usada para logar no sistema.
+                                    </p>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
@@ -461,7 +484,7 @@ export default function AuthorsPage() {
                                 onClick={() => {
                                     setShowCreateModal(false);
                                     setEditingAuthor(null);
-                                    setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false });
+                                    setFormData({ id: '', name: '', avatar_url: '', email: '', role: 'EDITOR', isVirtual: false, password: '' });
                                 }}
 
                                 className="flex-1 px-4 py-2 dark:bg-slate-700 bg-gray-100 dark:text-white text-gray-900 rounded-lg hover:bg-slate-600 transition-colors"

@@ -11,6 +11,8 @@ interface AuthorPayload {
     avatar_url?: string | null;
     role: string;
     email?: string | null;
+    password?: string;
+    isVirtualOverride?: boolean;
 }
 
 export async function upsertAuthor(payload: AuthorPayload, id?: string) {
@@ -18,15 +20,51 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
     await protectEditor();
 
     console.log('--- SERVER ACTION: UPSERT AUTHOR ---');
-    console.log('Payload:', payload);
+    console.log('Payload:', { ...payload, password: payload.password ? '***' : undefined });
     console.log('ID:', id);
 
     let finalId = id;
-    const isVirtual = !id;
+    let isVirtual = !id;
 
-    if (isVirtual) {
-        // Generate a new UUID for virtual authors
-        finalId = crypto.randomUUID();
+    // Se !id, estamos criando um novo.
+    if (!id) {
+        if (payload.email && payload.password && !payload.isVirtualOverride) {
+            // Criação de usuário real Auth
+            const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+                email: payload.email,
+                password: payload.password,
+                email_confirm: true,
+                user_metadata: {
+                    full_name: payload.name,
+                    role: payload.role
+                }
+            });
+
+            if (authError) {
+                console.error('Create User Auth Error:', authError);
+                return { success: false, error: authError.message };
+            }
+            finalId = authData.user.id;
+            isVirtual = false;
+        } else {
+            // Criação de autor virtual
+            finalId = crypto.randomUUID();
+            isVirtual = true;
+        }
+    } else {
+        // Se temos ID, estamos editando. Verifica se tem senha para alterar.
+        if (payload.password) {
+            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+                password: payload.password
+            });
+            if (updateError) {
+                console.error('Update User Password Error:', updateError);
+                // Retorna erro se falhou, ex: tentar atualizar senha de um autor virtual que não tem Auth
+                if (!updateError.message.includes('not found')) {
+                    return { success: false, error: updateError.message };
+                }
+            }
+        }
     }
 
     const dbPayload = {
@@ -37,7 +75,6 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
         role: payload.role || 'EDITOR',
         updated_at: new Date().toISOString()
     };
-
 
     let result;
     if (!isVirtual) {

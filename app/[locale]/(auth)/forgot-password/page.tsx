@@ -21,10 +21,7 @@ export default function ForgotPasswordPage() {
 
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                // Redireciona diretamente para a página de reset no client-side
-                // onde o Auth.getSession() vai trocar automaticamente o ?code= pela sessão
-                // já que o PKCE verifier está no localStorage do browser
-                redirectTo: `${window.location.origin}/pt/reset-password`,
+                redirectTo: `${window.location.origin}/api/auth/callback?next=/pt/reset-password`,
             });
 
             if (error) throw error;

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, Users, Search, Shield, UserCog, Loader2, Check, AlertTriangle } from 'lucide-react';
-import { listUsers, updateUserRole } from '@/app/actions/user-actions';
+import { Settings as SettingsIcon, Save, Users, Search, AlertTriangle, Loader2, UserPlus, Edit2, X } from 'lucide-react';
+import { listUsers, updateUserRole, createUser, updateUser } from '@/app/actions/user-actions';
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<'general' | 'users'>('general');
@@ -22,6 +22,11 @@ export default function SettingsPage() {
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const [showUserModal, setShowUserModal] = useState(false);
+    const [editingUser, setEditingUser] = useState<any>(null);
+    const [userFormData, setUserFormData] = useState({ id: '', name: '', email: '', password: '', role: 'EDITOR' });
+    const [savingUser, setSavingUser] = useState(false);
 
     useEffect(() => {
         if (activeTab === 'users') {
@@ -50,6 +55,41 @@ export default function SettingsPage() {
             alert('Erro ao atualizar cargo: ' + (error as Error).message);
         } finally {
             setUpdatingUserId(null);
+        }
+    };
+
+    const handleSaveUser = async () => {
+        if (!userFormData.name || !userFormData.email) return alert('Nome e email são obrigatórios');
+        if (!editingUser && !userFormData.password) return alert('Senha é obrigatória para novos usuários');
+
+        setSavingUser(true);
+        try {
+            if (editingUser) {
+                const res = await updateUser(editingUser.id, {
+                    name: userFormData.name,
+                    email: userFormData.email,
+                    role: userFormData.role,
+                    password: userFormData.password || undefined
+                });
+                if (!res.success) throw new Error(res.error);
+            } else {
+                const res = await createUser({
+                    name: userFormData.name,
+                    email: userFormData.email,
+                    role: userFormData.role,
+                    password: userFormData.password
+                });
+                if (!res.success) throw new Error(res.error);
+            }
+
+            setShowUserModal(false);
+            setEditingUser(null);
+            setUserFormData({ id: '', name: '', email: '', password: '', role: 'EDITOR' });
+            loadUsers();
+        } catch (error: any) {
+            alert('Erro: ' + error.message);
+        } finally {
+            setSavingUser(false);
         }
     };
 
@@ -164,15 +204,28 @@ export default function SettingsPage() {
                                 <h2 className="text-xl font-black dark:text-white text-gray-900">Gestão de Usuários</h2>
                             </div>
 
-                            <div className="relative w-full md:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar por nome ou email..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
+                            <div className="flex items-center gap-4 w-full md:w-auto">
+                                <div className="relative flex-1 md:w-64">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por nome ou email..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setEditingUser(null);
+                                        setUserFormData({ id: '', name: '', email: '', password: '', role: 'EDITOR' });
+                                        setShowUserModal(true);
+                                    }}
+                                    className="bg-primary hover:bg-primary/90 text-slate-950 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors whitespace-nowrap"
+                                >
+                                    <UserPlus className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Novo</span>
+                                </button>
                             </div>
                         </div>
 
@@ -242,6 +295,24 @@ export default function SettingsPage() {
                                                             <option value="ADMIN">Admin</option>
                                                         </select>
                                                         {updatingUserId === user.id && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingUser(user);
+                                                                setUserFormData({
+                                                                    id: user.id,
+                                                                    name: user.name || '',
+                                                                    email: user.email || '',
+                                                                    role: user.role || 'EDITOR',
+                                                                    password: ''
+                                                                });
+                                                                setShowUserModal(true);
+                                                            }}
+                                                            className="p-2 ml-2 hover:bg-white/10 dark:hover:bg-white/10 bg-gray-100 hover:bg-gray-200 dark:bg-transparent rounded-lg dark:text-slate-400 text-slate-600 dark:hover:text-white transition-colors"
+                                                            title="Editar Usuário"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -256,6 +327,86 @@ export default function SettingsPage() {
                             <div className="text-xs text-amber-500/80 leading-relaxed">
                                 <strong>Atenção:</strong> Alterar o cargo de um usuário para <strong>ADMIN</strong> concede acesso total ao sistema, incluindo configurações críticas e gestão de outros usuários. Tenha cautela ao delegar permissões.
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showUserModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="dark:bg-slate-900 bg-white border dark:border-white/10 border-gray-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b dark:border-white/10 border-gray-200 flex items-center justify-between">
+                            <h2 className="text-xl font-bold dark:text-white text-gray-900 flex items-center gap-2">
+                                {editingUser ? <Edit2 className="w-5 h-5 text-primary" /> : <UserPlus className="w-5 h-5 text-primary" />}
+                                {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
+                            </h2>
+                            <button
+                                onClick={() => setShowUserModal(false)}
+                                className="p-2 hover:bg-white/5 bg-gray-100 dark:bg-transparent rounded-lg text-slate-400 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Nome</label>
+                                <input
+                                    type="text"
+                                    value={userFormData.name}
+                                    onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
+                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    value={userFormData.email}
+                                    onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+                                    disabled={!!editingUser}
+                                />
+                                {editingUser && <p className="text-xs text-slate-500 mt-1">O email não pode ser alterado após a criação.</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
+                                    Senha {editingUser ? '(deixe em branco para não alterar)' : '*'}
+                                </label>
+                                <input
+                                    type="password"
+                                    value={userFormData.password}
+                                    onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                                    placeholder="••••••••"
+                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Cargo</label>
+                                <select
+                                    value={userFormData.role}
+                                    onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
+                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                >
+                                    <option value="VIEWER">Leitor</option>
+                                    <option value="EDITOR">Editor</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t dark:border-white/10 border-gray-200 flex justify-end gap-3 dark:bg-white/5 bg-gray-50">
+                            <button
+                                onClick={() => setShowUserModal(false)}
+                                className="px-4 py-2 rounded-lg font-medium text-slate-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/5 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveUser}
+                                disabled={savingUser}
+                                className="bg-primary hover:bg-primary/90 text-slate-950 px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
+                            >
+                                {savingUser ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                Salvar
+                            </button>
                         </div>
                     </div>
                 </div>
