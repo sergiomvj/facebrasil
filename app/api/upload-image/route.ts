@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,9 @@ export async function POST(req: Request) {
 
         const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
 
-        const { data, error } = await supabaseAdmin.storage
+        const supabase = getSupabaseAdmin();
+
+        const { data, error } = await supabase.storage
             .from('blog-assets')
             .upload(filename, file, {
                 cacheControl: '3600',
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
 
         console.log('[Upload API] Upload successful, getting public URL...');
 
-        const { data: { publicUrl } } = supabaseAdmin.storage
+        const { data: { publicUrl } } = supabase.storage
             .from('blog-assets')
             .getPublicUrl(filename);
 

@@ -6,6 +6,8 @@ interface ContentRendererProps {
 }
 
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
+    if (!content) return null;
+
     // Simple splitter: split by closing paragraph tag
     // Note: This is a naive approach. For production, use a proper HTML parser (like html-react-parser).
     // This assumes the content from FBR-Blogger is relatively clean HTML.
@@ -30,7 +32,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
                     <React.Fragment key={index}>
                         <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
                         {shouldInjectAd && (
-                            <AdSpace position="inline" />
+                            <AdSpace position="column" />
                         )}
                     </React.Fragment>
                 );
