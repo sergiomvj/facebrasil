@@ -19,17 +19,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setTheme] = useState<Theme>('dark');
 
     useEffect(() => {
-        // Load theme from localStorage or default to dark
         const savedTheme = localStorage.getItem('theme') as Theme | null;
-        if (savedTheme && savedTheme !== 'dark') {
-            setTheme(savedTheme);
-            document.documentElement.classList.remove('light', 'dark'); // Clear existing classes
-            document.documentElement.classList.add(savedTheme);
-        } else {
-            setTheme('dark');
-            document.documentElement.classList.remove('light', 'dark'); // Clear existing classes
-            document.documentElement.classList.add('dark');
-        }
+        const initialTheme = savedTheme || 'dark';
+        setTheme(initialTheme);
+        document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+        document.documentElement.classList.toggle('light', initialTheme === 'light');
     }, []);
 
     const toggleTheme = () => {
@@ -37,6 +31,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setTheme(newTheme);
         localStorage.setItem('theme', newTheme);
         document.documentElement.classList.toggle('dark', newTheme === 'dark');
+        document.documentElement.classList.toggle('light', newTheme === 'light');
     };
 
     // Provide default values during SSR to prevent errors

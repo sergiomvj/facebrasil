@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
     LayoutDashboard,
@@ -48,6 +48,8 @@ const navItems: NavItem[] = [
 
 export default function AdminSidebar() {
     const pathname = usePathname();
+    const params = useParams();
+    const locale = params.locale as string;
     const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -102,12 +104,13 @@ export default function AdminSidebar() {
                     <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                         {navItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+                            const fullHref = `/${locale}${item.href}`;
+                            const isActive = pathname === fullHref || (item.href !== '/admin' && pathname.startsWith(fullHref));
 
                             return (
                                 <Link
                                     key={item.href}
-                                    href={item.href}
+                                    href={fullHref}
                                     onClick={() => setIsOpen(false)}
                                     className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg transition-all
@@ -129,7 +132,7 @@ export default function AdminSidebar() {
                     {/* Footer */}
                     <div className="p-4 border-t dark:border-white/10 border-gray-200 space-y-2">
                         <Link
-                            href="/"
+                            href={`/${locale}`}
                             className="flex items-center gap-3 px-4 py-3 rounded-lg dark:text-slate-400 text-gray-600 dark:hover:bg-slate-800 hover:bg-gray-100 transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

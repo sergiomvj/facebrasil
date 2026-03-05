@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { FileText, Eye, Video, FolderOpen, TrendingUp, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 interface DashboardStats {
     totalArticles: number;
@@ -16,6 +17,8 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+    const params = useParams();
+    const locale = (params.locale as string) || 'pt';
     const [stats, setStats] = useState<DashboardStats>({
         totalArticles: 0,
         publishedArticles: 0,
@@ -154,7 +157,7 @@ export default function AdminDashboard() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Link
-                    href="/admin/editor"
+                    href={`/${locale}/admin/editor`}
                     className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group lg:flex lg:items-center lg:gap-8 hover:scale-[1.01] active:scale-[0.99]"
                 >
                     <div className="p-4 bg-primary/10 rounded-2xl group-hover:bg-primary transition-colors">
@@ -167,7 +170,7 @@ export default function AdminDashboard() {
                 </Link>
 
                 <Link
-                    href="/admin/video-reports"
+                    href={`/${locale}/admin/video-reports`}
                     className="dark:bg-slate-900 bg-white rounded-xl p-8 border dark:border-white/10 border-gray-200 hover:border-primary transition-all group lg:flex lg:items-center lg:gap-8 hover:scale-[1.01] active:scale-[0.99]"
                 >
                     <div className="p-4 bg-primary/10 rounded-2xl group-hover:bg-primary transition-colors">
@@ -214,7 +217,7 @@ export default function AdminDashboard() {
                     {recentArticles.map((article) => (
                         <Link
                             key={article.id}
-                            href={`/admin/editor?id=${article.id}`}
+                            href={`/${locale}/admin/editor?id=${article.id}`}
                             className="flex items-center justify-between p-6 dark:hover:bg-slate-800 hover:bg-gray-50 transition-colors group"
                         >
                             <div className="flex-1">

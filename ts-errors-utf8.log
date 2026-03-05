@@ -1,0 +1,15 @@
+﻿app/admin/analytics/page.tsx(15,29): error TS2307: Cannot find module './components/AdminLayout' or its corresponding type declarations.
+app/admin/analytics/page.tsx(16,53): error TS2307: Cannot find module './components/dashboard/Charts' or its corresponding type declarations.
+app/admin/articles/page.tsx(19,29): error TS2307: Cannot find module './components/AdminLayout' or its corresponding type declarations.
+app/admin/articles/page.tsx(20,28): error TS2305: Module '"@/hooks/useAdmin"' has no exported member 'useUpdateCommentStatus'.
+app/admin/components/index.ts(1,29): error TS2307: Cannot find module './components/AdminLayout' or its corresponding type declarations.
+app/admin/moderation/page.tsx(15,29): error TS2307: Cannot find module './components/AdminLayout' or its corresponding type declarations.
+app/admin/moderation/page.tsx(149,21): error TS2367: This comparison appears to be unintentional because the types '"pending" | "approved" | "rejected" | "spam"' and '"reported"' have no overlap.
+app/admin/moderation/page.tsx(155,23): error TS2367: This comparison appears to be unintentional because the types '"pending" | "approved" | "rejected" | "spam"' and '"reported"' have no overlap.
+app/admin/moderation/page.tsx(159,25): error TS2367: This comparison appears to be unintentional because the types '"pending" | "approved" | "rejected" | "spam"' and '"reported"' have no overlap.
+app/admin/moderation/page.tsx(169,26): error TS2367: This comparison appears to be unintentional because the types '"pending" | "approved" | "rejected" | "spam"' and '"reported"' have no overlap.
+lib/admin-service.ts(158,9): error TS2339: Property 'status' does not exist on type 'never'.
+lib/admin-service.ts(161,9): error TS2339: Property 'status' does not exist on type 'never'.
+lib/admin-service.ts(163,66): error TS2339: Property 'views' does not exist on type 'never'.
+lib/admin-service.ts(322,27): error TS2367: This comparison appears to be unintentional because the types '"pending" | "approved" | "rejected" | "spam" | "reported"' and '"all"' have no overlap.
+lib/admin-service.ts(374,15): error TS2345: Argument of type '{ status: "approved" | "rejected" | "spam"; updated_at: string; }' is not assignable to parameter of type 'never'.

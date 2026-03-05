@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Lock, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 
@@ -15,6 +15,8 @@ export default function ResetPasswordPage() {
     const [checkingSession, setCheckingSession] = useState(true);
 
     const router = useRouter();
+    const params = useParams();
+    const locale = (params?.locale as string) || 'pt';
     const supabase = createClient();
 
     useEffect(() => {
@@ -54,7 +56,7 @@ export default function ResetPasswordPage() {
 
             setSuccess(true);
             setTimeout(() => {
-                router.push('/dashboard');
+                router.push(`/${locale}/dashboard`);
             }, 3000);
 
         } catch (err: any) {
@@ -108,7 +110,7 @@ export default function ResetPasswordPage() {
                             <h2 className="text-xl font-bold text-white">Link Inválido</h2>
                             <p className="text-slate-400">{error}</p>
                             <button
-                                onClick={() => router.push('/forgot-password')}
+                                onClick={() => router.push(`/${locale}/forgot-password`)}
                                 className="inline-flex w-full items-center justify-center py-4 text-sm font-bold bg-white/5 border border-white/10 hover:bg-white/10 rounded-2xl transition-all mt-4"
                             >
                                 Solicitar novo link

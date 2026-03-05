@@ -147,20 +147,20 @@ export async function fetchAdminArticles(params?: {
 export async function fetchAdminStats(): Promise<AdminStats> {
   try {
     // Get article counts
-    const { data: articleStats, error: articleError } = await supabaseAdmin
+    const { data: articleStats, error: articleError } = await (supabaseAdmin
       .from('articles')
-      .select('status, views');
+      .select('status, views') as any);
 
     if (articleError) throw articleError;
 
     const totalArticles = articleStats?.length || 0;
-    const publishedArticles = articleStats?.filter(a => 
+    const publishedArticles = articleStats?.filter((a: any) =>
       a.status?.toLowerCase() === 'published'
     ).length || 0;
-    const draftArticles = articleStats?.filter(a => 
+    const draftArticles = articleStats?.filter((a: any) =>
       a.status?.toLowerCase() === 'draft'
     ).length || 0;
-    const totalViews = articleStats?.reduce((acc, a) => acc + (a.views || 0), 0) || 0;
+    const totalViews = articleStats?.reduce((acc: number, a: any) => acc + (a.views || 0), 0) || 0;
 
     // Get user counts
     const { count: totalUsers, error: userError } = await supabaseAdmin
@@ -172,7 +172,7 @@ export async function fetchAdminStats(): Promise<AdminStats> {
     // Get active users (logged in last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const { count: activeUsers, error: activeError } = await supabaseAdmin
       .from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -253,13 +253,15 @@ export async function fetchCategoryStats(): Promise<CategoryStats[]> {
       }
     });
 
-    return (data || []).map((cat: any) => ({
-      id: cat.id,
-      name: cat.name,
-      slug: cat.slug,
-      article_count: cat.articles?.[0]?.count || 0,
-      total_views: viewsByCategory[cat.id] || 0,
-    })).sort((a, b) => b.total_views - a.total_views);
+    const stats: CategoryStats[] = (data || []).map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      article_count: row.articles?.[0]?.count || 0,
+      total_views: viewsByCategory[row.id] || 0, // Use viewsByCategory for total_views
+    })).sort((a: any, b: any) => b.total_views - a.total_views);
+
+    return stats;
   } catch (error) {
     console.error('Error fetching category stats:', error);
     return [];
@@ -319,7 +321,7 @@ export async function fetchComments(params?: {
       `, { count: 'exact' });
 
     // Filter by status
-    if (params?.status && params.status !== 'all') {
+    if (params?.status && (params.status as string) !== 'all') {
       if (params.status === 'reported') {
         query = query.eq('is_reported', true);
       } else {
@@ -365,14 +367,14 @@ export async function fetchComments(params?: {
 
 // Update comment status
 export async function updateCommentStatus(
-  commentId: string, 
+  commentId: string,
   status: 'approved' | 'rejected' | 'spam'
 ): Promise<boolean> {
   try {
-    const { error } = await supabaseAdmin
+    const { error } = await (supabaseAdmin
       .from('comments')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', commentId);
+      .update({ status, updated_at: new Date().toISOString() } as any)
+      .eq('id', commentId));
 
     if (error) throw error;
     return true;
@@ -389,11 +391,11 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData[]
     // For now, returning mock data structured for the chart
     const data: AnalyticsData[] = [];
     const today = new Date();
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      
+
       data.push({
         date: date.toISOString().split('T')[0],
         views: Math.floor(Math.random() * 2000) + 500,
@@ -402,7 +404,7 @@ export async function fetchAnalytics(days: number = 30): Promise<AnalyticsData[]
         bounce_rate: Math.random() * 40 + 30,
       });
     }
-    
+
     return data;
   } catch (error) {
     console.error('Error fetching analytics:', error);

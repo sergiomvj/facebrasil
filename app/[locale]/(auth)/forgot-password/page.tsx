@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useParams } from 'next/navigation';
 import { Mail, Loader2, ArrowLeft, Send } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 import { Link } from '@/i18n/routing';
@@ -13,6 +14,8 @@ export default function ForgotPasswordPage() {
     const [success, setSuccess] = useState<boolean>(false);
 
     const supabase = createClient();
+    const params = useParams();
+    const locale = (params?.locale as string) || 'pt';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,7 +24,7 @@ export default function ForgotPasswordPage() {
 
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/api/auth/callback?next=/pt/reset-password`,
+                redirectTo: `${window.location.origin}/api/auth/callback?next=/${locale}/reset-password`,
             });
 
             if (error) throw error;

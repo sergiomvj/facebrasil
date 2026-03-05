@@ -11,11 +11,11 @@ export async function protectAdmin() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect("/sign-in");
+        redirect("/pt/login");
     }
 
     const userId = user.id;
-    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
+    const masterAdminId = process.env.MASTER_ADMIN_ID;
 
     console.log(`[AdminGuard] Checking Admin: User=${userId}, Master=${masterAdminId}`);
 
@@ -55,11 +55,11 @@ export async function protectEditor() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect("/sign-in");
+        redirect("/pt/login");
     }
 
     const userId = user.id;
-    const masterAdminId = process.env.MASTER_ADMIN_ID || process.env.MASTER_ADMIN_CLERK_ID;
+    const masterAdminId = process.env.MASTER_ADMIN_ID;
 
     console.log(`[AdminGuard] Checking Editor: User=${userId}, Master=${masterAdminId}`);
 

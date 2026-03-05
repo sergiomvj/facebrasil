@@ -1,0 +1,50 @@
+﻿Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Projetos\NovaFacebrasil\contexts\ThemeContext.tsx:25:13
+  23 |         const savedTheme = localStorage.getItem('theme') as Theme | null;
+  24 |         if (savedTheme) {
+> 25 |             setTheme(savedTheme);
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |             document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  27 |         } else {
+  28 |             // Default to dark mode  react-hooks/set-state-in-effect
+
+C:\Projetos\NovaFacebrasil\diagnose_articles.ts
+   9:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  10:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\i18n\request.ts
+   6:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\ad-service.ts
+  18:17  error    'query' is never reassigned. Use 'const' instead  prefer-const
+  18:17  warning  'query' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\lib\admin-guard.ts
+  16:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\blog-service.ts
+   67:54  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  114:18  warning  'innerError' is defined but never used            @typescript-eslint/no-unused-vars
+  134:42  warning  'latestError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  203:32  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+  209:18  warning  'e' is defined but never used                     @typescript-eslint/no-unused-vars
+  236:31  error    Unexpected any. Specify a different type          @typescript-eslint/no-explicit-any
+
+C:\Projetos\NovaFacebrasil\lib\utils.ts
+  46:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\NovaFacebrasil\migration\src\scrape-images.js
+  82:26  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 130 problems (81 errors, 49 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

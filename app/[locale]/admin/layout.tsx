@@ -61,7 +61,7 @@ function SupabaseUserMenu() {
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
-        router.push('/');
+        router.push('/pt');
         router.refresh();
     };
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { User, Mail, Lock, Loader2, Star, Trophy, ArrowRight, UserPlus } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 
@@ -19,6 +19,9 @@ export default function LoginPage() {
     const [success, setSuccess] = useState<string | null>(null);
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const params = useParams();
+    const locale = (params?.locale as string) || 'pt';
     const supabase = createClient();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,17 +39,9 @@ export default function LoginPage() {
 
                 if (error) throw error;
 
-                // Se "Não lembrar", definir sessão como temporária
-                if (!rememberMe) {
-                    // Supabase persiste por padrão — ao desmarcar, sinalizamos via localStorage
-                    // para o AuthContext encerrar a sessão ao fechar o browser
-                    sessionStorage.setItem('fbr_session_only', '1');
-                } else {
-                    sessionStorage.removeItem('fbr_session_only');
-                }
-
-                // Redirecionar baseado no perfil (verificado via middleware após o login)
-                router.push('/dashboard');
+                // Redirecionar para a página solicitada ou dashboard
+                const nextUrl = searchParams.get('next') || `/${locale}/dashboard`;
+                router.push(nextUrl);
                 router.refresh();
             } else {
                 // Sign Up
@@ -54,7 +49,7 @@ export default function LoginPage() {
                     email,
                     password,
                     options: {
-                        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/pt/dashboard`,
+                        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/${locale}/dashboard`,
                         data: {
                             full_name: name,
                         },
@@ -189,7 +184,7 @@ export default function LoginPage() {
                                 </label>
 
                                 <a
-                                    href="/forgot-password"
+                                    href={`/${locale}/forgot-password`}
                                     className="text-sm text-slate-400 hover:text-primary transition-colors underline underline-offset-4"
                                 >
                                     Esqueci a senha

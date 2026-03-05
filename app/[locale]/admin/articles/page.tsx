@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe, Sparkles, X, BrainCircuit, Type, FileText, Languages, BarChart2 } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
+import { useParams } from 'next/navigation';
 import { deleteArticle, upsertArticle } from '@/app/actions/article-actions';
 import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
@@ -33,6 +34,9 @@ interface CategoryListItem {
 }
 
 export default function ArticlesListPage() {
+    const router = useRouter();
+    const params = useParams();
+    const locale = (params.locale as string) || 'pt';
     const [articles, setArticles] = useState<ArticleListItem[]>([]);
     const [categories, setCategories] = useState<CategoryListItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -101,7 +105,7 @@ export default function ArticlesListPage() {
                 if (!response.success) {
                     alert('Erro ao criar artigo: ' + response.error);
                 } else if (response.data) {
-                    window.location.href = `/admin/editor?id=${response.data.id}`;
+                    window.location.href = `/${locale}/admin/editor?id=${response.data.id}`;
                 }
             } else {
                 alert('Erro na geração: ' + result.error);

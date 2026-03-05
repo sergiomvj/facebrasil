@@ -26,5 +26,7 @@ export function getSupabaseAdmin() {
 export const supabaseAdmin = {
     get auth() { return getSupabaseAdmin().auth; },
     get from() { return (table: string) => getSupabaseAdmin().from(table); },
-    // Add other methods as needed, but this covers the essentials used in actions
+    get storage() { return getSupabaseAdmin().storage; },
+    get rpc() { return (...args: any[]) => (getSupabaseAdmin().rpc as any)(...args); },
 } as any;
+
