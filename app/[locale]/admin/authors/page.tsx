@@ -52,7 +52,6 @@ export default function AuthorsPage() {
             const { data: authorsData, error } = await supabase
                 .from('profiles')
                 .select('*')
-                .not('role', 'eq', 'VIEWER')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
