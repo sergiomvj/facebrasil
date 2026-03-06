@@ -44,8 +44,9 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // getUser() refreshes the access token if needed (safe to call on every request)
-    const { data: { user } } = await supabase.auth.getUser()
+    // getUser() refreshes the access token if needed (safe to call on every request).
+    // If it fails (invalid/expired token that couldn't be refreshed), user will be null.
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser()
 
     // ─── 3. Route protection ─────────────────────────────────────────────────
     const isAdminRoute = /^\/(pt|en|es)\/admin/.test(path) || path.startsWith('/admin')
@@ -59,7 +60,19 @@ export async function middleware(request: NextRequest) {
         const resolvedLocale = validLocales.includes(locale) ? locale : 'pt'
         const loginUrl = new URL(`/${resolvedLocale}/login`, request.url)
         loginUrl.searchParams.set('next', path)
-        return NextResponse.redirect(loginUrl)
+        const redirectResponse = NextResponse.redirect(loginUrl)
+
+        // If the session token was invalid (not just absent), clear the auth cookies
+        // so the client doesn't keep sending broken tokens on every request.
+        if (getUserError) {
+            for (const cookie of request.cookies.getAll()) {
+                if (cookie.name.startsWith('sb-')) {
+                    redirectResponse.cookies.delete(cookie.name)
+                }
+            }
+        }
+
+        return redirectResponse
     }
 
     return intlResponse

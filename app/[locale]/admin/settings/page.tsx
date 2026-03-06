@@ -260,7 +260,7 @@ export default function SettingsPage() {
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-primary font-bold">
                                                             {user.avatar_url ? (
-                                                                <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                                                                <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                                             ) : (
                                                                 (user.name || user.email || 'U')[0].toUpperCase()
                                                             )}

@@ -23,6 +23,7 @@ const Navbar: React.FC = () => {
   const { user, profile, signOut } = useAuth();
   const displayName = profile?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuário';
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
+  const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -178,8 +179,8 @@ const Navbar: React.FC = () => {
                   className="flex items-center gap-2 p-1.5 rounded-full dark:hover:bg-slate-800 hover:bg-gray-100 transition-all border border-transparent hover:border-primary/20"
                 >
                   <div className="size-8 rounded-full bg-slate-800 border border-primary/30 overflow-hidden flex items-center justify-center text-primary">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                    {avatarUrl && !avatarError ? (
+                      <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" onError={() => setAvatarError(true)} />
                     ) : (
                       <UserIcon className="w-5 h-5" />
                     )}
@@ -191,8 +192,8 @@ const Navbar: React.FC = () => {
                   <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4">
                     <div className="flex items-center gap-3 mb-4 pb-4 border-b dark:border-white/5 border-gray-100">
                       <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
-                        {avatarUrl ? (
-                          <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                        {avatarUrl && !avatarError ? (
+                          <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" onError={() => setAvatarError(true)} />
                         ) : (
                           <UserIcon className="w-6 h-6" />
                         )}
@@ -281,8 +282,8 @@ const Navbar: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/50">
                     <div className="size-10 rounded-full bg-slate-800 overflow-hidden flex items-center justify-center text-primary border border-primary/20">
-                      {avatarUrl ? (
-                        <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                      {avatarUrl && !avatarError ? (
+                        <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" onError={() => setAvatarError(true)} />
                       ) : (
                         <UserIcon className="w-6 h-6" />
                       )}

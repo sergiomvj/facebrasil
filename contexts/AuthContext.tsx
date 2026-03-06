@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 
@@ -27,71 +27,85 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profile, setProfile] = useState<any | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
-    const fetchingProfileRef = useRef(false);
 
-    const fetchProfile = async (uid: string) => {
-        if (fetchingProfileRef.current) return;
-        fetchingProfileRef.current = true;
+    // Use an AbortController-style token to cancel stale profile fetches
+    const profileFetchIdRef = useRef(0);
+
+    const fetchProfile = useCallback(async (uid: string) => {
+        // Increment the fetch ID; if another fetch starts before this one finishes,
+        // the stale result is discarded.
+        const fetchId = ++profileFetchIdRef.current;
+
         try {
-            const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).single();
-            if (!error && data) {
-                setProfile(data);
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', uid)
+                .single();
+
+            // Discard result if a newer fetch has started
+            if (fetchId !== profileFetchIdRef.current) return;
+
+            if (error) {
+                if (error.code !== 'PGRST116') {
+                    // PGRST116 = row not found; anything else is unexpected
+                    console.error('[AuthContext] Error fetching profile:', error.message);
+                }
+                return;
             }
+
+            if (data) setProfile(data);
         } catch (err) {
-            console.error('[AuthContext] Error fetching profile:', err);
-        } finally {
-            fetchingProfileRef.current = false;
+            console.error('[AuthContext] Unexpected error fetching profile:', err);
         }
-    };
+    }, []);
 
-    const refreshProfile = async () => {
-        if (user) await fetchProfile(user.id);
-    };
+    const refreshProfile = useCallback(async () => {
+        if (user?.id) await fetchProfile(user.id);
+    }, [user?.id, fetchProfile]);
 
-    // Effect #1: Busca a sessão inicial UMA ÚNICA VEZ via getUser() (seguro, valida no servidor)
-    // e configura o listener de auth state. O callback do listener é SÍNCRONO para
-    // evitar o loop documentado pela Supabase:
-    // https://supabase.com/docs/reference/javascript/auth-onauthstatechange
     useEffect(() => {
         let mounted = true;
 
-        // Inicialização: usar getUser() em vez de getSession()
-        // getSession() retorna dados do storage local sem validação e pode disparar refreshes.
+        // Get the initial session once, server-validated
         const initialize = async () => {
             try {
                 const { data: { user: currentUser }, error } = await supabase.auth.getUser();
-                if (error) {
-                    // Usuário não autenticado ou token inválido — estado normal
-                    if (mounted) setLoading(false);
-                    return;
-                }
-                if (mounted) {
+
+                // Auth errors here are normal (no session, expired token, etc.)
+                // onAuthStateChange already fired and set the correct state, so we only
+                // update user if getUser() confirms a valid session.
+                if (!error && currentUser && mounted) {
                     setUser(currentUser);
-                    // A sessão será atualizada pelo onAuthStateChange abaixo
                 }
             } catch (err) {
-                console.error('[AuthContext] Error during initialization:', err);
+                // Network failure – onAuthStateChange INITIAL_SESSION already ran so
+                // user state is already set from local storage. Don't overwrite it.
+                console.error('[AuthContext] getUser() network error:', err);
             } finally {
                 if (mounted) setLoading(false);
             }
         };
 
-        // CRÍTICO: O callback deve ser SÍNCRONO.
-        // Colocar async/await aqui cria um loop porque operações de DB (fetchProfile)
-        // podem disparar novamente o onAuthStateChange.
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, currentSession: Session | null) => {
-            if (!mounted) return;
+        // CRITICAL: callback must be synchronous.
+        // Async operations (like fetchProfile) inside the callback create feedback loops
+        // per the Supabase docs: https://supabase.com/docs/reference/javascript/auth-onauthstatechange
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event: string, currentSession: Session | null) => {
+                if (!mounted) return;
 
-            const currentUser = currentSession?.user ?? null;
-            setSession(currentSession);
-            setUser(currentUser);
+                const currentUser = currentSession?.user ?? null;
+                setSession(currentSession);
+                setUser(currentUser);
 
-            if (event === 'SIGNED_OUT') {
-                setProfile(null);
+                if (event === 'SIGNED_OUT') {
+                    setProfile(null);
+                    profileFetchIdRef.current++; // cancel any in-flight profile fetch
+                }
+
+                setLoading(false);
             }
-
-            setLoading(false);
-        });
+        );
 
         initialize();
 
@@ -101,22 +115,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    // Effect #2: Busca o perfil SEPARADAMENTE quando o user muda.
-    // Isso garante que a busca de perfil NÃO acontece dentro do listener de auth,
-    // quebrando o ciclo de feedback.
+    // Fetch profile whenever the authenticated user changes (separate effect to avoid
+    // async calls inside onAuthStateChange which would cause feedback loops).
     useEffect(() => {
         if (user?.id) {
             fetchProfile(user.id);
         } else if (!user) {
             setProfile(null);
         }
-    }, [user?.id]);
+    }, [user?.id, fetchProfile]);
 
     const signOut = async () => {
-        await supabase.auth.signOut();
+        profileFetchIdRef.current++; // cancel any in-flight profile fetch
         setProfile(null);
         setSession(null);
         setUser(null);
+        await supabase.auth.signOut();
     };
 
     return (

@@ -145,7 +145,7 @@ export default function AdminSidebar() {
                         <div className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-gray-200 dark:border-white/5 ${isCollapsed ? 'justify-center p-2' : ''}`}>
                             <div className="size-8 rounded-full bg-slate-800 shrink-0 overflow-hidden border border-primary/30 flex items-center justify-center">
                                 {user?.user_metadata?.avatar_url ? (
-                                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                                 ) : (
                                     <Users className="w-4 h-4 text-primary" />
                                 )}

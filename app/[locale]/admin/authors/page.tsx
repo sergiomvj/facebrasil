@@ -269,6 +269,7 @@ export default function AuthorsPage() {
                                         src={author.avatar_url}
                                         alt={author.name || 'Author'}
                                         className="w-16 h-16 rounded-full object-cover"
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
                                 ) : (
                                     <div className="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center">

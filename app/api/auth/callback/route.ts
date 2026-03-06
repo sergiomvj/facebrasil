@@ -11,10 +11,15 @@ export async function GET(request: Request) {
         const supabase = await createClient()
         const { error } = await supabase.auth.exchangeCodeForSession(code)
         if (!error) {
-            return NextResponse.redirect(`${origin}${next}`)
+            // Only allow internal redirects to prevent open redirect vulnerabilities
+            const redirectTo = next.startsWith('/') ? `${origin}${next}` : origin
+            return NextResponse.redirect(redirectTo)
         }
     }
 
-    // return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/pt/login?error=Link_Invalido`)
+    // Detect locale from the 'next' param or default to 'pt'
+    const localeMatch = next.match(/^\/(pt|en|es)\//)
+    const locale = localeMatch ? localeMatch[1] : 'pt'
+
+    return NextResponse.redirect(`${origin}/${locale}/login?error=Link_Invalido`)
 }

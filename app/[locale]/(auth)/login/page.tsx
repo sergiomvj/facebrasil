@@ -3,20 +3,41 @@
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
-import { User, Mail, Lock, Loader2, Star, Trophy, ArrowRight, UserPlus } from 'lucide-react';
+import { User, Mail, Lock, Loader2, Star, Trophy, ArrowRight } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 
 type AuthMode = 'login' | 'signup';
+
+function translateSupabaseError(message: string): string {
+    if (!message) return 'Ocorreu um erro. Tente novamente.';
+    const m = message.toLowerCase();
+    if (m.includes('invalid login credentials') || m.includes('invalid credentials'))
+        return 'Email ou senha incorretos. Verifique seus dados.';
+    if (m.includes('email not confirmed'))
+        return 'EMAIL_NOT_CONFIRMED';
+    if (m.includes('too many requests') || m.includes('rate limit'))
+        return 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
+    if (m.includes('user not found'))
+        return 'Nenhuma conta encontrada com este email.';
+    if (m.includes('password should be') || m.includes('weak password'))
+        return 'A senha deve ter pelo menos 6 caracteres.';
+    if (m.includes('email already') || m.includes('already registered'))
+        return 'Este email já está cadastrado. Tente fazer login.';
+    if (m.includes('network') || m.includes('fetch'))
+        return 'Erro de conexão. Verifique sua internet e tente novamente.';
+    return message;
+}
 
 export default function LoginPage() {
     const [mode, setMode] = useState<AuthMode>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
-    const [rememberMe, setRememberMe] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [needsConfirmation, setNeedsConfirmation] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -24,35 +45,49 @@ export default function LoginPage() {
     const locale = (params?.locale as string) || 'pt';
     const supabase = createClient();
 
+    const handleResendConfirmation = async () => {
+        setResendLoading(true);
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/${locale}/dashboard`,
+                },
+            });
+            if (error) throw error;
+            setSuccess('Email de confirmação reenviado! Verifique sua caixa de entrada.');
+            setNeedsConfirmation(false);
+            setError(null);
+        } catch (err: any) {
+            setError('Não foi possível reenviar o email. Tente novamente em alguns minutos.');
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         setSuccess(null);
+        setNeedsConfirmation(false);
 
         try {
             if (mode === 'login') {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
 
                 if (error) throw error;
 
-                // Redirecionar para a página solicitada ou dashboard
                 const nextUrl = searchParams.get('next') || `/${locale}/dashboard`;
                 router.push(nextUrl);
-                router.refresh();
             } else {
-                // Sign Up
                 const { error, data } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
                         emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/${locale}/dashboard`,
-                        data: {
-                            full_name: name,
-                        },
+                        data: { full_name: name },
                     },
                 });
 
@@ -61,12 +96,18 @@ export default function LoginPage() {
                 if (data?.user?.identities?.length === 0) {
                     setError('Este email já está cadastrado. Tente fazer login.');
                 } else {
-                    setSuccess('Conta criada com sucesso! Verifique seu email para confirmar o cadastro.');
+                    setSuccess('Conta criada! Verifique seu email para confirmar o cadastro antes de entrar.');
                     setMode('login');
                 }
             }
         } catch (err: any) {
-            setError(err.message || 'Ocorreu um erro. Tente novamente.');
+            const translated = translateSupabaseError(err.message || '');
+            if (translated === 'EMAIL_NOT_CONFIRMED') {
+                setNeedsConfirmation(true);
+                setError('Seu email ainda não foi confirmado. Clique no link que enviamos para você ou reenvie abaixo.');
+            } else {
+                setError(translated);
+            }
         } finally {
             setLoading(false);
         }
@@ -74,7 +115,6 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-slate-950 text-white relative overflow-hidden">
-            {/* Background elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
 
@@ -98,13 +138,13 @@ export default function LoginPage() {
                     {/* Mode Toggle */}
                     <div className="flex bg-slate-950/50 p-1.5 rounded-2xl mb-8 border border-white/5">
                         <button
-                            onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
+                            onClick={() => { setMode('login'); setError(null); setSuccess(null); setNeedsConfirmation(false); }}
                             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${mode === 'login' ? 'bg-primary text-slate-950 shadow-lg' : 'text-slate-400 hover:text-white'}`}
                         >
                             Entrar
                         </button>
                         <button
-                            onClick={() => { setMode('signup'); setError(null); setSuccess(null); }}
+                            onClick={() => { setMode('signup'); setError(null); setSuccess(null); setNeedsConfirmation(false); }}
                             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${mode === 'signup' ? 'bg-primary text-slate-950 shadow-lg' : 'text-slate-400 hover:text-white'}`}
                         >
                             Criar Conta
@@ -159,30 +199,8 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Remember me / Forgot password */}
                         {mode === 'login' && (
-                            <div className="flex items-center justify-between">
-                                <label className="flex items-center gap-2.5 cursor-pointer group select-none">
-                                    <div
-                                        onClick={() => setRememberMe(v => !v)}
-                                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0
-                                            ${rememberMe
-                                                ? 'bg-primary border-primary'
-                                                : 'bg-transparent border-slate-600 group-hover:border-slate-400'
-                                            }`
-                                        }
-                                    >
-                                        {rememberMe && (
-                                            <svg className="w-3 h-3 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                    <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
-                                        Lembrar de mim
-                                    </span>
-                                </label>
-
+                            <div className="flex items-center justify-end">
                                 <a
                                     href={`/${locale}/forgot-password`}
                                     className="text-sm text-slate-400 hover:text-primary transition-colors underline underline-offset-4"
@@ -193,9 +211,21 @@ export default function LoginPage() {
                         )}
 
                         {error && (
-                            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-start gap-3 animate-in shake duration-300">
-                                <div className="mt-0.5">⚠️</div>
-                                <span>{error}</span>
+                            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex flex-col gap-3 animate-in fade-in duration-200">
+                                <div className="flex items-start gap-3">
+                                    <span className="mt-0.5">⚠️</span>
+                                    <span>{error}</span>
+                                </div>
+                                {needsConfirmation && email && (
+                                    <button
+                                        type="button"
+                                        onClick={handleResendConfirmation}
+                                        disabled={resendLoading}
+                                        className="w-full py-2.5 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {resendLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '📧 Reenviar email de confirmação'}
+                                    </button>
+                                )}
                             </div>
                         )}
 
