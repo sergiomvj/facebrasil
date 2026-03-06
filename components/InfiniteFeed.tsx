@@ -62,7 +62,7 @@ export default function InfiniteFeed({
         throw supabaseError;
       }
 
-      const newArticles = (data || []).map(row => mapRowToBlogPost(row));
+      const newArticles = (data || []).map((row: any) => mapRowToBlogPost(row));
 
       if (newArticles.length === 0) {
         setHasMore(false);

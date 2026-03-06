@@ -53,7 +53,7 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
             .select('favorites_count')
             .eq('id', articleId)
             .single()
-            .then(({ data }) => { if (data) setFavCount(data.favorites_count || 0); });
+            .then(({ data }: { data: any }) => { if (data) setFavCount(data.favorites_count || 0); });
 
         if (isSignedIn && user?.id) {
             supabase
@@ -62,7 +62,7 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
                 .eq('article_id', articleId)
                 .eq('user_id', user.id)
                 .maybeSingle()
-                .then(({ data }) => setIsFavorited(!!data));
+                .then(({ data }: { data: any }) => setIsFavorited(!!data));
         }
     }, [articleId, isSignedIn, user?.id]);
 

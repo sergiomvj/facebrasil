@@ -101,7 +101,7 @@ export default function AnalyticsDashboard() {
       })) || [];
 
       // Estatísticas
-      const totalViews = articles?.reduce((sum, a: any) => sum + (a.views || 0), 0) || 0;
+      const totalViews = articles?.reduce((sum: number, a: any) => sum + (a.views || 0), 0) || 0;
       const totalArticles = articles?.length || 0;
 
       setData({

@@ -38,7 +38,7 @@ export default function ArticleStatsModal({ articleId, articleTitle, onClose }: 
                 supabase.from('article_reads').select('*').eq('article_id', articleId),
             ]);
 
-            const reads = readsRes.data || [];
+            const reads: any[] = readsRes.data || [];
             const total = reads.length;
 
             // Aggregate

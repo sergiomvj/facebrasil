@@ -29,7 +29,7 @@ export default function MediaLibraryPage() {
             .list();
 
         if (!error && data) {
-            const mediaFiles: MediaFile[] = data.map(file => ({
+            const mediaFiles: MediaFile[] = data.map((file: any) => ({
                 id: file.id,
                 filename: file.name,
                 url: supabase.storage.from('media').getPublicUrl(file.name).data.publicUrl,
