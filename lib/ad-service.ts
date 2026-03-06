@@ -64,7 +64,7 @@ export const adService = {
 
             // 4. Filter by Category match (Priority)
             if (categoryId) {
-                const categorySpecific = pool.filter(ad => ad.category_id === category_id);
+                const categorySpecific = pool.filter(ad => ad.category_id === categoryId);
                 if (categorySpecific.length > 0) {
                     pool = categorySpecific;
                 } else {

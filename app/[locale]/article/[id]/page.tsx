@@ -2,7 +2,6 @@ import React from 'react';
 import { Zap, Clock, BookOpen, Calendar } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import AIAssistant from '@/components/AIAssistant';
 import ArticleReaderTracker from '@/components/ArticleReaderTracker';
 import ArticleTranslator from '@/components/ArticleTranslator';
 import AdSpace from '@/components/AdSpace';
