@@ -6,6 +6,7 @@ import { BlogPost } from '@/lib/fbr-types';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import { useTranslations } from 'next-intl';
+import { ensureHttps } from '@/lib/utils';
 
 export default function SearchResultsContent() {
     const t = useTranslations('Search');
@@ -59,7 +60,9 @@ export default function SearchResultsContent() {
                             avatar: row.author?.avatar_url,
                         },
                         categories: row.category ? [row.category.slug] : [],
-                        featuredImage: typeof row.featured_image === 'string' ? { url: row.featured_image } : (row.featured_image as { url: string }),
+                        featuredImage: typeof row.featured_image === 'string'
+                            ? { url: ensureHttps(row.featured_image) }
+                            : { url: ensureHttps((row.featured_image as { url?: string })?.url) },
                         publishedAt: row.published_at || row.created_at,
                         readTime: row.read_time || 5
                     };

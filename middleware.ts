@@ -18,7 +18,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // ─── 1. Apply next-intl routing first ────────────────────────────────────
-    const intlResponse = intlMiddleware(request)
+    // Skip next-intl for API routes to avoid redirecting /api/ to /pt/api/
+    const intlResponse = path.startsWith('/api/')
+        ? NextResponse.next()
+        : intlMiddleware(request)
 
     // ─── 2. Refresh Supabase session and propagate cookies to intlResponse ───
     // We must create a new client that reads FROM the request AND writes TO

@@ -47,3 +47,15 @@ export function getEmbedUrl(url: string): string {
     return url;
   }
 }
+
+/**
+ * Garante que uma URL de imagem usa HTTPS para evitar Mixed Content warnings.
+ * Converte http:// para https:// automaticamente.
+ */
+export function ensureHttps(url: string | null | undefined): string {
+  if (!url) return '';
+  if (url.startsWith('http://')) {
+    return 'https://' + url.slice(7);
+  }
+  return url;
+}

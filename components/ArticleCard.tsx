@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/lib/fbr-types';
 import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
+import { ensureHttps } from '@/lib/utils';
 
 interface ArticleCardProps {
   article: BlogPost;
@@ -14,7 +15,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
       <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-5">
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-          style={{ backgroundImage: `url('${article.featuredImage?.url || FALLBACK_ARTICLE_IMAGE}')` }}
+          style={{ backgroundImage: `url('${ensureHttps(article.featuredImage?.url) || FALLBACK_ARTICLE_IMAGE}')` }}
         ></div>
         <div className="absolute top-4 left-4">
           <span className="glass-card px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest text-accent-yellow border-accent-yellow/30">
@@ -37,7 +38,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         {article.author.avatar && (
           <div
             className="w-8 h-8 rounded-full bg-cover border border-white/10"
-            style={{ backgroundImage: `url('${article.author.avatar}')` }}
+            style={{ backgroundImage: `url('${ensureHttps(article.author.avatar)}')` }}
           ></div>
         )}
         <span className="text-xs font-semibold text-slate-500">

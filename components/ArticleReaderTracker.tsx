@@ -43,7 +43,7 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
     useEffect(() => {
         if (viewTrackedRef.current) return;
         viewTrackedRef.current = true;
-        supabase.rpc('increment_article_views', { p_article_id: articleId }).catch(() => { });
+        void (async () => { try { await supabase.rpc('increment_article_views', { p_article_id: articleId }); } catch { } })();
     }, [articleId]);
 
     // ----- FETCH INITIAL FAV STATE -----
@@ -136,7 +136,7 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
         // Use sendBeacon for reliability on page unload
         const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
         // Fallback via supabase rpc (works when tab stays open)
-        supabase.rpc('upsert_article_read', payload).catch(() => { });
+        void (async () => { try { await supabase.rpc('upsert_article_read', payload); } catch { } })();
     }, [articleId, user?.id]);
 
     useEffect(() => {

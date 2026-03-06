@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { BookOpen, Heart, Trophy, Clock, Star, User as UserIcon, Settings, FolderHeart } from 'lucide-react';
 import Link from 'next/link';
+import { ensureHttps } from '@/lib/utils';
 
 interface ArticleItem {
     id: string;
@@ -180,7 +181,7 @@ export default function DashboardPage() {
                                     <Link key={article.id} href={`/pt/article/${article.slug}`} className="flex gap-5 p-4 rounded-xl bg-slate-900/30 border border-white/5 hover:bg-slate-900/50 hover:border-white/10 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-300">
                                         <div className="w-24 h-24 rounded-lg bg-slate-800 shrink-0 overflow-hidden relative">
                                             {article.featured_image?.url ? (
-                                                <img src={article.featured_image.url} alt={article.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                                <img src={ensureHttps(article.featured_image.url)} alt={article.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-slate-700">
                                                     <BookOpen className="w-8 h-8" />
@@ -205,7 +206,7 @@ export default function DashboardPage() {
                                     <Link key={article.id} href={`/pt/article/${article.slug}`} className="flex gap-5 p-4 rounded-xl bg-slate-900/30 border border-white/5 hover:bg-slate-900/50 hover:border-white/10 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-300">
                                         <div className="w-24 h-24 rounded-lg bg-slate-800 shrink-0 overflow-hidden relative">
                                             {article.featured_image?.url ? (
-                                                <img src={article.featured_image.url} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                                <img src={ensureHttps(article.featured_image.url)} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                                             ) : <BookOpen className="w-8 h-8 m-auto text-slate-700 h-full" />}
                                         </div>
                                         <div className="flex-1">
