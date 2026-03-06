@@ -55,15 +55,21 @@ export async function upsertAuthor(payload: AuthorPayload, id?: string) {
         } else {
             // Se temos ID, estamos editando. Verifica se tem senha para alterar.
             if (payload.password) {
-                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
-                    password: payload.password
-                });
-                if (updateError) {
-                    console.error('Update User Password Error:', updateError);
-                    // Retorna erro se falhou, ex: tentar atualizar senha de um autor virtual que não tem Auth
-                    if (!updateError.message.includes('not found')) {
-                        return { success: false, error: updateError.message };
+                try {
+                    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+                        password: payload.password
+                    });
+                    if (updateError) {
+                        console.error('Update User Password Error:', updateError);
+                        // Ignora erros de "not found" (autor virtual) ou UUID inválido
+                        if (!updateError.message.includes('not found') && !updateError.message.toLowerCase().includes('uuid')) {
+                            return { success: false, error: updateError.message };
+                        }
+                        console.warn('[upsertAuthor] Ignorando erro de senha para autor virtual:', updateError.message);
                     }
+                } catch (passError: any) {
+                    // Autores virtuais não têm conta no Auth — ignora o erro de UUID
+                    console.warn('[upsertAuthor] Pulando atualização de senha (autor virtual ou UUID inválido):', passError.message);
                 }
             }
         }

@@ -438,6 +438,7 @@ export default function AuthorsPage() {
                                     </label>
                                     <input
                                         type="password"
+                                        autoComplete="new-password"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         placeholder={editingAuthor ? "••••••••" : "Mínimo 6 caracteres"}
