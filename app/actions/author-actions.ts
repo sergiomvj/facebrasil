@@ -16,85 +16,93 @@ interface AuthorPayload {
 }
 
 export async function upsertAuthor(payload: AuthorPayload, id?: string) {
-    // Both admins and editors can manage authors
-    await protectEditor();
+    try {
+        // Both admins and editors can manage authors
+        await protectEditor();
 
-    console.log('--- SERVER ACTION: UPSERT AUTHOR ---');
-    console.log('Payload:', { ...payload, password: payload.password ? '***' : undefined });
-    console.log('ID:', id);
+        console.log('--- SERVER ACTION: UPSERT AUTHOR ---');
+        console.log('Payload:', { ...payload, password: payload.password ? '***' : undefined });
+        console.log('ID:', id);
 
-    let finalId = id;
-    let isVirtual = !id;
+        let finalId = id;
+        let isVirtual = !id;
 
-    // Se !id, estamos criando um novo.
-    if (!id) {
-        if (payload.email && payload.password && !payload.isVirtualOverride) {
-            // Criação de usuário real Auth
-            const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-                email: payload.email,
-                password: payload.password,
-                email_confirm: true,
-                user_metadata: {
-                    full_name: payload.name,
-                    role: payload.role
+        // Se !id, estamos criando um novo.
+        if (!id) {
+            if (payload.email && payload.password && !payload.isVirtualOverride) {
+                // Criação de usuário real Auth
+                const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+                    email: payload.email,
+                    password: payload.password,
+                    email_confirm: true,
+                    user_metadata: {
+                        full_name: payload.name,
+                        role: payload.role
+                    }
+                });
+
+                if (authError) {
+                    console.error('Create User Auth Error:', authError);
+                    return { success: false, error: authError.message };
                 }
-            });
-
-            if (authError) {
-                console.error('Create User Auth Error:', authError);
-                return { success: false, error: authError.message };
+                finalId = authData.user.id;
+                isVirtual = false;
+            } else {
+                // Criação de autor virtual
+                finalId = crypto.randomUUID();
+                isVirtual = true;
             }
-            finalId = authData.user.id;
-            isVirtual = false;
         } else {
-            // Criação de autor virtual
-            finalId = crypto.randomUUID();
-            isVirtual = true;
-        }
-    } else {
-        // Se temos ID, estamos editando. Verifica se tem senha para alterar.
-        if (payload.password) {
-            const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
-                password: payload.password
-            });
-            if (updateError) {
-                console.error('Update User Password Error:', updateError);
-                // Retorna erro se falhou, ex: tentar atualizar senha de um autor virtual que não tem Auth
-                if (!updateError.message.includes('not found')) {
-                    return { success: false, error: updateError.message };
+            // Se temos ID, estamos editando. Verifica se tem senha para alterar.
+            if (payload.password) {
+                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+                    password: payload.password
+                });
+                if (updateError) {
+                    console.error('Update User Password Error:', updateError);
+                    // Retorna erro se falhou, ex: tentar atualizar senha de um autor virtual que não tem Auth
+                    if (!updateError.message.includes('not found')) {
+                        return { success: false, error: updateError.message };
+                    }
                 }
             }
         }
+
+        const dbPayload = {
+            id: finalId,
+            name: payload.name,
+            avatar_url: payload.avatar_url || null,
+            email: payload.email || null,
+            role: payload.role || 'EDITOR',
+            updated_at: new Date().toISOString()
+        };
+
+        let result;
+        if (!isVirtual) {
+            // Update existing (Supabase Auth or Virtual)
+            result = await supabaseAdmin.from('profiles').upsert([dbPayload], { onConflict: 'id' }).select();
+        } else {
+            // Insert new Virtual Author
+            result = await supabaseAdmin.from('profiles').insert([dbPayload]).select();
+        }
+
+        if (result.error) {
+            console.error('Author Upsert Error:', result.error);
+            return { success: false, error: result.error.message };
+        }
+
+        revalidatePath('/admin/authors');
+        revalidatePath('/admin/articles');
+        revalidatePath('/admin/editor');
+
+        return { success: true, data: result.data };
+    } catch (error: any) {
+        console.error('Critical Author Upsert Error:', error);
+        return {
+            success: false,
+            error: error.message || 'Erro inesperado ao processar autor. Verifique os logs do servidor.'
+        };
     }
-
-    const dbPayload = {
-        id: finalId,
-        name: payload.name,
-        avatar_url: payload.avatar_url || null,
-        email: payload.email || null,
-        role: payload.role || 'EDITOR',
-        updated_at: new Date().toISOString()
-    };
-
-    let result;
-    if (!isVirtual) {
-        // Update existing (Supabase Auth or Virtual)
-        result = await supabaseAdmin.from('profiles').upsert([dbPayload], { onConflict: 'id' }).select();
-    } else {
-        // Insert new Virtual Author
-        result = await supabaseAdmin.from('profiles').insert([dbPayload]).select();
-    }
-
-    if (result.error) {
-        console.error('Author Upsert Error:', result.error);
-        return { success: false, error: result.error.message };
-    }
-
-    revalidatePath('/admin/authors');
-    revalidatePath('/admin/articles');
-    revalidatePath('/admin/editor');
-
-    return { success: true, data: result.data };
 }
 
 export async function deleteAuthor(id: string, transferToId: string) {
