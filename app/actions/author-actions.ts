@@ -158,9 +158,11 @@ export async function inviteAuthor(email: string, role: string = 'EDITOR') {
 
         // Use Supabase Admin to invite the user
         console.log('[AuthorActions] Calling Supabase Admin inviteUserByEmail...');
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        let siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        siteUrl = siteUrl.replace(/\/+$/, ''); // Remove trailing slashes
+
         const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-        console.log(`[AuthorActions] Has Service Key: ${hasServiceKey}, Redirect URL: ${siteUrl}/api/auth/callback`);
+        console.log(`[AuthorActions] Has Service Key: ${hasServiceKey}, Redirect URL: ${siteUrl}/pt/accept-invite`);
 
         if (!hasServiceKey) {
             throw new Error('SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.');
