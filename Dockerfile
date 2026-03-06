@@ -45,6 +45,7 @@ ENV GIT_SHA=$GIT_SHA
 ENV TV_FACEBRASIL_WEBHOOK_URL=$TV_FACEBRASIL_WEBHOOK_URL
 
 ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
