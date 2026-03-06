@@ -133,6 +133,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await supabase.auth.signOut();
     };
 
+    // Intercept Supabase Auth Hash (Invite/Recovery) that land on the wrong page
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token=')) {
+                const currentPath = window.location.pathname;
+                const localeMatch = currentPath.match(/^\/(pt|en|es)/);
+                const locale = localeMatch ? localeMatch[1] : 'pt';
+
+                if (hash.includes('type=invite') && !currentPath.includes('accept-invite')) {
+                    window.location.href = `/${locale}/accept-invite${hash}`;
+                } else if (hash.includes('type=recovery') && !currentPath.includes('reset-password')) {
+                    window.location.href = `/${locale}/reset-password${hash}`;
+                }
+            }
+        }
+    }, []);
+
     return (
         <AuthContext.Provider value={{ user, profile, session, loading, signOut, refreshProfile }}>
             {children}
