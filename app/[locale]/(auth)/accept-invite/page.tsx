@@ -19,20 +19,43 @@ export default function AcceptInvitePage() {
     const locale = (params?.locale as string) || 'pt';
     const supabase = createClient();
 
-    // Verify session - Clicking the invite link logs the user in automatically
+    // Verify session - Clicking the invite link logs the user in automatically via the URL hash
     useEffect(() => {
         let mounted = true;
+
         const checkSession = async () => {
+            // First check if we already have a session
             const { data: { session }, error } = await supabase.auth.getSession();
-            if (mounted) {
-                if (!session || error) {
-                    setError('O link do convite é inválido ou expirou. Por favor, peça um novo convite.');
-                }
+            if (session && mounted) {
                 setVerifying(false);
+                return;
+            }
+
+            if (mounted) {
+                // Wait a bit to see if the hash processes into a session, otherwise show error
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, newSession: any) => {
+                    if (newSession && mounted) {
+                        setVerifying(false);
+                        subscription.unsubscribe();
+                    }
+                });
+
+                // Timeout after 3 seconds if no session is established
+                setTimeout(() => {
+                    if (mounted) {
+                        supabase.auth.getSession().then(({ data }: any) => {
+                            if (!data.session) {
+                                setError('O link do convite é inválido ou expirou. Por favor, peça um novo convite.');
+                                setVerifying(false);
+                            }
+                        });
+                    }
+                }, 3000);
             }
         };
 
         checkSession();
+
         return () => { mounted = false; };
     }, [supabase.auth]);
 
