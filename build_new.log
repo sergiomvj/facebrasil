@@ -1,0 +1,104 @@
+﻿
+> temp_next_app@0.1.0 build
+> next build
+
+node.exe : ÔÜá `eslint` configuration in next.config.ts is no longer supported. See more 
+info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\OEM\AppData\Roaming\np ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ÔÜá `eslint` co...xt-lint-options:String)     
+[], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ÔÜá Invalid next.config.ts options detected: 
+ÔÜá     Unrecognized key(s) in object: 'eslint'
+ÔÜá See more info here: https://nextjs.org/docs/messages/invalid-next-config
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
+https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 11.9s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+ÔÜá Using edge runtime on a page currently disables static generation for that page
+  Generating static pages using 11 workers (0/159) ...
+  Generating static pages using 11 workers (39/159) 
+  Generating static pages using 11 workers (79/159) 
+  Generating static pages using 11 workers (119/159) 
+Ô£ô Generating static pages using 11 workers (159/159) in 1712.5ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /_not-found
+Ôö£ ãÆ /[locale]
+Ôö£ ãÆ /[locale]/admin
+Ôö£ ãÆ /[locale]/admin/ads
+Ôö£ ãÆ /[locale]/admin/analytics
+Ôö£ ãÆ /[locale]/admin/articles
+Ôö£ ãÆ /[locale]/admin/authors
+Ôö£ ãÆ /[locale]/admin/categories
+Ôö£ ãÆ /[locale]/admin/daily-hero
+Ôö£ ãÆ /[locale]/admin/editor
+Ôö£ ãÆ /[locale]/admin/events
+Ôö£ ãÆ /[locale]/admin/gamification
+Ôö£ ãÆ /[locale]/admin/media
+Ôö£ ãÆ /[locale]/admin/pages
+Ôö£ ãÆ /[locale]/admin/pages/[id]
+Ôö£ ãÆ /[locale]/admin/settings
+Ôö£ ãÆ /[locale]/admin/shop
+Ôö£ ãÆ /[locale]/admin/tools/image-converter
+Ôö£ ãÆ /[locale]/admin/tv-facebrasil
+Ôö£ ãÆ /[locale]/admin/video-reports
+Ôö£ ãÆ /[locale]/advertise
+Ôö£ ãÆ /[locale]/ambassador
+Ôö£ ãÆ /[locale]/article/[id]
+Ôö£ ãÆ /[locale]/callback
+Ôö£ ãÆ /[locale]/category/[slug]
+Ôö£ ãÆ /[locale]/contact
+Ôö£ ãÆ /[locale]/dashboard
+Ôö£ ãÆ /[locale]/digital-editions
+Ôö£ ãÆ /[locale]/eu-reporter
+Ôö£ ãÆ /[locale]/eu-reporter/videos
+Ôö£ ãÆ /[locale]/events
+Ôö£ ãÆ /[locale]/events/submit
+Ôö£ ãÆ /[locale]/fbr-news
+Ôö£ ãÆ /[locale]/forgot-password
+Ôö£ ãÆ /[locale]/gamification
+Ôö£ ãÆ /[locale]/icon
+Ôö£ Ôùï /[locale]/icon.svg
+Ôö£ ãÆ /[locale]/imigracao
+Ôö£ ãÆ /[locale]/login
+Ôö£ ãÆ /[locale]/privacy
+Ôö£ ãÆ /[locale]/reset-password
+Ôö£ ãÆ /[locale]/search
+Ôö£ ãÆ /[locale]/settings
+Ôö£ ãÆ /[locale]/sitemap.xml
+Ôö£ ãÆ /[locale]/subscription
+Ôö£ ãÆ /[locale]/terms
+Ôö£ ãÆ /[locale]/trabalho
+Ôö£ ãÆ /[locale]/vida-eua
+Ôö£ Ôùï /about
+Ôö£ ãÆ /api/ai/chat
+Ôö£ ãÆ /api/ai/summarize
+Ôö£ ãÆ /api/articles
+Ôö£ ãÆ /api/articles/new
+Ôö£ ãÆ /api/auth/callback
+Ôö£ ãÆ /api/context/[id]
+Ôö£ ãÆ /api/gamification/badges
+Ôö£ ãÆ /api/gamification/xp
+Ôö£ ãÆ /api/gamification/xp/balance
+Ôö£ ãÆ /api/geo
+Ôö£ ãÆ /api/leaderboard
+Ôö£ ãÆ /api/upload-image
+Ôö£ ãÆ /api/user/achievement
+Ôöö ãÆ /api/user/reaction
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+
