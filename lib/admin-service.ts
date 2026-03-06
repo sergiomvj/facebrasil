@@ -154,13 +154,13 @@ export async function fetchAdminStats(): Promise<AdminStats> {
     if (articleError) throw articleError;
 
     const totalArticles = articleStats?.length || 0;
-    const publishedArticles = articleStats?.filter((a: any) =>
+    const publishedArticles = (articleStats as any[])?.filter((a: any) =>
       a.status?.toLowerCase() === 'published'
     ).length || 0;
-    const draftArticles = articleStats?.filter((a: any) =>
+    const draftArticles = (articleStats as any[])?.filter((a: any) =>
       a.status?.toLowerCase() === 'draft'
     ).length || 0;
-    const totalViews = articleStats?.reduce((acc: number, a: any) => acc + (a.views || 0), 0) || 0;
+    const totalViews = (articleStats as any[])?.reduce((acc: number, a: any) => acc + (a.views || 0), 0) || 0;
 
     // Get user counts
     const { count: totalUsers, error: userError } = await supabaseAdmin
@@ -322,7 +322,7 @@ export async function fetchComments(params?: {
 
     // Filter by status
     if (params?.status && (params.status as string) !== 'all') {
-      if (params.status === 'reported') {
+      if ((params.status as string) === 'reported') {
         query = query.eq('is_reported', true);
       } else {
         query = query.eq('status', params.status);
@@ -371,10 +371,10 @@ export async function updateCommentStatus(
   status: 'approved' | 'rejected' | 'spam'
 ): Promise<boolean> {
   try {
-    const { error } = await (supabaseAdmin
+    const { error } = await supabaseAdmin
       .from('comments')
-      .update({ status, updated_at: new Date().toISOString() } as any)
-      .eq('id', commentId));
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', commentId);
 
     if (error) throw error;
     return true;

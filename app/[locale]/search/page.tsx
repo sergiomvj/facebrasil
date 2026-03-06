@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import SearchResultsComponent from '@/components/SearchResults';
+import SearchResultsComponent from '../../../components/SearchResults';
 
 import { getTranslations } from 'next-intl/server';
 
