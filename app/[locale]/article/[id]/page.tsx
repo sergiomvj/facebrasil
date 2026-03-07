@@ -94,7 +94,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 ></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
 
-                <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 max-w-[1000px] mx-auto z-10">
+                <div className="absolute bottom-0 left-0 w-full p-6 pb-24 md:p-12 md:pb-28 max-w-[1000px] mx-auto z-10">
                     <span className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-6 border border-primary/30 backdrop-blur-md">
                         {article.categories?.[0] ?? 'Geral'}
                     </span>
