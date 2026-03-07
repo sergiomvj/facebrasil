@@ -20,15 +20,65 @@ export default function ResetPasswordPage() {
     const supabase = createClient();
 
     useEffect(() => {
-        // Verifica se o usuário chegou aqui com uma sessão válida (o callback do Supabase loga o usuário)
+        let mounted = true;
+
         const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                setError('Link de recuperação inválido ou expirado. Por favor, solicite um novo link.');
+            // First check if we already have a session
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (session && mounted) {
+                setCheckingSession(false);
+                return;
             }
-            setCheckingSession(false);
+
+            if (mounted) {
+                // Wait a bit to see if the hash processes into a session, otherwise show error
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, newSession: any) => {
+                    if (newSession && mounted) {
+                        setCheckingSession(false);
+                        subscription.unsubscribe();
+                    }
+                });
+
+                // Timeout after 3 seconds if no session is established natively
+                setTimeout(async () => {
+                    if (!mounted) return;
+
+                    // Natively failed? Try to extract the tokens directly from the hash as a fallback
+                    if (window.location.hash && window.location.hash.includes('access_token=')) {
+                        try {
+                            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                            const access_token = hashParams.get('access_token');
+                            const refresh_token = hashParams.get('refresh_token');
+
+                            if (access_token && refresh_token) {
+                                const { error } = await supabase.auth.setSession({
+                                    access_token,
+                                    refresh_token
+                                });
+
+                                if (!error) {
+                                    setCheckingSession(false);
+                                    return;
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Manual session fallback failed", e);
+                        }
+                    }
+
+                    supabase.auth.getSession().then(({ data }: any) => {
+                        if (!data.session) {
+                            setError('Link de recuperação inválido ou expirado. Por favor, solicite um novo link.');
+                            setCheckingSession(false);
+                        }
+                    });
+                }, 3000);
+            }
         };
+
         checkSession();
+
+        return () => { mounted = false; };
     }, [supabase.auth]);
 
     const handleSubmit = async (e: React.FormEvent) => {

@@ -40,16 +40,39 @@ export default function AcceptInvitePage() {
                     }
                 });
 
-                // Timeout after 3 seconds if no session is established
-                setTimeout(() => {
-                    if (mounted) {
-                        supabase.auth.getSession().then(({ data }: any) => {
-                            if (!data.session) {
-                                setError('O link do convite é inválido ou expirou. Por favor, peça um novo convite.');
-                                setVerifying(false);
+                // Timeout after 3 seconds if no session is established natively
+                setTimeout(async () => {
+                    if (!mounted) return;
+
+                    // Natively failed? Try to extract the tokens directly from the hash as a fallback
+                    if (window.location.hash && window.location.hash.includes('access_token=')) {
+                        try {
+                            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                            const access_token = hashParams.get('access_token');
+                            const refresh_token = hashParams.get('refresh_token');
+
+                            if (access_token && refresh_token) {
+                                const { error } = await supabase.auth.setSession({
+                                    access_token,
+                                    refresh_token
+                                });
+
+                                if (!error) {
+                                    setVerifying(false);
+                                    return;
+                                }
                             }
-                        });
+                        } catch (e) {
+                            console.error("Manual session fallback failed", e);
+                        }
                     }
+
+                    supabase.auth.getSession().then(({ data }: any) => {
+                        if (!data.session) {
+                            setError('O link do convite é inválido ou expirou. Por favor, peça um novo convite.');
+                            setVerifying(false);
+                        }
+                    });
                 }, 3000);
             }
         };
