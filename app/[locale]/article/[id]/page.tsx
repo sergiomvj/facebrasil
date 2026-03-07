@@ -38,9 +38,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { id, locale } = await params;
     const article = await fetchPost(id, locale);
     if (!article) return { title: 'Article Not Found' };
+
+    // Ensure absolute URL for Open Graph
+    const imageUrl = article.featuredImage?.url || `https://fbr.news${FALLBACK_ARTICLE_IMAGE}`;
+
     return {
         title: `${article.seo.metaTitle} | Facebrasil`,
         description: article.seo.metaDescription,
+        openGraph: {
+            title: `${article.seo.metaTitle} | Facebrasil`,
+            description: article.seo.metaDescription,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: article.seo.metaTitle,
+                }
+            ],
+            type: 'article',
+            publishedTime: article.publishedAt,
+            authors: [article.author.name],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${article.seo.metaTitle} | Facebrasil`,
+            description: article.seo.metaDescription,
+            images: [imageUrl],
+        },
     };
 }
 
