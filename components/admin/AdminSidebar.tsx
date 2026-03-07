@@ -26,31 +26,32 @@ interface NavItem {
     name: string;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
+    allowedRoles?: string[]; // Arrays of roles allowed, undefined means all logged in users who reach the panel
 }
 
 const navItems: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Artigos', href: '/admin/articles', icon: FileText },
-    { name: 'TV Facebrasil', href: '/admin/tv-facebrasil', icon: MonitorPlay },
-    { name: 'Mídia', href: '/admin/media', icon: AdImageIcon },
-    { name: 'Categorias', href: '/admin/categories', icon: FolderOpen },
-    { name: 'Autores', href: '/admin/authors', icon: Users },
-    { name: 'Eventos', href: '/admin/events', icon: Calendar },
-    { name: 'Vídeos Reportados', href: '/admin/video-reports', icon: Video },
-    { name: 'Hero Diário', href: '/admin/daily-hero', icon: Star },
-    { name: 'Anúncios', href: '/admin/ads', icon: DollarSign },
-    { name: 'Páginas', href: '/admin/pages', icon: FileText },
-    { name: 'Gamificação', href: '/admin/gamification', icon: Trophy },
-    { name: 'FacebrasilShop', href: '/admin/shop', icon: Star },
-    { name: 'Conversor de Imagens', href: '/admin/tools/image-converter', icon: AdImageIcon },
-    { name: 'Configurações', href: '/admin/settings', icon: Settings },
+    { name: 'TV Facebrasil', href: '/admin/tv-facebrasil', icon: MonitorPlay, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Mídia', href: '/admin/media', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Categorias', href: '/admin/categories', icon: FolderOpen, allowedRoles: ['ADMIN'] },
+    { name: 'Autores', href: '/admin/authors', icon: Users, allowedRoles: ['ADMIN'] },
+    { name: 'Eventos', href: '/admin/events', icon: Calendar, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Vídeos Reportados', href: '/admin/video-reports', icon: Video, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Hero Diário', href: '/admin/daily-hero', icon: Star, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Anúncios', href: '/admin/ads', icon: DollarSign, allowedRoles: ['ADMIN'] },
+    { name: 'Páginas', href: '/admin/pages', icon: FileText, allowedRoles: ['ADMIN'] },
+    { name: 'Gamificação', href: '/admin/gamification', icon: Trophy, allowedRoles: ['ADMIN'] },
+    { name: 'FacebrasilShop', href: '/admin/shop', icon: Star, allowedRoles: ['ADMIN'] },
+    { name: 'Conversor de Imagens', href: '/admin/tools/image-converter', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Configurações', href: '/admin/settings', icon: Settings, allowedRoles: ['ADMIN', 'EDITOR'] },
 ];
 
 export default function AdminSidebar() {
     const pathname = usePathname();
     const params = useParams();
     const locale = params.locale as string;
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -101,8 +102,15 @@ export default function AdminSidebar() {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+                    <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
                         {navItems.map((item) => {
+                            const userRole = profile?.role?.toUpperCase() || 'CONTRIBUTOR'; // Default lowest access inside admin if undefined
+
+                            // Check if item has allowedRoles and if current user role is included
+                            if (item.allowedRoles && !item.allowedRoles.includes(userRole)) {
+                                return null;
+                            }
+
                             const Icon = item.icon;
                             const fullHref = `/${locale}${item.href}`;
                             const isActive = pathname === fullHref || (item.href !== '/admin' && pathname.startsWith(fullHref));

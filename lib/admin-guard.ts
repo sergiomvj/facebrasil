@@ -88,3 +88,69 @@ export async function protectEditor() {
 
     return { userId, role };
 }
+
+/**
+ * Checks if the current user has at least the WRITER role.
+ */
+export async function protectWriter() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect("/pt/login");
+    }
+
+    const userId = user.id;
+    const masterAdminId = process.env.MASTER_ADMIN_ID;
+
+    if (masterAdminId && userId === masterAdminId) {
+        return { userId, role: "ADMIN" };
+    }
+
+    const { data: profile } = await (supabaseAdmin
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single() as any);
+
+    const role = profile?.role?.toUpperCase();
+
+    if (role !== "ADMIN" && role !== "EDITOR" && role !== "WRITER") {
+        throw new Error("Não autorizado. Você precisa ser, no mínimo, Escritor para realizar esta ação.");
+    }
+
+    return { userId, role };
+}
+
+/**
+ * Checks if the current user has at least the CONTRIBUTOR role.
+ */
+export async function protectContributor() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect("/pt/login");
+    }
+
+    const userId = user.id;
+    const masterAdminId = process.env.MASTER_ADMIN_ID;
+
+    if (masterAdminId && userId === masterAdminId) {
+        return { userId, role: "ADMIN" };
+    }
+
+    const { data: profile } = await (supabaseAdmin
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single() as any);
+
+    const role = profile?.role?.toUpperCase();
+
+    if (role !== "ADMIN" && role !== "EDITOR" && role !== "WRITER" && role !== "CONTRIBUTOR") {
+        throw new Error("Não autorizado. Você precisa ter acesso de Contribuidor para realizar esta ação.");
+    }
+
+    return { userId, role };
+}

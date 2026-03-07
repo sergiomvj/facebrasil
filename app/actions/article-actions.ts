@@ -3,6 +3,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { auth } from '@/lib/auth-server';
+import { protectEditor, protectWriter, protectContributor } from '@/lib/admin-guard';
 
 import { revalidatePath } from 'next/cache';
 import { reportArticleToSEO } from '@/lib/seo-api';
@@ -60,8 +61,21 @@ export async function upsertArticle(payload: UpdateArticlePayload, id?: string) 
 
     let result;
     if (id) {
+        // Enforce update permissions:
+        // Must be at least WRITER. If WRITER, must own the article. ADMIN/EDITOR can edit any.
+        const { role } = await protectWriter();
+
+        if (role === 'WRITER') {
+            const { data: existingArticle } = await supabaseAdmin.from('articles').select('author_id').eq('id', id).single();
+            if (existingArticle?.author_id !== userId) {
+                return { success: false, error: 'Unauthorized: You can only edit your own articles.' };
+            }
+        }
+
         result = await supabaseAdmin.from('articles').update(finalPayload).eq('id', id).select().single();
     } else {
+        // Enforce insert permissions: Must be at least CONTRIBUTOR
+        await protectContributor();
         result = await supabaseAdmin.from('articles').insert([finalPayload]).select().single();
     }
 
@@ -96,6 +110,9 @@ export async function upsertArticle(payload: UpdateArticlePayload, id?: string) 
 export async function deleteArticle(id: string) {
     const { userId } = await auth();
     if (!userId) return { success: false, error: 'Unauthorized' };
+
+    // Enforce delete permissions: Must be at least EDITOR
+    await protectEditor();
 
     const { error } = await supabaseAdmin.from('articles').delete().eq('id', id);
 

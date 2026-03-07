@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe, Sparkles, X, BrainCircuit, Type, FileText, Languages, BarChart2 } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { deleteArticle, upsertArticle } from '@/app/actions/article-actions';
 import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
@@ -20,6 +21,7 @@ interface ArticleListItem {
     views: number;
     created_at: string;
     language: string;
+    author_id: string | null;
     author: { name: string } | null;
     category: { name: string; color: string; slug: string } | null;
 }
@@ -44,6 +46,7 @@ export default function ArticlesListPage() {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLanguage, setSelectedLanguage] = useState('all');
     const [selectedStatsArticle, setSelectedStatsArticle] = useState<{ id: string; title: string } | null>(null);
+    const { user, profile } = useAuth();
 
     // AI Generation Modal State
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -123,7 +126,7 @@ export default function ArticlesListPage() {
             supabase
                 .from('articles')
                 .select(`
-                    id, title, slug, status, published_at, created_at, language,
+                    id, title, slug, status, published_at, created_at, language, author_id,
                     author:profiles(name),
                     category:categories(name, color, slug)
                 `)
@@ -142,6 +145,7 @@ export default function ArticlesListPage() {
                 views: number;
                 created_at: string;
                 language: string;
+                author_id: string | null;
                 author: { name: string } | { name: string }[] | null;
                 category: { name: string; color: string; slug: string } | { name: string; color: string; slug: string }[] | null;
             }
@@ -157,6 +161,7 @@ export default function ArticlesListPage() {
                 views: item.views,
                 created_at: item.created_at,
                 language: item.language,
+                author_id: item.author_id,
                 author: Array.isArray(item.author) ? item.author[0] : item.author,
                 category: Array.isArray(item.category) ? item.category[0] : item.category
             }));
@@ -489,12 +494,20 @@ export default function ArticlesListPage() {
                                                 <Link href={`/article/${post.slug}`} target="_blank" className="p-2 text-slate-400 hover:text-blue-400 rounded-lg hover:bg-blue-400/10 transition-colors" title="View">
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
-                                                <Link href={`/admin/editor?id=${post.id}`} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors" title="Edit">
-                                                    <Edit className="w-4 h-4" />
-                                                </Link>
-                                                <button onClick={() => handleDelete(post.id)} className="p-2 text-slate-400 hover:text-red-400 rounded-lg hover:bg-red-400/10 transition-colors" title="Delete">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+
+                                                {/* Edit Button Logic */}
+                                                {(profile?.role === 'ADMIN' || profile?.role === 'EDITOR' || (profile?.role === 'WRITER' && post.author_id === user?.id)) && (
+                                                    <Link href={`/admin/editor?id=${post.id}`} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors" title="Edit">
+                                                        <Edit className="w-4 h-4" />
+                                                    </Link>
+                                                )}
+
+                                                {/* Delete Button Logic */}
+                                                {(profile?.role === 'ADMIN' || profile?.role === 'EDITOR') && (
+                                                    <button onClick={() => handleDelete(post.id)} className="p-2 text-slate-400 hover:text-red-400 rounded-lg hover:bg-red-400/10 transition-colors" title="Delete">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

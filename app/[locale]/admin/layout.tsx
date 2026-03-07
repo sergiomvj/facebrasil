@@ -3,15 +3,30 @@
 import React from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
 export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const { profile, loading } = useAuth();
+    const router = useRouter();
+    const params = useParams();
+    const locale = params.locale as string;
+
+    React.useEffect(() => {
+        if (!loading && profile?.role === 'VIRTUAL_COLUMNIST') {
+            router.replace(`/${locale}`);
+        }
+    }, [profile, loading, router, locale]);
+
+    if (!loading && profile?.role === 'VIRTUAL_COLUMNIST') {
+        return null; // Block render while redirecting
+    }
     return (
         <div className="min-h-screen dark:bg-slate-950 bg-gray-50">
             <AdminSidebar />
