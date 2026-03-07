@@ -23,6 +23,7 @@ export default function AuthorsPage() {
     const [loading, setLoading] = useState(true);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [roleFilter, setRoleFilter] = useState('ALL');
     const [userSearchTerm, setUserSearchTerm] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
@@ -209,9 +210,11 @@ export default function AuthorsPage() {
 
     }
 
-    const filteredAuthors = authors.filter(author =>
-        author.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredAuthors = authors.filter(author => {
+        const matchesSearch = author.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = roleFilter === 'ALL' || author.role === roleFilter;
+        return matchesSearch && matchesRole;
+    });
 
     return (
         <>
@@ -232,6 +235,19 @@ export default function AuthorsPage() {
                         className="w-full pl-10 pr-4 py-2 dark:bg-slate-800 bg-white border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                 </div>
+                {/* Role Filter */}
+                <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="px-4 py-2 dark:bg-slate-800 bg-white border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary min-w-[200px]"
+                >
+                    <option value="ALL">Todos os Tipos</option>
+                    <option value="EDITOR">Editor</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="CONTRIBUTOR">Contribuidor</option>
+                    <option value="WRITER">Escritor</option>
+                    <option value="VIRTUAL_COLUMNIST">Colunista Virtual</option>
+                </select>
                 <button
                     onClick={() => setShowInviteModal(true)}
                     className="flex items-center gap-2 px-4 py-2 border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors"
@@ -280,8 +296,8 @@ export default function AuthorsPage() {
                                         {author.name || 'Sem nome'}
                                     </h3>
                                     <p className="text-sm text-slate-400 mb-1 flex items-center gap-1">
-                                        {author.role || 'EDITOR'}
-                                        {author.id && author.id.length === 36 ? (
+                                        {author.role === 'VIRTUAL_COLUMNIST' ? 'COLUNISTA VIRTUAL' : (author.role || 'EDITOR')}
+                                        {author.id && author.id.length === 36 && author.role !== 'VIRTUAL_COLUMNIST' ? (
                                             <div title="Usuário Autenticado">
                                                 <Shield className="w-3 h-3 text-blue-400" />
                                             </div>
@@ -476,6 +492,7 @@ export default function AuthorsPage() {
                                     <option value="ADMIN">Admin</option>
                                     <option value="CONTRIBUTOR">Contribuidor</option>
                                     <option value="WRITER">Escritor</option>
+                                    <option value="VIRTUAL_COLUMNIST">Colunista Virtual</option>
                                 </select>
                             </div>
                         </div>
@@ -552,6 +569,7 @@ export default function AuthorsPage() {
                                     <option value="ADMIN">Admin</option>
                                     <option value="CONTRIBUTOR">Contribuidor</option>
                                     <option value="WRITER">Escritor</option>
+                                    <option value="VIRTUAL_COLUMNIST">Colunista Virtual</option>
                                 </select>
                             </div>
                         </div>
