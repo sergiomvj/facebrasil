@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
     user: User | null;
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profile, setProfile] = useState<any | null>(null);
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     // Use an AbortController-style token to cancel stale profile fetches
     const profileFetchIdRef = useRef(0);
@@ -143,9 +145,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const locale = localeMatch ? localeMatch[1] : 'pt';
 
                 if (hash.includes('type=invite') && !currentPath.includes('accept-invite')) {
-                    window.location.href = `/${locale}/accept-invite${hash}`;
+                    router.push(`/${locale}/accept-invite${hash}`);
                 } else if (hash.includes('type=recovery') && !currentPath.includes('reset-password')) {
-                    window.location.href = `/${locale}/reset-password${hash}`;
+                    router.push(`/${locale}/reset-password${hash}`);
                 }
             }
         }
