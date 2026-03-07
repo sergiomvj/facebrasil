@@ -19,7 +19,8 @@ import {
     ChevronLeft,
     Calendar,
     Users,
-    Trophy
+    Trophy,
+    UserCheck
 } from 'lucide-react';
 
 interface NavItem {
@@ -34,6 +35,7 @@ const navItems: NavItem[] = [
     { name: 'Artigos', href: '/admin/articles', icon: FileText },
     { name: 'TV Facebrasil', href: '/admin/tv-facebrasil', icon: MonitorPlay, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Mídia', href: '/admin/media', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Leitores', href: '/admin/readers', icon: UserCheck, allowedRoles: ['ADMIN'] },
     { name: 'Categorias', href: '/admin/categories', icon: FolderOpen, allowedRoles: ['ADMIN'] },
     { name: 'Autores', href: '/admin/authors', icon: Users, allowedRoles: ['ADMIN'] },
     { name: 'Eventos', href: '/admin/events', icon: Calendar, allowedRoles: ['ADMIN', 'EDITOR'] },
