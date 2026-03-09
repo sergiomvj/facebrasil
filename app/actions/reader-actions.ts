@@ -19,7 +19,19 @@ export async function listReaders() {
     return data;
 }
 
-export async function createReader(payload: { name: string; email: string; password?: string }) {
+interface ReaderPayload {
+    name: string;
+    email: string;
+    password?: string;
+    phone?: string;
+    whatsapp?: string;
+    tiktok?: string;
+    instagram?: string;
+    city?: string;
+    profession?: string;
+}
+
+export async function createReader(payload: ReaderPayload) {
     await protectAdmin();
 
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -39,6 +51,12 @@ export async function createReader(payload: { name: string; email: string; passw
         name: payload.name,
         email: payload.email,
         role: 'VIEWER',
+        phone: payload.phone,
+        whatsapp: payload.whatsapp,
+        tiktok: payload.tiktok,
+        instagram: payload.instagram,
+        city: payload.city,
+        profession: payload.profession,
         updated_at: new Date().toISOString()
     }], { onConflict: 'id' });
 
@@ -48,7 +66,7 @@ export async function createReader(payload: { name: string; email: string; passw
     return { success: true, user: authData.user };
 }
 
-export async function updateReader(userId: string, payload: { name: string; email: string; password?: string }) {
+export async function updateReader(userId: string, payload: ReaderPayload) {
     await protectAdmin();
 
     if (payload.password) {
@@ -68,6 +86,12 @@ export async function updateReader(userId: string, payload: { name: string; emai
         .update({
             name: payload.name,
             email: payload.email,
+            phone: payload.phone,
+            whatsapp: payload.whatsapp,
+            tiktok: payload.tiktok,
+            instagram: payload.instagram,
+            city: payload.city,
+            profession: payload.profession,
             updated_at: new Date().toISOString()
         })
         .eq('id', userId);

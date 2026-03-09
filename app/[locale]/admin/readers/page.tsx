@@ -11,7 +11,10 @@ export default function ReadersPage() {
 
     const [showModal, setShowModal] = useState(false);
     const [editingReader, setEditingReader] = useState<any>(null);
-    const [formData, setFormData] = useState({ id: '', name: '', email: '', password: '' });
+    const [formData, setFormData] = useState({
+        id: '', name: '', email: '', password: '',
+        phone: '', whatsapp: '', tiktok: '', instagram: '', city: '', profession: ''
+    });
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -40,21 +43,36 @@ export default function ReadersPage() {
                 const res = await updateReader(editingReader.id, {
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password || undefined
+                    password: formData.password || undefined,
+                    phone: formData.phone,
+                    whatsapp: formData.whatsapp,
+                    tiktok: formData.tiktok,
+                    instagram: formData.instagram,
+                    city: formData.city,
+                    profession: formData.profession
                 });
                 if (!res.success) throw new Error(res.error);
             } else {
                 const res = await createReader({
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password
+                    password: formData.password,
+                    phone: formData.phone,
+                    whatsapp: formData.whatsapp,
+                    tiktok: formData.tiktok,
+                    instagram: formData.instagram,
+                    city: formData.city,
+                    profession: formData.profession
                 });
                 if (!res.success) throw new Error(res.error);
             }
 
             setShowModal(false);
             setEditingReader(null);
-            setFormData({ id: '', name: '', email: '', password: '' });
+            setFormData({
+                id: '', name: '', email: '', password: '',
+                phone: '', whatsapp: '', tiktok: '', instagram: '', city: '', profession: ''
+            });
             loadReaders();
         } catch (error: any) {
             alert('Erro: ' + error.message);
@@ -102,7 +120,10 @@ export default function ReadersPage() {
                     <button
                         onClick={() => {
                             setEditingReader(null);
-                            setFormData({ id: '', name: '', email: '', password: '' });
+                            setFormData({
+                                id: '', name: '', email: '', password: '',
+                                phone: '', whatsapp: '', tiktok: '', instagram: '', city: '', profession: ''
+                            });
                             setShowModal(true);
                         }}
                         className="bg-primary hover:bg-primary/90 text-slate-950 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors whitespace-nowrap"
@@ -163,7 +184,13 @@ export default function ReadersPage() {
                                                             id: reader.id,
                                                             name: reader.name || '',
                                                             email: reader.email || '',
-                                                            password: ''
+                                                            password: '',
+                                                            phone: reader.phone || '',
+                                                            whatsapp: reader.whatsapp || '',
+                                                            tiktok: reader.tiktok || '',
+                                                            instagram: reader.instagram || '',
+                                                            city: reader.city || '',
+                                                            profession: reader.profession || ''
                                                         });
                                                         setShowModal(true);
                                                     }}
@@ -236,6 +263,65 @@ export default function ReadersPage() {
                                     placeholder="••••••••"
                                     className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Telefone</label>
+                                    <input
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">WhatsApp</label>
+                                    <input
+                                        type="tel"
+                                        value={formData.whatsapp}
+                                        onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                                        className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">TikTok</label>
+                                    <input
+                                        type="text"
+                                        value={formData.tiktok}
+                                        onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+                                        placeholder="@usuario"
+                                        className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Instagram</label>
+                                    <input
+                                        type="text"
+                                        value={formData.instagram}
+                                        onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                                        placeholder="@usuario"
+                                        className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Cidade</label>
+                                    <input
+                                        type="text"
+                                        value={formData.city}
+                                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                        className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Profissão</label>
+                                    <input
+                                        type="text"
+                                        value={formData.profession}
+                                        onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                                        className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="p-6 border-t dark:border-white/10 border-gray-200 flex justify-end gap-3 dark:bg-white/5 bg-gray-50">
