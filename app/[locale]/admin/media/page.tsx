@@ -23,16 +23,16 @@ export default function MediaLibraryPage() {
     async function fetchMedia() {
         setLoading(true);
 
-        // List files from Supabase Storage
+        // List files from Supabase Storage (now using 'blog-assets')
         const { data, error } = await supabase.storage
-            .from('media')
+            .from('blog-assets')
             .list();
 
         if (!error && data) {
             const mediaFiles: MediaFile[] = data.map((file: any) => ({
                 id: file.id,
                 filename: file.name,
-                url: supabase.storage.from('media').getPublicUrl(file.name).data.publicUrl,
+                url: supabase.storage.from('blog-assets').getPublicUrl(file.name).data.publicUrl,
                 type: file.metadata?.mimetype || 'image/jpeg',
                 size: file.metadata?.size || 0,
                 created_at: file.created_at || new Date().toISOString(),
@@ -55,14 +55,22 @@ export default function MediaLibraryPage() {
         setUploading(true);
 
         for (const file of Array.from(files)) {
-            const filename = `${Date.now()}-${file.name}`;
+            const formData = new FormData();
+            formData.append('image', file);
 
-            const { error } = await supabase.storage
-                .from('media')
-                .upload(filename, file);
+            try {
+                const response = await fetch('/api/upload-image', {
+                    method: 'POST',
+                    body: formData,
+                });
 
-            if (error) {
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Upload failed');
+                }
+            } catch (error: any) {
                 console.error('Upload error:', error);
+                alert(`Erro ao fazer upload do arquivo ${file.name}: ${error.message}`);
             }
         }
 
@@ -73,11 +81,17 @@ export default function MediaLibraryPage() {
     const deleteMedia = async (filename: string) => {
         if (!confirm('Tem certeza que deseja deletar esta mídia?')) return;
 
+        // Ensure we're targeting the right bucket
+        // We might want to migrate this to an API action as well, 
+        // but trying client-side first if Delete RLS is open. If not, it will fail silently.
+        // I will add a quick alert if it errors out just in case.
         const { error } = await supabase.storage
-            .from('media')
+            .from('blog-assets')
             .remove([filename]);
 
-        if (!error) {
+        if (error) {
+            alert('Erro ao excluir mídia: ' + error.message);
+        } else {
             fetchMedia();
         }
     };
