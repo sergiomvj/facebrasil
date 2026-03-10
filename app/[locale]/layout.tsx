@@ -7,6 +7,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CronInitializer } from '@/components/CronInitializer';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,6 +50,7 @@ export default async function RootLayout({
         <html lang={locale} suppressHydrationWarning>
           <body className={`${inter.className} dark:bg-slate-950 bg-white dark:text-slate-50 text-gray-900 ethereal-bg`} suppressHydrationWarning>
             <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet" />
+            <CronInitializer />
             <ClientLayout>
               {children}
             </ClientLayout>
