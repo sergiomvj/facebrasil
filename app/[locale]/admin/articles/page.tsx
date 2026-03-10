@@ -59,6 +59,33 @@ export default function ArticlesListPage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSuggestingKeywords, setIsSuggestingKeywords] = useState(false);
 
+    // Scheduling Modal State
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [scheduleArticleId, setScheduleArticleId] = useState('');
+    const [scheduleDate, setScheduleDate] = useState('');
+    const [isScheduling, setIsScheduling] = useState(false);
+
+    const handleScheduleSubmit = async () => {
+        if (!scheduleDate || !scheduleArticleId) return;
+        setIsScheduling(true);
+        try {
+            const { error } = await supabase
+                .from('articles')
+                .update({ published_at: new Date(scheduleDate).toISOString() })
+                .eq('id', scheduleArticleId);
+
+            if (error) throw error;
+            setIsScheduleModalOpen(false);
+            setScheduleDate('');
+            setScheduleArticleId('');
+            await fetchInitialData();
+        } catch (err: any) {
+            alert('Erro ao agendar: ' + err.message);
+        } finally {
+            setIsScheduling(false);
+        }
+    };
+
     const handleSuggestKeywords = async () => {
         if (!aiTopic) return alert('Digite um tema primeiro');
         setIsSuggestingKeywords(true);
@@ -495,6 +522,21 @@ export default function ArticlesListPage() {
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
 
+                                                {/* Schedule Button Logic */}
+                                                {(post.status === 'DRAFT' || post.status === 'DRAFT-IA') && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setScheduleArticleId(post.id);
+                                                            setScheduleDate(post.published_at ? new Date(post.published_at).toISOString().slice(0, 16) : '');
+                                                            setIsScheduleModalOpen(true);
+                                                        }}
+                                                        className="p-2 text-slate-400 hover:text-emerald-400 rounded-lg hover:bg-emerald-400/10 transition-colors"
+                                                        title="Agendar Publicação"
+                                                    >
+                                                        <Calendar className="w-4 h-4" />
+                                                    </button>
+                                                )}
+
                                                 {/* Edit Button Logic */}
                                                 {(profile?.role === 'ADMIN' || profile?.role === 'EDITOR' || (profile?.role === 'WRITER' && post.author_id === user?.id)) && (
                                                     <Link href={`/admin/editor?id=${post.id}`} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors" title="Edit">
@@ -525,6 +567,51 @@ export default function ArticlesListPage() {
                     articleTitle={selectedStatsArticle.title}
                     onClose={() => setSelectedStatsArticle(null)}
                 />
+            )}
+
+            {/* Schedule Article Modal */}
+            {isScheduleModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden scale-in-center">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                                    <Calendar className="w-5 h-5 text-emerald-400" />
+                                </div>
+                                <h2 className="text-lg font-black text-white uppercase tracking-tighter">Agendar Artigo</h2>
+                            </div>
+                            <button onClick={() => setIsScheduleModalOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                <X className="w-5 h-5 text-slate-500" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest block">Data e Hora de Publicação</label>
+                            <input
+                                type="datetime-local"
+                                value={scheduleDate}
+                                onChange={(e) => setScheduleDate(e.target.value)}
+                                className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:ring-1 focus:ring-emerald-500/50 outline-none transition-all [color-scheme:dark]"
+                            />
+                        </div>
+
+                        <div className="p-6 border-t border-white/5 flex gap-3">
+                            <button
+                                onClick={() => setIsScheduleModalOpen(false)}
+                                className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-slate-400 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleScheduleSubmit}
+                                disabled={isScheduling || !scheduleDate}
+                                className="flex-1 bg-emerald-600 text-white px-4 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {isScheduling ? <span className="animate-spin border-2 border-white/30 border-t-white rounded-full w-4 h-4"></span> : 'Salvar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );

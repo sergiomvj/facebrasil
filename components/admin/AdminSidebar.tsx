@@ -20,7 +20,8 @@ import {
     Calendar,
     Users,
     Trophy,
-    UserCheck
+    UserCheck,
+    BrainCircuit
 } from 'lucide-react';
 
 interface NavItem {
@@ -33,6 +34,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Artigos', href: '/admin/articles', icon: FileText },
+    { name: 'Agendador IA', href: '/admin/articles/scheduler', icon: BrainCircuit, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'TV Facebrasil', href: '/admin/tv-facebrasil', icon: MonitorPlay, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Mídia', href: '/admin/media', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Leitores', href: '/admin/readers', icon: UserCheck, allowedRoles: ['ADMIN'] },
