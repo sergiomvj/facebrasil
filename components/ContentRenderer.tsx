@@ -19,26 +19,41 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
 
     return (
         <div className="prose dark:prose-invert prose-lg max-w-none dark:text-slate-300 text-slate-800 leading-relaxed mb-16">
-            {sections.map((chunk, index) => {
-                const trimmed = chunk.trim();
-                if (!trimmed) return null; // Skip empty chunks
+            {(() => {
+                let wordCountSinceLastAd = 0;
 
-                const isLast = index === sections.length - 1;
-                // Inject Ad after every 3rd paragraph for better flow, but not at the very end
-                const shouldInjectAd = (index + 1) % 3 === 0 && !isLast;
+                return sections.map((chunk, index) => {
+                    const trimmed = chunk.trim();
+                    if (!trimmed) return null; // Skip empty chunks
 
-                // Re-wrap in P if it was plain text or split
-                const htmlContent = hasTags ? (trimmed.endsWith('</p>') ? trimmed : (trimmed + '</p>')) : `<p>${trimmed.replace(/\n/g, '<br/>')}</p>`;
+                    const isLast = index === sections.length - 1;
 
-                return (
-                    <React.Fragment key={index}>
-                        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-                        {shouldInjectAd && (
-                            <AdSpace position="column" />
-                        )}
-                    </React.Fragment>
-                );
-            })}
+                    // Approximate word count by stripping HTML tags
+                    const plainText = trimmed.replace(/<[^>]*>?/gm, '');
+                    const wordsInChunk = plainText.split(/\s+/).filter(w => w.length > 0).length;
+
+                    wordCountSinceLastAd += wordsInChunk;
+
+                    // Inject Ad after approximately 300 words, but not at the very end
+                    let shouldInjectAd = false;
+                    if (wordCountSinceLastAd >= 300 && !isLast) {
+                        shouldInjectAd = true;
+                        wordCountSinceLastAd = 0; // Reset counter after ad injection
+                    }
+
+                    // Re-wrap in P if it was plain text or split
+                    const htmlContent = hasTags ? (trimmed.endsWith('</p>') ? trimmed : (trimmed + '</p>')) : `<p>${trimmed.replace(/\n/g, '<br/>')}</p>`;
+
+                    return (
+                        <React.Fragment key={index}>
+                            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+                            {shouldInjectAd && (
+                                <AdSpace position="column" className="my-8 mx-auto" />
+                            )}
+                        </React.Fragment>
+                    );
+                });
+            })()}
         </div>
     );
 };
