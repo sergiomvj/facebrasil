@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Edit, Trash2, Eye, Calendar, User, Search, Filter, Globe, Sparkles, X, BrainCircuit, Type, FileText, Languages, BarChart2 } from 'lucide-react';
+import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, BrainCircuit, X, Type, FileImage, FileText, CheckCircle2 } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { deleteArticle, upsertArticle } from '@/app/actions/article-actions';
+import { deleteArticle, upsertArticle, updateArticleScheduleDate } from '@/app/actions/article-actions';
 import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
@@ -69,12 +69,13 @@ export default function ArticlesListPage() {
         if (!scheduleDate || !scheduleArticleId) return;
         setIsScheduling(true);
         try {
-            const { error } = await supabase
-                .from('articles')
-                .update({ published_at: new Date(scheduleDate).toISOString() })
-                .eq('id', scheduleArticleId);
+            const result = await updateArticleScheduleDate(
+                scheduleArticleId,
+                new Date(scheduleDate).toISOString()
+            );
 
-            if (error) throw error;
+            if (!result.success) throw new Error(result.error);
+
             setIsScheduleModalOpen(false);
             setScheduleDate('');
             setScheduleArticleId('');

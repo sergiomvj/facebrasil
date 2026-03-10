@@ -126,3 +126,30 @@ export async function deleteArticle(id: string) {
     return { success: true };
 }
 
+export async function updateArticleScheduleDate(id: string, published_at: string) {
+    const { userId } = await auth();
+    if (!userId) return { success: false, error: 'Unauthorized' };
+
+    const { role } = await protectWriter();
+
+    if (role === 'WRITER') {
+        const { data: existingArticle } = await supabaseAdmin.from('articles').select('author_id').eq('id', id).single();
+        if (existingArticle?.author_id !== userId) {
+            return { success: false, error: 'Unauthorized: You can only edit your own articles.' };
+        }
+    }
+
+    const { error } = await supabaseAdmin
+        .from('articles')
+        .update({ published_at, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        console.error('Update schedule error:', error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/articles');
+    return { success: true };
+}
+
