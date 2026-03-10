@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Plus, Image as ImageIcon, Trash2, Edit, Save, BarChart, ExternalLink, X, Globe, MapPin, Hash, CheckCircle2, Wand2 } from 'lucide-react';
+import { Plus, Image as ImageIcon, Trash2, Edit, Save, BarChart, ExternalLink, X, Globe, MapPin, Hash, CheckCircle2, Wand2, Settings } from 'lucide-react';
 import { Ad } from '@/lib/ad-service';
 import { upsertAd, deleteAd, toggleAdStatus, fetchPublications, fetchAdPublications } from '@/app/actions/ad-actions';
 import { uploadAdImage } from '@/app/actions/ad-image-actions';
@@ -24,6 +24,7 @@ export default function AdManagerPage() {
     const [geoMode, setGeoMode] = useState<GeoMode>('global');
     const [selectedPubs, setSelectedPubs] = useState<string[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [showAdvanced, setShowAdvanced] = useState(false);
 
     const [currentAd, setCurrentAd] = useState<Partial<Ad>>({
         position: 'super_hero',
@@ -304,95 +305,109 @@ export default function AdManagerPage() {
                                 </div>
                             </div>
 
-                            {/* Publicações Selection */}
-                            <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5">
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 italic">Veicular em Publicações</label>
-                                <div className="flex flex-wrap gap-4">
-                                    {publications.map(pub => (
-                                        <button
-                                            key={pub.id}
-                                            onClick={() => togglePub(pub.id)}
-                                            className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all ${selectedPubs.includes(pub.id)
-                                                ? 'bg-accent-yellow/20 border-accent-yellow text-accent-yellow'
-                                                : 'bg-slate-900 border-white/10 text-slate-500'
-                                                }`}
-                                        >
-                                            <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${selectedPubs.includes(pub.id) ? 'bg-accent-yellow border-accent-yellow' : 'bg-transparent border-white/20'
-                                                }`}>
-                                                {selectedPubs.includes(pub.id) && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
+                            <div className="flex justify-center border-t border-white/10 pt-6">
+                                <button
+                                    onClick={() => setShowAdvanced(!showAdvanced)}
+                                    className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-accent-yellow transition-colors bg-slate-900 px-6 py-2 rounded-full border border-white/5"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                    {showAdvanced ? 'Ocultar Segmentação Avançada' : 'Segmentação Avançada de Público'}
+                                </button>
+                            </div>
+
+                            {showAdvanced && (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-top-4">
+                                    {/* Publicações Selection */}
+                                    <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 italic">Veicular em Publicações</label>
+                                        <div className="flex flex-wrap gap-4">
+                                            {publications.map(pub => (
+                                                <button
+                                                    key={pub.id}
+                                                    onClick={() => togglePub(pub.id)}
+                                                    className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all ${selectedPubs.includes(pub.id)
+                                                        ? 'bg-accent-yellow/20 border-accent-yellow text-accent-yellow'
+                                                        : 'bg-slate-900 border-white/10 text-slate-500'
+                                                        }`}
+                                                >
+                                                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border ${selectedPubs.includes(pub.id) ? 'bg-accent-yellow border-accent-yellow' : 'bg-transparent border-white/20'
+                                                        }`}>
+                                                        {selectedPubs.includes(pub.id) && <CheckCircle2 className="w-4 h-4 text-slate-950" />}
+                                                    </div>
+                                                    <span className="font-bold text-sm">{pub.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className="mt-4 text-[10px] text-slate-600 italic">*Demais publicações integradas via API receberão este ad conforme disponibilidade.</p>
+                                    </div>
+
+                                    {/* Geolocation Section */}
+                                    <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5 space-y-6">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-2">Preferência de Geolocalização</label>
+
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <button
+                                                onClick={() => setGeoMode('global')}
+                                                className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 ${geoMode === 'global' ? 'bg-accent-yellow/10 border-accent-yellow text-accent-yellow shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                                            >
+                                                <Globe className="w-6 h-6" />
+                                                <span className="text-[10px] font-black uppercase">Global (Sem limites)</span>
+                                            </button>
+                                            <button
+                                                onClick={() => setGeoMode('region')}
+                                                className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 ${geoMode === 'region' ? 'bg-accent-yellow/10 border-accent-yellow text-accent-yellow shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                                            >
+                                                <MapPin className="w-6 h-6" />
+                                                <span className="text-[10px] font-black uppercase">Região (País/Estado)</span>
+                                            </button>
+                                            <button
+                                                onClick={() => setGeoMode('local')}
+                                                className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 ${geoMode === 'local' ? 'bg-accent-yellow/10 border-accent-yellow text-accent-yellow shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
+                                            >
+                                                <Hash className="w-6 h-6" />
+                                                <span className="text-[10px] font-black uppercase">Local (Postais/Zip)</span>
+                                            </button>
+                                        </div>
+
+                                        {geoMode === 'region' && (
+                                            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
+                                                <div>
+                                                    <label className="block text-[9px] font-black text-slate-500 uppercase mb-2">Países (ISO Codes)</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="BR, US, ES"
+                                                        className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-white text-xs"
+                                                        value={currentAd.target_countries?.join(', ') || ''}
+                                                        onChange={e => setCurrentAd({ ...currentAd, target_countries: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) })}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[9px] font-black text-slate-500 uppercase mb-2">Estados/Regiões</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="SP, FL, RJ"
+                                                        className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-white text-xs"
+                                                        value={currentAd.target_regions?.join(', ') || ''}
+                                                        onChange={e => setCurrentAd({ ...currentAd, target_regions: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) })}
+                                                    />
+                                                </div>
                                             </div>
-                                            <span className="font-bold text-sm">{pub.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                                <p className="mt-4 text-[10px] text-slate-600 italic">*Demais publicações integradas via API receberão este ad conforme disponibilidade.</p>
-                            </div>
+                                        )}
 
-                            {/* Geolocation Section */}
-                            <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5 space-y-6">
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-2">Preferência de Geolocalização</label>
-
-                                <div className="grid grid-cols-3 gap-3">
-                                    <button
-                                        onClick={() => setGeoMode('global')}
-                                        className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 ${geoMode === 'global' ? 'bg-accent-yellow/10 border-accent-yellow text-accent-yellow shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
-                                    >
-                                        <Globe className="w-6 h-6" />
-                                        <span className="text-[10px] font-black uppercase">Global (Sem limites)</span>
-                                    </button>
-                                    <button
-                                        onClick={() => setGeoMode('region')}
-                                        className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 ${geoMode === 'region' ? 'bg-accent-yellow/10 border-accent-yellow text-accent-yellow shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
-                                    >
-                                        <MapPin className="w-6 h-6" />
-                                        <span className="text-[10px] font-black uppercase">Região (País/Estado)</span>
-                                    </button>
-                                    <button
-                                        onClick={() => setGeoMode('local')}
-                                        className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all gap-2 ${geoMode === 'local' ? 'bg-accent-yellow/10 border-accent-yellow text-accent-yellow shadow-lg' : 'bg-slate-900 border-white/5 text-slate-500'}`}
-                                    >
-                                        <Hash className="w-6 h-6" />
-                                        <span className="text-[10px] font-black uppercase">Local (Postais/Zip)</span>
-                                    </button>
-                                </div>
-
-                                {geoMode === 'region' && (
-                                    <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2">
-                                        <div>
-                                            <label className="block text-[9px] font-black text-slate-500 uppercase mb-2">Países (ISO Codes)</label>
-                                            <input
-                                                type="text"
-                                                placeholder="BR, US, ES"
-                                                className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-white text-xs"
-                                                value={currentAd.target_countries?.join(', ') || ''}
-                                                onChange={e => setCurrentAd({ ...currentAd, target_countries: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) })}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[9px] font-black text-slate-500 uppercase mb-2">Estados/Regiões</label>
-                                            <input
-                                                type="text"
-                                                placeholder="SP, FL, RJ"
-                                                className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-white text-xs"
-                                                value={currentAd.target_regions?.join(', ') || ''}
-                                                onChange={e => setCurrentAd({ ...currentAd, target_regions: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) })}
-                                            />
-                                        </div>
+                                        {geoMode === 'local' && (
+                                            <div className="animate-in slide-in-from-top-2">
+                                                <label className="block text-[9px] font-black text-slate-500 uppercase mb-2">Códigos Postais / Zip Codes (Separados por vírgula)</label>
+                                                <textarea
+                                                    placeholder="33166, 01000-000, 90210"
+                                                    className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-white text-xs font-mono h-20"
+                                                    value={currentAd.target_zip_codes?.join(', ') || ''}
+                                                    onChange={e => setCurrentAd({ ...currentAd, target_zip_codes: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-
-                                {geoMode === 'local' && (
-                                    <div className="animate-in slide-in-from-top-2">
-                                        <label className="block text-[9px] font-black text-slate-500 uppercase mb-2">Códigos Postais / Zip Codes (Separados por vírgula)</label>
-                                        <textarea
-                                            placeholder="33166, 01000-000, 90210"
-                                            className="w-full bg-slate-900 border border-white/10 p-3 rounded-xl text-white text-xs font-mono h-20"
-                                            value={currentAd.target_zip_codes?.join(', ') || ''}
-                                            onChange={e => setCurrentAd({ ...currentAd, target_zip_codes: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                                        />
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Coluna 2: Media & Controls */}
@@ -440,7 +455,10 @@ export default function AdManagerPage() {
 
                                 {/* Slot Mobile */}
                                 <div className="space-y-4">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Mobile (WebP / PNG)</label>
+                                    <div className="flex flex-col gap-0.5 mb-2">
+                                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Imagem Mobile (Opcional)</label>
+                                        <p className="text-[9px] text-slate-600">Será reciclada a Desktop se em branco</p>
+                                    </div>
                                     <div className="flex flex-col gap-3">
                                         <div className="flex gap-2">
                                             <input
@@ -479,7 +497,7 @@ export default function AdManagerPage() {
                                 </div>
                             </div>
                             <p className="text-[9px] text-slate-600 italic mt-4 text-center">
-                                * Imagens serão convertidas para WebP otimizado automaticamente (respeitando dimensões desktop/mobile).
+                                * Banners serão auto-dimensionados perfeitamente pelo próprio servidor ao realizar o envio sem necessidade de recortes exatos.
                             </p>
 
                             <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5">

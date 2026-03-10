@@ -96,19 +96,16 @@ export async function uploadAdImage(formData: FormData) {
 
         const targetSize = config[deviceType];
 
-        // 1. Pixel Size Validation
-        if (metadata.width !== targetSize.width || metadata.height !== targetSize.height) {
-            return {
-                success: false,
-                error: `Tamanho inválido para ${deviceType}. Esperado ${targetSize.width}x${targetSize.height}, recebido ${metadata.width}x${metadata.height}.`
-            };
-        }
-
         const safeAdvertiser = advertiserName.toLowerCase().replace(/[^a-z0-9]/g, '-');
         const fileName = `${safeAdvertiser}-${placement}-${deviceType}-${Date.now()}.webp`;
 
-        // 2. Format Handling & Conversion - FORCING WEBP FOR MAXIMUM COMPATIBILITY/PERFORMANCE
+        // 2. Format Handling & Auto-Crop Conversion - FORCING WEBP FOR MAXIMUM COMPATIBILITY/PERFORMANCE
+        // Instead of strict validation, we force conform the image to the exact needed slot pixels:
         const webpBuffer = await image
+            .resize(targetSize.width, targetSize.height, {
+                fit: 'cover',
+                position: 'center'
+            })
             .webp({ quality: 90 })
             .toBuffer();
 
