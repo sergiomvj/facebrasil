@@ -38,15 +38,15 @@ export async function standaloneConvertImage(formData: FormData) {
         const image = sharp(buffer);
         const metadata = await image.metadata();
 
-        const pngBuffer = await image.png().toBuffer();
-        const fileName = `converted-${Date.now()}.png`;
+        const webpBuffer = await image.webp({ quality: 90 }).toBuffer();
+        const fileName = `converted-${Date.now()}.webp`;
 
         const supabaseAdmin = getSupabaseAdmin();
         const { error: uploadError } = await supabaseAdmin
             .storage
             .from('ads')
-            .upload(fileName, pngBuffer, {
-                contentType: 'image/png',
+            .upload(fileName, webpBuffer, {
+                contentType: 'image/webp',
                 upsert: true
             });
 
@@ -60,7 +60,7 @@ export async function standaloneConvertImage(formData: FormData) {
         return {
             success: true,
             url: publicUrl,
-            info: `Convertido para PNG (${metadata.width}x${metadata.height}) e salvo no Storage.`
+            info: `Convertido para WebP Otimizado (${metadata.width}x${metadata.height}) e salvo no Storage.`
         };
     } catch (err: any) {
         return { success: false, error: 'Erro na conversão: ' + err.message };
@@ -105,11 +105,11 @@ export async function uploadAdImage(formData: FormData) {
         }
 
         const safeAdvertiser = advertiserName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        const fileName = `${safeAdvertiser}-${placement}-${deviceType}-${Date.now()}.png`;
+        const fileName = `${safeAdvertiser}-${placement}-${deviceType}-${Date.now()}.webp`;
 
-        // 2. Format Handling & Conversion - FORCING PNG FOR MAXIMUM COMPATIBILITY
-        const pngBuffer = await image
-            .png()
+        // 2. Format Handling & Conversion - FORCING WEBP FOR MAXIMUM COMPATIBILITY/PERFORMANCE
+        const webpBuffer = await image
+            .webp({ quality: 90 })
             .toBuffer();
 
         // 3. Upload to Supabase Storage
@@ -117,8 +117,8 @@ export async function uploadAdImage(formData: FormData) {
         const { error: uploadError } = await supabaseAdmin
             .storage
             .from('ads')
-            .upload(fileName, pngBuffer, {
-                contentType: 'image/png',
+            .upload(fileName, webpBuffer, {
+                contentType: 'image/webp',
                 upsert: true
             });
 

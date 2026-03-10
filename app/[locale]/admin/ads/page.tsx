@@ -400,7 +400,7 @@ export default function AdManagerPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Slot Desktop */}
                                 <div className="space-y-4">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Desktop (SVG / WebP)</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Desktop (WebP / PNG)</label>
                                     <div className="flex flex-col gap-3">
                                         <div className="flex gap-2">
                                             <input
@@ -426,7 +426,7 @@ export default function AdManagerPage() {
                                                     alt="Desktop Preview"
                                                     className="w-full h-full object-contain"
                                                     onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/1240x150/0f172a/64748b?text=Erro+no+SVG';
+                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/1240x150/0f172a/64748b?text=Erro+na+Imagem';
                                                     }}
                                                 />
                                             ) : (
@@ -440,7 +440,7 @@ export default function AdManagerPage() {
 
                                 {/* Slot Mobile */}
                                 <div className="space-y-4">
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Mobile (SVG / WebP)</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 italic">Imagem Mobile (WebP / PNG)</label>
                                     <div className="flex flex-col gap-3">
                                         <div className="flex gap-2">
                                             <input
@@ -466,7 +466,7 @@ export default function AdManagerPage() {
                                                     alt="Mobile Preview"
                                                     className="w-full h-full object-contain"
                                                     onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/300x50/0f172a/64748b?text=Erro+no+SVG';
+                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/300x50/0f172a/64748b?text=Erro+na+Imagem';
                                                     }}
                                                 />
                                             ) : (
@@ -479,7 +479,7 @@ export default function AdManagerPage() {
                                 </div>
                             </div>
                             <p className="text-[9px] text-slate-600 italic mt-4 text-center">
-                                * PNG/JPG serão convertidos para SVG auto respeitando as dimensões desktop/mobile da posição.
+                                * Imagens serão convertidas para WebP otimizado automaticamente (respeitando dimensões desktop/mobile).
                             </p>
 
                             <div className="p-6 bg-slate-950/50 rounded-2xl border border-white/5">

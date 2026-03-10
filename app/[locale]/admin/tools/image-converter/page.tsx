@@ -52,8 +52,8 @@ export default function ImageConverterPage() {
     return (
         <div className="p-6 max-w-4xl mx-auto">
             <div className="mb-10 text-center">
-                <h1 className="text-4xl font-black italic uppercase tracking-tighter dark:text-white text-gray-900 mb-2">Conversor de Imagens SVG</h1>
-                <p className="text-slate-500 font-bold">Transforme PNG, JPG e WebP em assets SVG otimizados para anúncios.</p>
+                <h1 className="text-4xl font-black italic uppercase tracking-tighter dark:text-white text-gray-900 mb-2">Conversor de Imagens WebP</h1>
+                <p className="text-slate-500 font-bold">Transforme PNG e JPG em assets WebP otimizados para anúncios.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -67,7 +67,7 @@ export default function ImageConverterPage() {
 
                     <div>
                         <h2 className="font-black text-white uppercase italic tracking-wider mb-2">Upload de Origem</h2>
-                        <p className="text-xs text-slate-500 max-w-[200px] mx-auto">Selecione uma imagem PNG ou JPG para converter em SVG.</p>
+                        <p className="text-xs text-slate-500 max-w-[200px] mx-auto">Selecione uma imagem PNG ou JPG para converter em WebP.</p>
                     </div>
 
                     <label className="w-full">
@@ -86,7 +86,7 @@ export default function ImageConverterPage() {
                             }`}
                     >
                         {isConverting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
-                        {isConverting ? 'Convertendo...' : 'Converter para SVG'}
+                        {isConverting ? 'Convertendo...' : 'Converter Otimizado'}
                     </button>
                 </div>
 
@@ -126,7 +126,7 @@ export default function ImageConverterPage() {
                                 download
                                 className="w-full flex items-center justify-center gap-2 p-4 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
                             >
-                                <Download className="w-4 h-4" /> Download SVG
+                                <Download className="w-4 h-4" /> Download Imagem
                             </a>
                         </div>
                     )}
@@ -134,19 +134,19 @@ export default function ImageConverterPage() {
             </div>
 
             <div className="mt-12 p-8 bg-slate-950/50 rounded-3xl border border-white/5">
-                <h3 className="text-sm font-black text-white uppercase italic mb-4 tracking-widest">Por que SVG com WebP?</h3>
+                <h3 className="text-sm font-black text-white uppercase italic mb-4 tracking-widest">Por que WebP?</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                         <div className="text-accent-yellow font-black text-xs uppercase">Performance</div>
-                        <p className="text-[11px] text-slate-500 font-medium">Arquivos menores significam carregamento instantâneo, essencial para vitrines de anúncios dinâmicos.</p>
+                        <p className="text-[11px] text-slate-500 font-medium">Arquivos até 80% menores que originais significam carregamento instantâneo, essencial para vitrines de anúncios dinâmicos.</p>
                     </div>
                     <div className="space-y-2">
                         <div className="text-accent-yellow font-black text-xs uppercase">Compatibilidade</div>
-                        <p className="text-[11px] text-slate-500 font-medium">O formato SVG é tratado nativamente pelo navegador como vetor, permitindo manipulação via CSS e animações.</p>
+                        <p className="text-[11px] text-slate-500 font-medium">O formato WebP é amplamente suportado por praticamente todos os navegadores modernos e sistemas móveis do mercado.</p>
                     </div>
                     <div className="space-y-2">
                         <div className="text-accent-yellow font-black text-xs uppercase">Fidelidade</div>
-                        <p className="text-[11px] text-slate-500 font-medium">O wrapper WebP mantém 100% da fidelidade das cores originais enquanto reduz drasticamente o peso do arquivo.</p>
+                        <p className="text-[11px] text-slate-500 font-medium">Mantém toda a qualidade das cores e bordas transparentes originais enquanto elimina totalmente avisos de lentidão.</p>
                     </div>
                 </div>
             </div>

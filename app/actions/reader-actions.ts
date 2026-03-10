@@ -104,9 +104,22 @@ export async function updateReader(userId: string, payload: ReaderPayload) {
 
 export async function deleteReader(userId: string) {
     await protectAdmin();
-    // Delete from auth (cascade should delete profile)
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    if (error) return { success: false, error: error.message };
+
+    // First, try to delete the profile manually to clean up orphaned records
+    const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+    if (profileError) return { success: false, error: profileError.message };
+
+    // Then delete from auth (cascade usually handles the profile, but doing it manually above is safer for ghosts)
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    // If auth user wasn't found, it means it's a ghost profile. We can ignore this error.
+    if (authError && !authError.message.toLowerCase().includes('not found')) {
+        return { success: false, error: authError.message };
+    }
 
     revalidatePath('/[locale]/admin/readers', 'page');
     return { success: true };
