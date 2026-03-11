@@ -19,7 +19,12 @@ export async function auth() {
  * Replacement for Clerk's currentUser()
  */
 export async function currentUser() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
+    try {
+        const supabase = await createClient();
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data) return null;
+        return data.user || null;
+    } catch {
+        return null;
+    }
 }

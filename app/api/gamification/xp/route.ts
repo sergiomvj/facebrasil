@@ -13,7 +13,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { type, distinctId } = await req.json();
+        const payload = await req.json().catch(() => ({}));
+        const { type, distinctId } = payload;
 
         // Basic validation
         if (!type) {
