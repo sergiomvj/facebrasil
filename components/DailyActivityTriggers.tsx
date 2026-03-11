@@ -1,18 +1,21 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useXP } from '@/hooks/useXP';
 
 export function DailyActivityTriggers() {
+    const pathname = usePathname();
     const { user, loading } = useAuth();
     const isSignedIn = !!user;
     const isLoaded = !loading;
-
     const { gainXP } = useXP();
     const triggeredRef = useRef(false);
 
     useEffect(() => {
+        // Não disparar em páginas de admin
+        if (pathname.includes('/admin')) return;
         if (!isLoaded || !isSignedIn || triggeredRef.current) return;
 
         const triggerDailyLogin = async () => {
@@ -28,7 +31,7 @@ export function DailyActivityTriggers() {
         };
 
         triggerDailyLogin();
-    }, [isLoaded, isSignedIn, gainXP]);
+    }, [isLoaded, isSignedIn, gainXP, pathname]);
 
     return null;
 }
