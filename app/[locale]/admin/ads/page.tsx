@@ -101,7 +101,9 @@ export default function AdManagerPage() {
                 .upload(fileName, pngBlob, { upsert: true, contentType: 'image/png' });
 
             if (uploadError) {
-                toast.error('Erro ao enviar imagem: ' + uploadError.message);
+                console.error('[FRONTEND] Erro no upload Storage:', uploadError);
+                toast.error('Erro ao enviar: ' + uploadError.message);
+                setUploadProgress(null);
                 return;
             }
 
