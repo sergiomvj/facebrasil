@@ -86,8 +86,10 @@ export async function uploadAdImage(formData: FormData) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     try {
+        console.log(`[UPLOAD AD] Recebendo arquivo ${file.name} - Tamanho original: ${buffer.length} bytes`);
         const image = sharp(buffer);
         const metadata = await image.metadata();
+        console.log(`[UPLOAD AD] Metadata da imagem fonte: ${metadata.width}x${metadata.height} formato: ${metadata.format}`);
 
         const config = PLACEMENT_SIZES[placement as keyof typeof PLACEMENT_SIZES];
         if (!config) {
@@ -109,6 +111,8 @@ export async function uploadAdImage(formData: FormData) {
             .webp({ quality: 90 })
             .toBuffer();
 
+        console.log(`[UPLOAD AD] Imagem convertida para WEBP. Tamanho final: ${webpBuffer.length} bytes`);
+
         // 3. Upload to Supabase Storage
         const supabaseAdmin = getSupabaseAdmin();
         const { error: uploadError } = await supabaseAdmin
@@ -120,9 +124,11 @@ export async function uploadAdImage(formData: FormData) {
             });
 
         if (uploadError) {
-            console.error('[uploadAdImage] Storage upload error:', uploadError);
+            console.error('[UPLOAD AD] Erro fatal no Supabase Storage:', uploadError);
             throw new Error(`Falha ao subir imagem para o storage: ${uploadError.message}`);
         }
+
+        console.log(`[UPLOAD AD] Upload para o Storage BUCKET ads concluído com sucesso. Arquivo: ${fileName}`);
 
         // 4. Get Public URL
         const { data: { publicUrl: storageUrl } } = supabaseAdmin
@@ -132,6 +138,8 @@ export async function uploadAdImage(formData: FormData) {
 
         // Add a cache buster so the browser doesn't hit a transient 404 while CDN propagates
         const finalUrl = `${storageUrl}?v=${Date.now()}`;
+
+        console.log(`[UPLOAD AD] URL Pública gerada: ${finalUrl}`);
 
         return {
             success: true,

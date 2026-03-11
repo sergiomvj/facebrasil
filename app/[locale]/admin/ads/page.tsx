@@ -70,7 +70,10 @@ export default function AdManagerPage() {
         formData.append('advertiserName', currentAd.title || 'anunciante');
 
         try {
+            console.log(`[FRONTEND] Iniciando upload para ${deviceType}...`);
             const result = await uploadAdImage(formData);
+            console.log(`[FRONTEND] Resposta do Servidor:`, result);
+
             if (result.success) {
                 if (deviceType === 'desktop') {
                     setCurrentAd(prev => ({ ...prev, image_url: result.url }));
@@ -441,6 +444,7 @@ export default function AdManagerPage() {
                                                     alt="Desktop Preview"
                                                     className="w-full h-full object-contain"
                                                     onError={(e) => {
+                                                        console.error(`[FRONTEND] Erro ao carregar Desktop Image URL no navegador: ${currentAd.image_url}`);
                                                         (e.target as HTMLImageElement).src = 'https://placehold.co/1240x150/0f172a/64748b?text=Erro+na+Imagem';
                                                     }}
                                                 />
@@ -484,6 +488,7 @@ export default function AdManagerPage() {
                                                     alt="Mobile Preview"
                                                     className="w-full h-full object-contain"
                                                     onError={(e) => {
+                                                        console.error(`[FRONTEND] Erro ao carregar Mobile Image URL no navegador: ${currentAd.mobile_image_url}`);
                                                         (e.target as HTMLImageElement).src = 'https://placehold.co/300x50/0f172a/64748b?text=Erro+na+Imagem';
                                                     }}
                                                 />
