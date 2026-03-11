@@ -154,7 +154,7 @@ export default function ArticlesListPage() {
             supabase
                 .from('articles')
                 .select(`
-                    id, title, slug, status, published_at, created_at, language, author_id,
+                    id, title, slug, status, published_at, created_at, language, author_id, views,
                     author:profiles(name),
                     category:categories(name, color, slug)
                 `)

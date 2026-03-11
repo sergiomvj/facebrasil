@@ -30,31 +30,50 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
   const supabase = await createClient();
-  const mainHero = await fetchMainHero(undefined, supabase);
 
-  // Use hero image or fallback
-  const imageUrl = mainHero?.featuredImage?.url || `https://fbr.news${FALLBACK_ARTICLE_IMAGE}`;
+  // Fetch Hero and Site Settings
+  const [mainHero, settings] = await Promise.all([
+    fetchMainHero(undefined, supabase),
+    (async () => {
+      const { data } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+      return data;
+    })()
+  ]);
+
+  // Priority logic for metadata:
+  // Title/Desc: Site Settings > Translation File
+  // Image: Hero Article Image > Site Settings Image > Fallback Image
+
+  const siteName = settings?.site_name || t('title');
+  const siteDesc = settings?.site_description || t('description');
+
+  // Hero article metadata (if exists)
+  const heroTitle = mainHero?.title || siteName;
+  const heroDesc = mainHero?.excerpt || siteDesc;
+
+  // Image strategy: 1. Hero Image, 2. Global OG Image, 3. Hardcoded Fallback
+  const imageUrl = mainHero?.featuredImage?.url || settings?.og_image_url || `https://fbr.news${FALLBACK_ARTICLE_IMAGE}`;
 
   return {
-    title: t('title'),
-    description: t('description'),
+    title: siteName,
+    description: siteDesc,
     openGraph: {
-      title: t('title'),
-      description: t('description'),
+      title: heroTitle,
+      description: heroDesc,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: t('title'),
+          alt: heroTitle,
         }
       ],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: t('title'),
-      description: t('description'),
+      title: heroTitle,
+      description: heroDesc,
       images: [imageUrl],
     },
   };

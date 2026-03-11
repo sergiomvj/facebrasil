@@ -1,21 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, Users, Search, AlertTriangle, Loader2, UserPlus, Edit2, X } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Users, Search, AlertTriangle, Loader2, UserPlus, Edit2, X, Image as ImageIcon, Upload } from 'lucide-react';
 import { listUsers, updateUserRole, createUser, updateUser } from '@/app/actions/user-actions';
+import { getSiteSettings, updateSiteSettings } from '@/app/actions/settings-actions';
+import { uploadSiteImage } from '@/app/actions/image-actions';
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<'general' | 'users'>('general');
-    const [settings, setSettings] = useState({
-        siteName: 'Facebrasil',
-        siteDescription: 'Notícias da comunidade brasileira',
-        instagramUrl: 'https://instagram.com/facebrasil',
-        facebookUrl: 'https://facebook.com/facebrasil',
-        twitterUrl: 'https://twitter.com/facebrasil',
-        googleAnalyticsId: '',
-        metaPixelId: '',
-        newsletterProvider: 'mailchimp',
-        newsletterApiKey: '',
+    const [loadingSettings, setLoadingSettings] = useState(false);
+    const [savingSettings, setSavingSettings] = useState(false);
+    const [siteSettings, setSiteSettings] = useState({
+        site_name: '',
+        site_description: '',
+        og_image_url: '',
+        meta_title_template: '',
+        meta_description_template: '',
     });
 
     const [users, setUsers] = useState<any[]>([]);
@@ -31,8 +31,30 @@ export default function SettingsPage() {
     useEffect(() => {
         if (activeTab === 'users') {
             loadUsers();
+        } else if (activeTab === 'general') {
+            loadSettings();
         }
     }, [activeTab]);
+
+    const loadSettings = async () => {
+        setLoadingSettings(true);
+        try {
+            const data = await getSiteSettings();
+            if (data) {
+                setSiteSettings({
+                    site_name: data.site_name || '',
+                    site_description: data.site_description || '',
+                    og_image_url: data.og_image_url || '',
+                    meta_title_template: data.meta_title_template || '',
+                    meta_description_template: data.meta_description_template || '',
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao carregar configurações:', error);
+        } finally {
+            setLoadingSettings(false);
+        }
+    };
 
     const loadUsers = async () => {
         setLoadingUsers(true);
@@ -93,9 +115,37 @@ export default function SettingsPage() {
         }
     };
 
-    const handleSave = () => {
-        // TODO: Save to database
-        alert('Configurações salvas com sucesso!');
+    const handleSaveSettings = async () => {
+        setSavingSettings(true);
+        try {
+            const res = await updateSiteSettings(siteSettings);
+            if (res.success) {
+                alert('Configurações salvas com sucesso!');
+            }
+        } catch (error: any) {
+            alert('Erro ao salvar: ' + error.message);
+        } finally {
+            setSavingSettings(false);
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await uploadSiteImage(formData);
+            if (res.success && res.url) {
+                setSiteSettings({ ...siteSettings, og_image_url: res.url });
+            } else {
+                alert('Erro no upload: ' + res.error);
+            }
+        } catch (error: any) {
+            alert('Erro no upload: ' + error.message);
+        }
     };
 
     const filteredUsers = users.filter(user =>
@@ -140,58 +190,105 @@ export default function SettingsPage() {
                                 <h2 className="text-xl font-black dark:text-white text-gray-900">Configurações Gerais</h2>
                             </div>
                             <button
-                                onClick={handleSave}
-                                className="bg-primary hover:bg-primary/90 text-slate-950 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20"
+                                onClick={handleSaveSettings}
+                                disabled={savingSettings || loadingSettings}
+                                className="bg-primary hover:bg-primary/90 text-slate-950 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20 disabled:opacity-50"
                             >
-                                <Save className="w-4 h-4" />
+                                {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                 Salvar
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium dark:text-slate-300 text-gray-700 mb-2">
-                                    Nome do Site
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.siteName}
-                                    onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
+                        {loadingSettings ? (
+                            <div className="py-20 flex flex-col items-center justify-center">
+                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                <p className="mt-4 text-slate-400 font-medium">Carregando configurações...</p>
                             </div>
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">
+                                            Nome do Site
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Ex: Facebrasil"
+                                            value={siteSettings.site_name}
+                                            onChange={(e) => setSiteSettings({ ...siteSettings, site_name: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                                        />
+                                    </div>
 
-                            <div>
-                                <label className="block text-sm font-medium dark:text-slate-300 text-gray-700 mb-2">
-                                    Descrição do Site
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.siteDescription}
-                                    onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                            </div>
-                        </div>
-                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">
+                                            Descrição Global (SEO)
+                                        </label>
+                                        <textarea
+                                            rows={3}
+                                            placeholder="Descrição padrão do site para buscadores"
+                                            value={siteSettings.site_description}
+                                            onChange={(e) => setSiteSettings({ ...siteSettings, site_description: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary font-medium resize-none"
+                                        />
+                                    </div>
 
-                    {/* Social Media */}
-                    <div className="dark:bg-slate-900 bg-white rounded-xl p-6 border dark:border-white/10 border-gray-200 space-y-6">
-                        <h2 className="text-xl font-black dark:text-white text-gray-900">Redes Sociais</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium dark:text-slate-300 text-gray-700 mb-2">Instagram</label>
-                                <input type="url" value={settings.instagramUrl} className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900" />
+                                    <div className="pt-4 border-t dark:border-white/5 border-gray-100 space-y-4">
+                                        <h3 className="text-sm font-black text-primary uppercase tracking-widest">Templates de Metadados</h3>
+                                        <div>
+                                            <label className="block text-xs font-bold dark:text-slate-400 text-gray-500 mb-1 uppercase tracking-wider text-right">
+                                                Título da Página
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: %title% | Facebrasil"
+                                                value={siteSettings.meta_title_template}
+                                                onChange={(e) => setSiteSettings({ ...siteSettings, meta_title_template: e.target.value })}
+                                                className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">
+                                        Imagem de Referência (Social Sharing)
+                                    </label>
+
+                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-white/10 group">
+                                        {siteSettings.og_image_url ? (
+                                            <>
+                                                <img
+                                                    src={siteSettings.og_image_url}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <label className="cursor-pointer bg-white text-slate-950 px-4 py-2 rounded-full font-bold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                                                        <Upload className="w-4 h-4" />
+                                                        Alterar Imagem
+                                                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                                    </label>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-colors">
+                                                <ImageIcon className="w-12 h-12 text-slate-600 mb-2" />
+                                                <span className="text-sm font-bold text-slate-500">Clique para upload</span>
+                                                <span className="text-[10px] text-slate-600 mt-1 uppercase">Recomendado: 1200x630px</span>
+                                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                            </label>
+                                        )}
+                                    </div>
+
+                                    <div className="p-4 bg-primary/5 border border-primary/10 rounded-lg">
+                                        <p className="text-xs text-primary/80 leading-relaxed italic">
+                                            Esta imagem será usada como fallback quando um artigo compartilhado não tiver imagem própria ou quando a HOME for compartilhada.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium dark:text-slate-300 text-gray-700 mb-2">Facebook</label>
-                                <input type="url" value={settings.facebookUrl} className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium dark:text-slate-300 text-gray-700 mb-2">Twitter</label>
-                                <input type="url" value={settings.twitterUrl} className="w-full px-4 py-3 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900" />
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             ) : (
@@ -212,7 +309,7 @@ export default function SettingsPage() {
                                         placeholder="Buscar por nome ou email..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full pl-10 pr-4 py-2 rounded-lg dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"
                                     />
                                 </div>
                                 <button
@@ -271,7 +368,7 @@ export default function SettingsPage() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="py-4 text-sm text-slate-500">
+                                                <td className="py-4 text-sm text-slate-500 font-medium">
                                                     {new Date(user.created_at).toLocaleDateString('pt-BR')}
                                                 </td>
                                                 <td className="py-4">
@@ -288,7 +385,7 @@ export default function SettingsPage() {
                                                             disabled={updatingUserId === user.id}
                                                             value={user.role || 'VIEWER'}
                                                             onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                                                            className="bg-slate-800 border-none rounded-md text-xs py-1 px-2 focus:ring-1 focus:ring-primary h-8 disabled:opacity-50"
+                                                            className="bg-slate-800 border-none rounded-md text-xs py-1 px-2 focus:ring-1 focus:ring-primary h-8 disabled:opacity-50 font-bold"
                                                         >
                                                             <option value="VIEWER">Leitor</option>
                                                             <option value="EDITOR">Editor</option>
@@ -324,7 +421,7 @@ export default function SettingsPage() {
 
                         <div className="mt-8 p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl flex items-start gap-3">
                             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                            <div className="text-xs text-amber-500/80 leading-relaxed">
+                            <div className="text-xs text-amber-500/80 leading-relaxed font-medium">
                                 <strong>Atenção:</strong> Alterar o cargo de um usuário para <strong>ADMIN</strong> concede acesso total ao sistema, incluindo configurações críticas e gestão de outros usuários. Tenha cautela ao delegar permissões.
                             </div>
                         </div>
@@ -333,9 +430,9 @@ export default function SettingsPage() {
             )}
             {showUserModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                    <div className="dark:bg-slate-900 bg-white border dark:border-white/10 border-gray-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+                    <div className="dark:bg-slate-900 bg-white border dark:border-white/10 border-gray-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl scale-in-center">
                         <div className="p-6 border-b dark:border-white/10 border-gray-200 flex items-center justify-between">
-                            <h2 className="text-xl font-bold dark:text-white text-gray-900 flex items-center gap-2">
+                            <h2 className="text-xl font-black dark:text-white text-gray-900 flex items-center gap-2">
                                 {editingUser ? <Edit2 className="w-5 h-5 text-primary" /> : <UserPlus className="w-5 h-5 text-primary" />}
                                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
                             </h2>
@@ -348,43 +445,43 @@ export default function SettingsPage() {
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Nome</label>
+                                <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">Nome</label>
                                 <input
                                     type="text"
                                     value={userFormData.name}
                                     onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
-                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary font-medium"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Email</label>
+                                <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">Email</label>
                                 <input
                                     type="email"
                                     value={userFormData.email}
                                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+                                    className="w-full px-4 py-3 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 font-medium"
                                     disabled={!!editingUser}
                                 />
-                                {editingUser && <p className="text-xs text-slate-500 mt-1">O email não pode ser alterado após a criação.</p>}
+                                {editingUser && <p className="text-[10px] uppercase font-bold text-slate-500 mt-2">O email não pode ser alterado após a criação.</p>}
                             </div>
                             <div>
-                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">
-                                    Senha {editingUser ? '(deixe em branco para não alterar)' : '*'}
+                                <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">
+                                    Senha {editingUser ? '(deixe em branco)' : '*'}
                                 </label>
                                 <input
                                     type="password"
                                     value={userFormData.password}
                                     onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
                                     placeholder="••••••••"
-                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary font-medium"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium dark:text-white text-gray-900 mb-2">Cargo</label>
+                                <label className="block text-sm font-bold dark:text-slate-300 text-gray-700 mb-2 uppercase tracking-wider">Cargo</label>
                                 <select
                                     value={userFormData.role}
                                     onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-                                    className="w-full px-4 py-2 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full px-4 py-3 dark:bg-slate-800 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary font-bold"
                                 >
                                     <option value="VIEWER">Leitor</option>
                                     <option value="EDITOR">Editor</option>
@@ -395,14 +492,14 @@ export default function SettingsPage() {
                         <div className="p-6 border-t dark:border-white/10 border-gray-200 flex justify-end gap-3 dark:bg-white/5 bg-gray-50">
                             <button
                                 onClick={() => setShowUserModal(false)}
-                                className="px-4 py-2 rounded-lg font-medium text-slate-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/5 transition-colors"
+                                className="px-6 py-2 rounded-lg font-bold text-slate-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/5 transition-colors uppercase tracking-widest text-xs"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleSaveUser}
                                 disabled={savingUser}
-                                className="bg-primary hover:bg-primary/90 text-slate-950 px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
+                                className="bg-primary hover:bg-primary/90 text-slate-950 px-8 py-2 rounded-lg font-black flex items-center gap-2 transition-colors disabled:opacity-50 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs"
                             >
                                 {savingUser ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                 Salvar

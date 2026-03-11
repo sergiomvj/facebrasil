@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { createClient } from "@/lib/supabase/server";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientLayout } from "@/components/ClientLayout";
@@ -18,11 +19,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const supabase = await createClient();
+
+  const { data: settings } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+
+  const siteName = settings?.site_name || t('title');
+  const siteDesc = settings?.site_description || t('description');
+  const ogImage = settings?.og_image_url || `https://fbr.news/icon.png`; // Fallback icon
 
   return {
     metadataBase: new URL('https://fbr.news'),
-    title: t('title'),
-    description: t('description'),
+    title: {
+      template: settings?.meta_title_template || `%s | ${siteName}`,
+      default: siteName,
+    },
+    description: siteDesc,
+    openGraph: {
+      title: siteName,
+      description: siteDesc,
+      images: [ogImage],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteName,
+      description: siteDesc,
+      images: [ogImage],
+    }
   };
 }
 
