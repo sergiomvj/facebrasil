@@ -198,7 +198,7 @@ export default async function ArticlePage({ params }: PageProps) {
             />
 
 
-            <div className="mt-16 py-12 bg-slate-100 dark:bg-slate-900/30">
+            <div className="mt-16 py-12 bg-slate-100 dark:bg-slate-900/30 flex justify-center">
                 <AdSpace position="super_footer" />
             </div>
         </article>

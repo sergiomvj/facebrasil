@@ -255,7 +255,7 @@ export default async function Home({
       </div>
       <EditionsSection posts={editorialPosts} />
 
-      <div className="py-12 bg-slate-100 dark:bg-slate-900/50">
+      <div className="py-12 bg-slate-100 dark:bg-slate-900/50 flex justify-center">
         <AdSpace position="super_footer" />
       </div>
     </div>
