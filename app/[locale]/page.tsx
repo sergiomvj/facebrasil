@@ -93,12 +93,15 @@ export default async function Home({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {latestNews.map((article) => (
-                <div key={article.id} className="flex flex-col gap-4">
-                  <ArticleCard article={article} />
-                  <AdSpace position="column" className="mx-auto" />
-                </div>
-              ))}
+              {latestNews.map((article, index) => {
+                const columnPosition = (['column_1', 'column_2', 'column_3'] as const)[index] || 'column_1';
+                return (
+                  <div key={article.id} className="flex flex-col gap-4">
+                    <ArticleCard article={article} />
+                    <AdSpace position={columnPosition} className="mx-auto" />
+                  </div>
+                );
+              })}
             </div>
 
             {/* Infinite Feed Section */}

@@ -7,7 +7,7 @@ import { detectLocation } from '@/lib/geo-utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AdSpaceProps {
-    position: 'super_hero' | 'sidebar' | 'column' | 'super_footer';
+    position: 'super_hero' | 'sidebar' | 'column' | 'column_1' | 'column_2' | 'column_3' | 'super_footer';
     className?: string;
     categoryId?: string;
     publicationName?: 'Facebrasil' | 'TVFacebrasil';
