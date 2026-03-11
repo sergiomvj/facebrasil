@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-header h-16' : 'bg-transparent h-20'}`}>
         <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-10">
-            <div className="flex items-center gap-4 lg:gap-0">
+            <div className="flex items-center gap-3">
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -88,11 +88,12 @@ const Navbar: React.FC = () => {
                 )}
               </button>
 
-              <Link href="/" className="flex items-center gap-3 cursor-pointer group">
-                <div className="size-8 text-primary group-hover:scale-110 transition-transform">
+              <Link href="/" className="flex items-center gap-2 cursor-pointer group">
+                <div className="size-8 text-primary group-hover:scale-110 transition-transform shrink-0">
                   <LogoSVG />
                 </div>
-                <h2 className="text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
+                {/* Ocultar o texto em telas muito pequenas para evitar overflow */}
+                <h2 className="hidden sm:block text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
               </Link>
             </div>
             <nav className="hidden lg:flex items-center gap-8">
@@ -241,7 +242,7 @@ const Navbar: React.FC = () => {
       {/* Mobile Sidebar Menu */}
       <div className={`fixed inset-0 z-[60] lg:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
-        <div className={`absolute top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`absolute top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 mobile-menu-container ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-8">
               <div className="size-8 text-primary">
