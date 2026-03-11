@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 import { Plus, Image as ImageIcon, Trash2, Edit, Save, BarChart, ExternalLink, X, Globe, MapPin, Hash, CheckCircle2, Wand2, Settings } from 'lucide-react';
 import { Ad } from '@/lib/ad-service';
 import { upsertAd, deleteAd, toggleAdStatus, fetchPublications, fetchAdPublications } from '@/app/actions/ad-actions';
-import { uploadAdImage } from '@/app/actions/ad-image-actions';
 import { toast } from 'sonner';
 
 type GeoMode = 'global' | 'region' | 'local';
@@ -63,39 +62,48 @@ export default function AdManagerPage() {
         if (!file) return;
 
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('placement', currentAd.position || 'super_hero');
-        formData.append('deviceType', deviceType);
-        formData.append('advertiserName', currentAd.title || 'anunciante');
+        toast.loading('Enviando imagem...', { id: 'upload-toast' });
 
         try {
-            console.log(`[FRONTEND] Iniciando upload para ${deviceType}...`);
-            const result = await uploadAdImage(formData);
-            console.log(`[FRONTEND] Resposta do Servidor:`, result);
+            // Upload direto ao Supabase Storage pelo browser (sem passar pelo Server Action)
+            // Desta forma evitamos o limite de tamanho de payload do Next.js
+            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+            const safeName = (currentAd.title || 'anuncio').toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const fileName = `${safeName}-${deviceType}-${Date.now()}.${fileExt}`;
 
-            if (result.success) {
-                if (deviceType === 'desktop') {
-                    setCurrentAd(prev => ({ ...prev, image_url: result.url }));
-                } else {
-                    setCurrentAd(prev => ({ ...prev, mobile_image_url: result.url }));
-                }
+            console.log(`[FRONTEND] Iniciando upload direto para ${deviceType}...`);
 
-                if (result.wasConverted) {
-                    toast.info(result.message, { duration: 5000 });
-                } else {
-                    toast.success(result.message);
-                }
-            } else {
-                toast.error(result.error);
+            const { error: uploadError } = await supabase.storage
+                .from('ads')
+                .upload(fileName, file, { upsert: true, contentType: file.type });
+
+            if (uploadError) {
+                console.error('[FRONTEND] Erro no upload Storage:', uploadError);
+                toast.error('Erro ao enviar imagem: ' + uploadError.message, { id: 'upload-toast' });
+                return;
             }
-        } catch (error) {
-            console.error('Upload failed:', error);
-            toast.error('Falha ao enviar imagem.');
+
+            const { data: { publicUrl } } = supabase.storage.from('ads').getPublicUrl(fileName);
+            const finalUrl = `${publicUrl}?v=${Date.now()}`;
+
+            console.log('[FRONTEND] Upload OK! URL:', finalUrl);
+
+            if (deviceType === 'desktop') {
+                setCurrentAd(prev => ({ ...prev, image_url: finalUrl }));
+            } else {
+                setCurrentAd(prev => ({ ...prev, mobile_image_url: finalUrl }));
+            }
+
+            toast.success(`Imagem ${deviceType} enviada com sucesso!`, { id: 'upload-toast' });
+
+        } catch (error: any) {
+            console.error('[FRONTEND] Upload failed:', error);
+            toast.error('Falha ao enviar imagem: ' + error.message, { id: 'upload-toast' });
         } finally {
             setIsUploading(false);
         }
     };
+
 
     const handleSave = async () => {
         if (!currentAd.title || !currentAd.link_url || !currentAd.position) {
@@ -125,12 +133,15 @@ export default function AdManagerPage() {
         };
 
         const result = await upsertAd(payload, currentAd.id);
+        console.log('[FRONTEND] Resultado do upsertAd:', result);
 
         if (!result.success) {
-            alert('Erro ao salvar campanha: ' + result.error);
+            toast.error('Erro ao salvar campanha: ' + result.error);
         } else {
+            toast.success('Campanha salva com sucesso!');
             setIsEditing(false);
             resetForm();
+            fetchData();
         }
     };
 
