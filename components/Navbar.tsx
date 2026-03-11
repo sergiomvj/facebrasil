@@ -73,22 +73,17 @@ const Navbar: React.FC = () => {
       {/* ====== HEADER ====== */}
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-header' : 'bg-transparent'}`}>
 
-        {/* MOBILE: Faixa do Logo (mobile-only) */}
-        <div className="lg:hidden flex items-center justify-center py-2.5 border-b dark:border-white/5 border-gray-200/60">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="size-7 text-primary group-hover:scale-110 transition-transform shrink-0">
-              <LogoSVG />
-            </div>
-            <h2 className="text-xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
-          </Link>
-        </div>
-
         {/* Barra de navegação principal */}
         <div className="max-w-[1280px] mx-auto px-4 lg:px-6 h-14 lg:h-20 flex items-center justify-between">
 
-          {/* Esquerda: Logo (desktop) + Nav (desktop) */}
+          {/* Esquerda: FACEBRASIL (mobile text-only) + Logo+Nav (desktop) */}
           <div className="flex items-center gap-10">
-            {/* Logo — visível apenas no desktop */}
+            {/* Mobile: apenas texto */}
+            <Link href="/" className="lg:hidden">
+              <span className="text-lg font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</span>
+            </Link>
+
+            {/* Desktop: ícone + texto */}
             <Link href="/" className="hidden lg:flex items-center gap-3 cursor-pointer group">
               <div className="size-8 text-primary group-hover:scale-110 transition-transform shrink-0">
                 <LogoSVG />
