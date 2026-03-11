@@ -73,7 +73,7 @@ export default async function Home({
   };
 
   return (
-    <div className="flex flex-col min-h-screen dark:bg-slate-950 bg-slate-50 pt-[100px]">
+    <div className="flex flex-col min-h-screen dark:bg-slate-950 bg-slate-50 pt-[60px] lg:pt-[100px]">
       <AdSpace position="super_hero" className="mb-[20px] mx-auto" />
       <Hero post={mainHero} />
       <FeaturedCarousel posts={carouselPosts} />

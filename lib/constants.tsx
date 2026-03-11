@@ -109,7 +109,7 @@ export const LogoSVG = ({ className }: { className?: string }) => (
     <text
       x="24"
       y="28"
-      fill="white"
+      fill="#FCD34D"
       fontSize="14"
       fontWeight="900"
       fontFamily="Inter, sans-serif"

@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
           <div className="flex items-center gap-10">
             {/* Mobile: apenas texto */}
             <Link href="/" className="lg:hidden">
-              <span className="text-lg font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</span>
+              <span className="text-xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</span>
             </Link>
 
             {/* Desktop: ícone + texto */}
