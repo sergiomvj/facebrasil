@@ -113,39 +113,18 @@ export async function uploadAdImage(formData: FormData) {
 
         console.log(`[UPLOAD AD] Imagem convertida para WEBP. Tamanho final: ${webpBuffer.length} bytes`);
 
-        // 3. Upload to Supabase Storage
-        const supabaseAdmin = getSupabaseAdmin();
-        const { error: uploadError } = await supabaseAdmin
-            .storage
-            .from('ads')
-            .upload(fileName, webpBuffer, {
-                contentType: 'image/webp',
-                upsert: true
-            });
+        // PLANO B DE EMERGÊNCIA (Base64 Direto no Banco):
+        // Ignora complemente a Supabase Storage, problemas de CORS, e cache Edge da Vercel.
+        const base64Str = webpBuffer.toString('base64');
+        const finalUrl = `data:image/webp;base64,${base64Str}`;
 
-        if (uploadError) {
-            console.error('[UPLOAD AD] Erro fatal no Supabase Storage:', uploadError);
-            throw new Error(`Falha ao subir imagem para o storage: ${uploadError.message}`);
-        }
-
-        console.log(`[UPLOAD AD] Upload para o Storage BUCKET ads concluído com sucesso. Arquivo: ${fileName}`);
-
-        // 4. Get Public URL
-        const { data: { publicUrl: storageUrl } } = supabaseAdmin
-            .storage
-            .from('ads')
-            .getPublicUrl(fileName);
-
-        // Add a cache buster so the browser doesn't hit a transient 404 while CDN propagates
-        const finalUrl = `${storageUrl}?v=${Date.now()}`;
-
-        console.log(`[UPLOAD AD] URL Pública gerada: ${finalUrl}`);
+        console.log(`[UPLOAD AD] Gerado Base64. Upload Storage ignorado (Opção 2 - Plano B).`);
 
         return {
             success: true,
             url: finalUrl,
             wasConverted: true,
-            message: `Upload (${deviceType}) concluído via Supabase Storage.`
+            message: `Upload (${deviceType}) convertido para Base64 com sucesso. (Opção de Emergência)`
         };
 
     } catch (err: any) {
