@@ -23,6 +23,7 @@ export default function AdManagerPage() {
     const [geoMode, setGeoMode] = useState<GeoMode>('global');
     const [selectedPubs, setSelectedPubs] = useState<string[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<{ slot: 'desktop' | 'mobile', pct: number, label: string } | null>(null);
     const [showAdvanced, setShowAdvanced] = useState(false);
 
     const [currentAd, setCurrentAd] = useState<Partial<Ad>>({
@@ -62,14 +63,18 @@ export default function AdManagerPage() {
         if (!file) return;
 
         setIsUploading(true);
-        toast.loading('Convertendo e enviando imagem...', { id: 'upload-toast' });
+        setUploadProgress({ slot: deviceType, pct: 10, label: 'Lendo arquivo...' });
 
         try {
-            // 1. Converter QUALQUER formato para PNG usando Canvas do browser
+            // Etapa 1: Criar Object URL para carregamento
+            const objectUrl = URL.createObjectURL(file);
+            setUploadProgress({ slot: deviceType, pct: 30, label: 'Carregando imagem...' });
+
+            // Etapa 2: Converter para PNG via Canvas
             const pngBlob = await new Promise<Blob>((resolve, reject) => {
                 const img = new Image();
-                const objectUrl = URL.createObjectURL(file);
                 img.onload = () => {
+                    setUploadProgress({ slot: deviceType, pct: 60, label: 'Convertendo para PNG...' });
                     const canvas = document.createElement('canvas');
                     canvas.width = img.naturalWidth;
                     canvas.height = img.naturalHeight;
@@ -86,38 +91,45 @@ export default function AdManagerPage() {
                 img.src = objectUrl;
             });
 
-            // 2. Upload do PNG convertido direto para o Supabase Storage
+            // Etapa 3: Upload para Supabase Storage
+            setUploadProgress({ slot: deviceType, pct: 80, label: 'Enviando para o servidor...' });
             const safeName = (currentAd.title || 'anuncio').toLowerCase().replace(/[^a-z0-9]/g, '-');
             const fileName = `${safeName}-${deviceType}-${Date.now()}.png`;
-
-            console.log(`[FRONTEND] Iniciando upload PNG para ${deviceType}... (${(pngBlob.size / 1024).toFixed(0)} KB)`);
 
             const { error: uploadError } = await supabase.storage
                 .from('ads')
                 .upload(fileName, pngBlob, { upsert: true, contentType: 'image/png' });
 
             if (uploadError) {
-                console.error('[FRONTEND] Erro no upload Storage:', uploadError);
-                toast.error('Erro ao enviar imagem: ' + uploadError.message, { id: 'upload-toast' });
+                toast.error('Erro ao enviar imagem: ' + uploadError.message);
                 return;
             }
 
+            // Etapa 4: Get URL pública
+            setUploadProgress({ slot: deviceType, pct: 95, label: 'Finalizando...' });
             const { data: { publicUrl } } = supabase.storage.from('ads').getPublicUrl(fileName);
             const finalUrl = `${publicUrl}?v=${Date.now()}`;
 
-            console.log('[FRONTEND] Upload PNG OK! URL:', finalUrl);
-
+            // Atualiza estado ANTES de completar para evitar race condition
             if (deviceType === 'desktop') {
                 setCurrentAd(prev => ({ ...prev, image_url: finalUrl }));
             } else {
                 setCurrentAd(prev => ({ ...prev, mobile_image_url: finalUrl }));
             }
 
-            toast.success(`Imagem ${deviceType} convertida para PNG e enviada!`, { id: 'upload-toast' });
+            // Pequena pausa para garantir que o estado foi propagado
+            await new Promise(r => setTimeout(r, 300));
+
+            setUploadProgress({ slot: deviceType, pct: 100, label: '✓ Imagem pronta!' });
+            toast.success(`Imagem ${deviceType} enviada com sucesso!`);
+
+            // Limpa a barra após 1.5s
+            setTimeout(() => setUploadProgress(null), 1500);
 
         } catch (error: any) {
             console.error('[FRONTEND] Upload failed:', error);
-            toast.error('Falha ao enviar imagem: ' + error.message, { id: 'upload-toast' });
+            toast.error('Falha ao enviar imagem: ' + error.message);
+            setUploadProgress(null);
         } finally {
             setIsUploading(false);
         }
@@ -467,14 +479,27 @@ export default function AdManagerPage() {
                                                 <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'desktop')} disabled={isUploading} />
                                             </label>
                                         </div>
-                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner bg-grid-slate-800/[0.05]">
-                                            {currentAd.image_url ? (
+                                        <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner">
+                                            {uploadProgress && uploadProgress.slot === 'desktop' ? (
+                                                <div className="w-full px-6 flex flex-col gap-3">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-xs text-slate-400 font-mono">{uploadProgress.label}</span>
+                                                        <span className="text-xs text-accent-yellow font-black">{uploadProgress.pct}%</span>
+                                                    </div>
+                                                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-accent-yellow rounded-full transition-all duration-500 ease-out"
+                                                            style={{ width: `${uploadProgress.pct}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : currentAd.image_url ? (
                                                 <img
                                                     src={currentAd.image_url}
                                                     alt="Desktop Preview"
                                                     className="w-full h-full object-contain"
                                                     onError={(e) => {
-                                                        console.error(`[FRONTEND] Erro ao carregar Desktop Image URL no navegador: ${currentAd.image_url}`);
+                                                        console.error(`[FRONTEND] Erro ao carregar Desktop Image URL: ${currentAd.image_url}`);
                                                         (e.target as HTMLImageElement).src = 'https://placehold.co/1240x150/0f172a/64748b?text=Erro+na+Imagem';
                                                     }}
                                                 />
