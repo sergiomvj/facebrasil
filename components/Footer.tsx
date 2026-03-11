@@ -35,10 +35,10 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="dark:text-white text-gray-900 font-bold mb-6">{t('categories')}</h4>
             <ul className="space-y-3 text-sm text-slate-400">
-              <li><Link className="hover:text-primary transition-colors" href="/category/saude-bem-estar">{tNav('categories.health')} & {tNav('categories.wellbeing')}</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/category/negocios-carreira">{tNav('categories.business')}</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/category/estilo-de-vida-artes">{tNav('categories.lifestyle')}</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/events">{tNav('events')} & {tNav('community')}</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/category/saude">{tNav('categories.health')}</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/category/bem-estar">{tNav('categories.wellbeing')}</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/category/estilo-de-vida">{tNav('categories.lifestyle')}</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/category/negocios">{tNav('categories.business')}</Link></li>
             </ul>
           </div>
 

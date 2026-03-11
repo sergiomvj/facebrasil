@@ -31,10 +31,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     if (slug === 'face-brasileira') {
         redirect('/category/face-brasil-na-america');
     }
-    // Handle invalid categories that return 404
-    if (slug === 'estilo-de-vida' || slug === 'bem-estar') {
-        redirect('/category/saude');
-    }
 
     const supabase = await createClient();
 
