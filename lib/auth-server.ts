@@ -5,14 +5,18 @@ import { createClient } from './supabase/server';
  * Replacement for Clerk's auth() in server actions and API routes.
  */
 export async function auth() {
-    const supabase = await createClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
+    try {
+        const supabase = await createClient();
+        const { data, error } = await supabase.auth.getUser();
 
-    if (error || !user) {
+        if (error || !data || !data.user) {
+            return { userId: null };
+        }
+
+        return { userId: data.user.id };
+    } catch {
         return { userId: null };
     }
-
-    return { userId: user.id };
 }
 
 /**
