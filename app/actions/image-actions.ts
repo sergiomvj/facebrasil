@@ -24,23 +24,26 @@ export async function uploadSiteImage(formData: FormData) {
             .webp({ quality: 85 })
             .toBuffer();
 
-        const fileName = `site-meta-${Date.now()}.webp`;
+        const fileName = `site-settings/${Date.now()}.webp`;
 
-        // We use the 'ads' bucket for now as it exists, or 'media' if preferred.
-        // Let's check available buckets or just use 'ads' as it's already configured.
+        // Using 'blog-assets' which we know exists from database inspection
         const { error: uploadError } = await supabaseAdmin
             .storage
-            .from('articles') // 'articles' is likely a safe bet for public images
+            .from('blog-assets')
             .upload(fileName, optimizedBuffer, {
                 contentType: 'image/webp',
+                cacheControl: '3600',
                 upsert: true
             });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+            console.error('Supabase Storage Upload Error:', uploadError);
+            return { success: false, error: `Erro no Supabase: ${uploadError.message}` };
+        }
 
         const { data: { publicUrl } } = supabaseAdmin
             .storage
-            .from('articles')
+            .from('blog-assets')
             .getPublicUrl(fileName);
 
         return {
@@ -48,7 +51,10 @@ export async function uploadSiteImage(formData: FormData) {
             url: publicUrl
         };
     } catch (err: any) {
-        console.error('Upload site image error:', err);
-        return { success: false, error: err.message };
+        console.error('Critical Upload Error:', err);
+        return {
+            success: false,
+            error: err.message || 'Erro interno no processamento da imagem'
+        };
     }
 }
