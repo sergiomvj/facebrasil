@@ -27,7 +27,7 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
     const lastActiveRef = useRef(Date.now()); // for computing active intervals
     const scrollDepthRef = useRef(0);         // 0-100
     const completedRef = useRef(false);
-    const viewTrackedRef = useRef(false);
+    const viewTrackedRef = useRef<string | null>(null); // Track WHICH article ID was incremented
     const xpAwardedRef = useRef(false);
     const savedRef = useRef(false);
     const translatorUsedRef = useRef(false);
@@ -39,10 +39,28 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
     const [showXP, setShowXP] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
 
-    // ----- INCREMENT VIEWS (first mount, for all visitors) -----
+    // ----- RESET TRACKER ON ARTICLE CHANGE -----
     useEffect(() => {
-        if (viewTrackedRef.current) return;
-        viewTrackedRef.current = true;
+        // Generate new session and reset tracking refs
+        sessionId.current = generateSessionId();
+        startTime.current = Date.now();
+        activeTimeRef.current = 0;
+        lastActiveRef.current = Date.now();
+        scrollDepthRef.current = 0;
+        completedRef.current = false;
+        xpAwardedRef.current = false;
+        savedRef.current = false;
+        translatorUsedRef.current = false;
+        translatorLangRef.current = null;
+        // Navigation resets UI state too
+        setIsFavorited(false);
+        setFavCount(0);
+    }, [articleId]);
+
+    // ----- INCREMENT VIEWS (when articleId changes and not yet tracked for THIS id) -----
+    useEffect(() => {
+        if (viewTrackedRef.current === articleId) return;
+        viewTrackedRef.current = articleId;
         void (async () => { try { await supabase.rpc('increment_article_views', { p_article_id: articleId }); } catch { } })();
     }, [articleId]);
 

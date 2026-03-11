@@ -98,8 +98,8 @@ export const LogoSVG = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 48 48" className={className} xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#ff9d00" />
-        <stop offset="100%" stopColor="#f97316" />
+        <stop offset="0%" stopColor="#FACC15" />
+        <stop offset="100%" stopColor="#EAB308" />
       </linearGradient>
     </defs>
     <path
@@ -108,13 +108,13 @@ export const LogoSVG = ({ className }: { className?: string }) => (
     />
     <text
       x="24"
-      y="28"
-      fill="#FCD34D"
-      fontSize="14"
+      y="28.5"
+      fill="#1E293B"
+      fontSize="13"
       fontWeight="900"
       fontFamily="Inter, sans-serif"
       textAnchor="middle"
-      style={{ letterSpacing: '-1px' }}
+      style={{ letterSpacing: '-0.5px' }}
     >
       FB
     </text>

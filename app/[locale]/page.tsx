@@ -16,8 +16,49 @@ import { getTranslations } from 'next-intl/server';
 
 import AdSpace from '@/components/AdSpace';
 
+import { Metadata } from 'next';
+import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
+
 // Force dynamic revalidation
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const supabase = await createClient();
+  const mainHero = await fetchMainHero(undefined, supabase);
+
+  // Use hero image or fallback
+  const imageUrl = mainHero?.featuredImage?.url || `https://fbr.news${FALLBACK_ARTICLE_IMAGE}`;
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: t('title'),
+        }
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('title'),
+      description: t('description'),
+      images: [imageUrl],
+    },
+  };
+}
 
 export default async function Home({
   params
