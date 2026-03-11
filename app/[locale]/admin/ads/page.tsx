@@ -62,20 +62,39 @@ export default function AdManagerPage() {
         if (!file) return;
 
         setIsUploading(true);
-        toast.loading('Enviando imagem...', { id: 'upload-toast' });
+        toast.loading('Convertendo e enviando imagem...', { id: 'upload-toast' });
 
         try {
-            // Upload direto ao Supabase Storage pelo browser (sem passar pelo Server Action)
-            // Desta forma evitamos o limite de tamanho de payload do Next.js
-            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
-            const safeName = (currentAd.title || 'anuncio').toLowerCase().replace(/[^a-z0-9]/g, '-');
-            const fileName = `${safeName}-${deviceType}-${Date.now()}.${fileExt}`;
+            // 1. Converter QUALQUER formato para PNG usando Canvas do browser
+            const pngBlob = await new Promise<Blob>((resolve, reject) => {
+                const img = new Image();
+                const objectUrl = URL.createObjectURL(file);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) { reject(new Error('Canvas não disponível')); return; }
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob((blob) => {
+                        URL.revokeObjectURL(objectUrl);
+                        if (blob) resolve(blob);
+                        else reject(new Error('Falha ao converter para PNG'));
+                    }, 'image/png', 0.92);
+                };
+                img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Erro ao carregar imagem')); };
+                img.src = objectUrl;
+            });
 
-            console.log(`[FRONTEND] Iniciando upload direto para ${deviceType}...`);
+            // 2. Upload do PNG convertido direto para o Supabase Storage
+            const safeName = (currentAd.title || 'anuncio').toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const fileName = `${safeName}-${deviceType}-${Date.now()}.png`;
+
+            console.log(`[FRONTEND] Iniciando upload PNG para ${deviceType}... (${(pngBlob.size / 1024).toFixed(0)} KB)`);
 
             const { error: uploadError } = await supabase.storage
                 .from('ads')
-                .upload(fileName, file, { upsert: true, contentType: file.type });
+                .upload(fileName, pngBlob, { upsert: true, contentType: 'image/png' });
 
             if (uploadError) {
                 console.error('[FRONTEND] Erro no upload Storage:', uploadError);
@@ -86,7 +105,7 @@ export default function AdManagerPage() {
             const { data: { publicUrl } } = supabase.storage.from('ads').getPublicUrl(fileName);
             const finalUrl = `${publicUrl}?v=${Date.now()}`;
 
-            console.log('[FRONTEND] Upload OK! URL:', finalUrl);
+            console.log('[FRONTEND] Upload PNG OK! URL:', finalUrl);
 
             if (deviceType === 'desktop') {
                 setCurrentAd(prev => ({ ...prev, image_url: finalUrl }));
@@ -94,7 +113,7 @@ export default function AdManagerPage() {
                 setCurrentAd(prev => ({ ...prev, mobile_image_url: finalUrl }));
             }
 
-            toast.success(`Imagem ${deviceType} enviada com sucesso!`, { id: 'upload-toast' });
+            toast.success(`Imagem ${deviceType} convertida para PNG e enviada!`, { id: 'upload-toast' });
 
         } catch (error: any) {
             console.error('[FRONTEND] Upload failed:', error);
