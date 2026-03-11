@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
-import { Search, Sun, Moon, X, Trophy, LayoutDashboard, LogOut, User as UserIcon, ChevronRight } from 'lucide-react';
+import { Search, Sun, Moon, X, Trophy, LayoutDashboard, LogOut, User as UserIcon, ChevronRight, Smartphone } from 'lucide-react';
 import { LogoSVG } from '@/lib/constants';
 import XPHUD from '@/components/XPHUD';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -141,6 +141,16 @@ const Navbar: React.FC = () => {
 
           {/* Direita: Ações */}
           <div className="flex items-center gap-2 lg:gap-4">
+
+            {/* Eu Reporter — Mobile & Desktop */}
+            <Link
+              href="/eu-reporter"
+              className="flex items-center gap-1 p-1.5 lg:p-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors shrink-0"
+              title="Eu Repórter"
+            >
+              <Smartphone className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-white" />
+              <span className="text-[10px] lg:text-xs font-black text-white tracking-wider">EU</span>
+            </Link>
 
             {/* Hamburger — Mobile only */}
             <button
