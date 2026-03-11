@@ -70,32 +70,33 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-header h-16' : 'bg-transparent h-20'}`}>
-        <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            <div className="flex items-center gap-3">
-              {/* Mobile Menu Toggle */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg dark:hover:bg-slate-800 hover:bg-gray-100 transition-all mobile-menu-container"
-              >
-                {isMobileMenuOpen ? <X className="size-6 text-primary" /> : (
-                  <div className="flex flex-col gap-1.5 w-6">
-                    <div className="h-0.5 w-full bg-slate-400 rounded-full" />
-                    <div className="h-0.5 w-full bg-slate-400 rounded-full" />
-                    <div className="h-0.5 w-full bg-slate-400 rounded-full" />
-                  </div>
-                )}
-              </button>
+      {/* ====== HEADER ====== */}
+      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-header' : 'bg-transparent'}`}>
 
-              <Link href="/" className="flex items-center gap-2 cursor-pointer group">
-                <div className="size-8 text-primary group-hover:scale-110 transition-transform shrink-0">
-                  <LogoSVG />
-                </div>
-                {/* Ocultar o texto em telas muito pequenas para evitar overflow */}
-                <h2 className="hidden sm:block text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
-              </Link>
+        {/* MOBILE: Faixa do Logo (mobile-only) */}
+        <div className="lg:hidden flex items-center justify-center py-2.5 border-b dark:border-white/5 border-gray-200/60">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="size-7 text-primary group-hover:scale-110 transition-transform shrink-0">
+              <LogoSVG />
             </div>
+            <h2 className="text-xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
+          </Link>
+        </div>
+
+        {/* Barra de navegação principal */}
+        <div className="max-w-[1280px] mx-auto px-4 lg:px-6 h-14 lg:h-20 flex items-center justify-between">
+
+          {/* Esquerda: Logo (desktop) + Nav (desktop) */}
+          <div className="flex items-center gap-10">
+            {/* Logo — visível apenas no desktop */}
+            <Link href="/" className="hidden lg:flex items-center gap-3 cursor-pointer group">
+              <div className="size-8 text-primary group-hover:scale-110 transition-transform shrink-0">
+                <LogoSVG />
+              </div>
+              <h2 className="text-2xl font-black tracking-tighter dark:text-white text-gray-900">FACEBRASIL</h2>
+            </Link>
+
+            {/* Desktop nav links */}
             <nav className="hidden lg:flex items-center gap-8">
               {navItems.map((item) => (
                 <Link key={item.key} className="text-xs font-medium dark:text-slate-300 text-gray-700 dark:hover:text-primary hover:text-primary transition-colors" href={item.href}>
@@ -138,7 +139,23 @@ const Navbar: React.FC = () => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Direita: Ações */}
+          <div className="flex items-center gap-2 lg:gap-4">
+
+            {/* Hamburger — Mobile only */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg dark:hover:bg-slate-800 hover:bg-gray-100 transition-all mobile-menu-container"
+            >
+              {isMobileMenuOpen ? <X className="size-5 text-primary" /> : (
+                <div className="flex flex-col gap-1.5 w-5">
+                  <div className="h-0.5 w-full bg-slate-400 rounded-full" />
+                  <div className="h-0.5 w-full bg-slate-400 rounded-full" />
+                  <div className="h-0.5 w-full bg-slate-400 rounded-full" />
+                </div>
+              )}
+            </button>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -146,9 +163,9 @@ const Navbar: React.FC = () => {
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
-                <Sun className="w-5 h-5 dark:text-yellow-400 text-yellow-600" />
+                <Sun className="w-4 h-4 lg:w-5 lg:h-5 dark:text-yellow-400 text-yellow-600" />
               ) : (
-                <Moon className="w-5 h-5 text-slate-700" />
+                <Moon className="w-4 h-4 lg:w-5 lg:h-5 text-slate-700" />
               )}
             </button>
 
@@ -164,11 +181,11 @@ const Navbar: React.FC = () => {
               onClick={() => setIsSearchOpen(true)}
               className="p-2 rounded-full dark:bg-slate-800 bg-gray-200 dark:hover:bg-slate-700 hover:bg-gray-300 transition-colors"
             >
-              <Search className="w-5 h-5 dark:text-slate-300 text-gray-700" />
+              <Search className="w-4 h-4 lg:w-5 lg:h-5 dark:text-slate-300 text-gray-700" />
             </button>
 
             <SignedOut>
-              <Link href="/login" className="bg-primary hover:bg-primary-dark text-white px-4 md:px-6 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-primary/20 text-sm md:text-base">
+              <Link href="/login" className="bg-primary hover:bg-primary-dark text-white px-3 lg:px-6 py-1.5 lg:py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-primary/20 text-xs lg:text-sm">
                 Entrar
               </Link>
             </SignedOut>
@@ -179,11 +196,11 @@ const Navbar: React.FC = () => {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 p-1.5 rounded-full dark:hover:bg-slate-800 hover:bg-gray-100 transition-all border border-transparent hover:border-primary/20"
                 >
-                  <div className="size-8 rounded-full bg-slate-800 border border-primary/30 overflow-hidden flex items-center justify-center text-primary">
+                  <div className="size-7 lg:size-8 rounded-full bg-slate-800 border border-primary/30 overflow-hidden flex items-center justify-center text-primary">
                     {avatarUrl && !avatarError ? (
                       <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" onError={() => setAvatarError(true)} />
                     ) : (
-                      <UserIcon className="w-5 h-5" />
+                      <UserIcon className="w-4 h-4" />
                     )}
                   </div>
                 </button>
