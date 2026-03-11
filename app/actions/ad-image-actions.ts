@@ -130,9 +130,12 @@ export async function uploadAdImage(formData: FormData) {
             .from('ads')
             .getPublicUrl(fileName);
 
+        // Add a cache buster so the browser doesn't hit a transient 404 while CDN propagates
+        const finalUrl = `${storageUrl}?v=${Date.now()}`;
+
         return {
             success: true,
-            url: storageUrl,
+            url: finalUrl,
             wasConverted: true,
             message: `Upload (${deviceType}) concluído via Supabase Storage.`
         };
