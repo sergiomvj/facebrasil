@@ -1,1 +1,240 @@
-//aqui vai ficar o codigo do fbrseo
+Aqui está o documento HTML estruturado com o **Conceito Geral do FBR-SEO**, desenhado de acordo com os padrões visuais e
+arquitetônicos da FBR (definidos no `DESIGN_STANDARDS.md` e `fbr-arquitetura.md`), visando o ganho de performance em
+todo o ecossistema de produtos (Facebrasil, Facebrasil TV, FacebrasilShop, etc.).
+
+Você pode salvar o código abaixo como um arquivo `.html` e abri-lo no seu navegador.
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBR-SEO: Conceito Geral e Estratégia</title>
+    <!-- Tailwind CSS (via CDN para visualização direta) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts conforme DESIGN_STANDARDS.md -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'], // Corpo de texto
+                        heading: ['Outfit', 'sans-serif'], // Títulos e Logo
+                    },
+                    colors: {
+                        primary: '#F97316', // Orange 500
+                        primaryDark: '#EA580C', // Orange 600
+                        background: '#F8FAFC', // Slate 50
+                        card: '#FFFFFF', // White
+                        darkBg: '#101622', // Dark Blue FBR
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8FAFC;
+            color: #1E293B;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Topbar Padrão FBR -->
+    <header class="bg-darkBg text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-primary font-heading font-extrabold text-2xl tracking-tight">FBR<span
+                        class="text-white font-light">APPS</span></span>
+                <span class="text-slate-400">|</span>
+                <span class="font-heading font-semibold text-lg text-slate-200">Módulo FBR-SEO</span>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium">
+                <a href="#" class="text-primary hover:text-white transition">Visão Geral</a>
+                <a href="#" class="text-slate-300 hover:text-white transition">Métricas</a>
+                <a href="#" class="text-slate-300 hover:text-white transition">Integrações</a>
+                <a href="#" class="text-slate-300 hover:text-white transition">Configurações</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <!-- Header da Página -->
+        <div class="mb-10 border-b border-slate-200 pb-6">
+            <h1 class="text-4xl font-bold text-slate-900 mb-3 tracking-tight">Conceito Geral do FBR-SEO</h1>
+            <p class="text-lg text-slate-600 font-sans">Arquitetura Estratégica e Inteligência Sistêmica para Gestão de
+                SEO Enterprise. Documento base para alavancar a performance orgânica de todos os produtos do Facebrasil
+                Group (Revista Facebrasil, Facebrasil TV, FacebrasilShop, GBSN, etc.).</p>
+        </div>
+
+        <!-- Seção 1: Filosofia e Visão Executiva -->
+        <section class="bg-card rounded-xl shadow-sm border border-slate-200 p-8 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">1. A Filosofia FBR-SEO</h2>
+            </div>
+            <div class="space-y-4 text-slate-600 leading-relaxed">
+                <p>O FBR-SEO abandona o modelo de "tarefas manuais isoladas" para operar como um <strong>workflow
+                        automatizado de SEO Enterprise</strong>. O foco não é apenas rastrear palavras-chave, mas agir
+                    como o cérebro coordenador entre a demanda de pesquisa e a produção de conteúdo (via FBR-Redação).
+                </p>
+                <p>Nesta escala corporativa com múltiplos domínios e sistemas de gerenciamento de conteúdo (CMS), o
+                    FBR-SEO padroniza auditorias, interliga conteúdos e previne a <em>canibalização de
+                        palavras-chave</em> entre as diferentes marcas do grupo (ex: separar as intenções de busca
+                    informacionais na Revista Facebrasil das transacionais no FacebrasilShop).</p>
+            </div>
+        </section>
+
+        <!-- Seção 2: Arquitetura de Agentes (MAS) -->
+        <section class="bg-card rounded-xl shadow-sm border border-slate-200 p-8 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">2. Arquitetura Multiagentes FBR</h2>
+            </div>
+            <div class="space-y-4 text-slate-600 leading-relaxed">
+                <p>O coração do FBR-SEO é o <strong>Sistema Multiagentes (MAS)</strong>. Seguindo os princípios
+                    inegociáveis da Arquitetura FBR, todos os agentes rodam exclusivamente no <strong>OpenClaw
+                        Gateway</strong> e são orquestrados pelo <strong>n8n</strong> (que atua como o sistema nervoso
+                    central).</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="p-5 bg-slate-50 rounded-lg border border-slate-100">
+                        <h4 class="font-bold text-slate-800 mb-2">Agentes Especializados</h4>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li><strong>Monitor de Performance:</strong> Detecta anomalias e quedas de tráfego usando a
+                                API do GSC.</li>
+                            <li><strong>Auditor Técnico:</strong> Varre domínios do Facebrasil Group em busca de erros
+                                (404s, Core Web Vitals).</li>
+                            <li><strong>Otimizador de Conteúdo:</strong> Interage bidirecionalmente com o FBR-Redação
+                                para sugerir entidades e validar QA.</li>
+                        </ul>
+                    </div>
+                    <div class="p-5 bg-slate-50 rounded-lg border border-slate-100">
+                        <h4 class="font-bold text-slate-800 mb-2">Governança (FBR-CLICK)</h4>
+                        <p class="text-sm">Ações críticas sugeridas pelo FBR-SEO (ex: aplicar redirecionamentos em
+                            massa, publicar centenas de artigos gerados) requerem aprovação no
+                            <strong>FBR-CLICK</strong>. Os agentes do FBR-SEO enviam os <em>insights</em> para o canal
+                            <code>#fbr-seo</code> para decisão humana ("Human-in-the-loop").</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 3: Infraestrutura de Dados e APIs -->
+        <section class="bg-card rounded-xl shadow-sm border border-slate-200 p-8 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                        </path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">3. Ecossistema de Dados e MCP</h2>
+            </div>
+            <div class="space-y-4 text-slate-600 leading-relaxed">
+                <p>Para suportar altíssima volumetria sem custos proibitivos, o FBR-SEO utiliza uma combinação
+                    estratégica de APIs:</p>
+                <ul class="list-disc list-inside space-y-2 mt-4 ml-4">
+                    <li><strong>Google Search Console (GSC) API:</strong> Dados primários de cliques, impressões e taxas
+                        de cliques gratuitos para todos os subdomínios.</li>
+                    <li><strong>DataForSEO API (Pay-As-You-Go):</strong> Padrão ouro para desenvolvedores. Recuperação
+                        em massa de SERPs e análise de links cruzados sem contratos mensais abusivos.</li>
+                    <li><strong>Model Context Protocol (MCP):</strong> Permite que os gestores façam consultas em
+                        linguagem natural no FBR-CLICK. Ex: <em>"Quais serviços do FacebrasilShop perderam posição para
+                            'envio de remessas' esta semana?"</em>. O agente consome o MCP e entrega a resposta pronta.
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Seção 4: Caminhos de Ganho de Performance -->
+        <section class="bg-card rounded-xl shadow-sm border-t-4 border-t-primary p-8 mb-8">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">4. Caminhos Estratégicos de Ganho de Performance</h2>
+            <p class="text-slate-600 mb-6">Diretrizes acionáveis para o crescimento orgânico de todos os portais do
+                grupo, de informativos (Revista) a serviços de suporte ao imigrante e ecommerce.</p>
+
+            <div class="space-y-6">
+                <!-- Caminho 1 -->
+                <div class="border-l-4 border-amber-300 pl-4">
+                    <h3 class="font-bold text-lg text-slate-800">1. Otimização para Inteligência Artificial (AEO/GEO)
+                    </h3>
+                    <p class="text-slate-600 text-sm mt-1">O tráfego orgânico agora passa pelos <em>AI Overviews</em> do
+                        Google e respostas de LLMs. O conteúdo produzido pelo FBR-Redação deve possuir alta "densidade
+                        de fatos", tabelas estruturadas e respostas concisas (BLUF - Bottom Line Up Front) na introdução
+                        para maximizar a taxa de citação por IA.</p>
+                </div>
+
+                <!-- Caminho 2 -->
+                <div class="border-l-4 border-amber-400 pl-4">
+                    <h3 class="font-bold text-lg text-slate-800">2. Estrutura de Topic Clusters e Entidades</h3>
+                    <p class="text-slate-600 text-sm mt-1">Substituir a repetição de palavras-chave pelo
+                        <strong>Semantic SEO</strong>. A criação de Guias Pilares (ex: "Guia de Imigração EUA") cercados
+                        por artigos de cluster de longa cauda. O FBR-SEO mapeará os relacionamentos das "entidades" da
+                        comunidade brasileira, injetando Schema Markup automatizado para consolidar a autoridade de
+                        marca.</p>
+                </div>
+
+                <!-- Caminho 3 -->
+                <div class="border-l-4 border-amber-500 pl-4">
+                    <h3 class="font-bold text-lg text-slate-800">3. Linkagem Interna Automatizada Multi-Site</h3>
+                    <p class="text-slate-600 text-sm mt-1">Eliminação de páginas "órfãs" através de scripts/APIs de
+                        injeção contextual. O sistema conectará organicamente conteúdos educacionais da Revista
+                        Facebrasil diretamente com soluções (BOFU) do FacebrasilShop. Isso distribui o <em>link
+                            equity</em> gerado pelo portal de conteúdo para as páginas de conversão.</p>
+                </div>
+
+                <!-- Caminho 4 -->
+                <div class="border-l-4 border-orange-500 pl-4">
+                    <h3 class="font-bold text-lg text-slate-800">4. Governança Técnica (Core Web Vitals e Crawl Budget)
+                    </h3>
+                    <p class="text-slate-600 text-sm mt-1">Em escala enterprise, infraestrutura limpa é essencial. O
+                        agente de auditoria focará implacavelmente nas métricas de velocidade LCP e INP (Interaction to
+                        Next Paint). O rastreamento (crawl budget) será focado em páginas de valor, automatizando
+                        <em>canonicals</em> e gerenciando filtros em lojas Shopify/E-commerce.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Padrão FBR -->
+    <footer class="bg-darkBg text-slate-400 py-6 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm font-sans">
+            <p>&copy; 2026 Facebrasil Group. Documentação protegida - Arquitetura de Sistemas FBR.</p>
+            <p class="mt-2 text-xs">Desenvolvido com padrões de UX Corporativo de alta densidade e eficiência.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
+```
