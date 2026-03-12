@@ -26,7 +26,7 @@ interface FBRSystem {
     icon: React.ComponentType<{ className?: string }>;
     color: string;
     colorDim: string;
-    status: 'active' | 'development';
+    status: string;
     tags: string[];
     version?: string;
 }
@@ -40,21 +40,9 @@ const SYSTEMS: FBRSystem[] = [
         icon: Megaphone,
         color: '#0EA5E9',
         colorDim: 'rgba(14,165,233,0.15)',
-        status: 'active',
+        status: '95%',
         tags: ['Marketing', 'IA Estratégica', 'Multi-tenant'],
         version: 'v2.0',
-    },
-    {
-        id: 'click',
-        name: 'FBR-CLICK',
-        description: 'Sistema de links inteligentes e rastreamento de cliques. Gerencia campanhas com links personalizados, analytics em tempo real e otimização de funil.',
-        folder: 'click',
-        icon: MousePointerClick,
-        color: '#F97316',
-        colorDim: 'rgba(249,115,22,0.15)',
-        status: 'active',
-        tags: ['Links', 'Analytics', 'Rastreamento'],
-        version: 'v1.0',
     },
     {
         id: 'leads',
@@ -64,20 +52,20 @@ const SYSTEMS: FBRSystem[] = [
         icon: Users,
         color: '#22C55E',
         colorDim: 'rgba(34,197,94,0.15)',
-        status: 'active',
+        status: '90%',
         tags: ['Captação', 'Nutrição', 'Automação'],
         version: 'v1.0',
     },
     {
-        id: 'redacao',
-        name: 'FBR-REDAÇÃO',
-        description: 'Estúdio de redação assistida por IA. Produz artigos, newsletters e conteúdo editorial com voz de marca consistente e SEO integrado.',
-        folder: 'redacao',
-        icon: PenLine,
-        color: '#8B5CF6',
-        colorDim: 'rgba(139,92,246,0.15)',
-        status: 'active',
-        tags: ['Copywriting', 'Editorial', 'IA Gerativa'],
+        id: 'click',
+        name: 'FBR-CLICK',
+        description: 'Sistema de links inteligentes e rastreamento de cliques. Gerencia campanhas com links personalizados, analytics em tempo real e otimização de funil.',
+        folder: 'click',
+        icon: MousePointerClick,
+        color: '#F97316',
+        colorDim: 'rgba(249,115,22,0.15)',
+        status: '95%',
+        tags: ['Links', 'Analytics', 'Rastreamento'],
         version: 'v1.0',
     },
     {
@@ -88,20 +76,20 @@ const SYSTEMS: FBRSystem[] = [
         icon: ShoppingBag,
         color: '#F59E0B',
         colorDim: 'rgba(245,158,11,0.15)',
-        status: 'active',
+        status: '75%',
         tags: ['CRM', 'Pipeline', 'Previsão de Receita'],
         version: 'v1.0',
     },
     {
-        id: 'social',
-        name: 'FBR-SOCIAL',
-        description: 'Hub de gestão de redes sociais. Agenda posts, monitora engajamento, analisa concorrentes e gera relatórios de performance cross-platform.',
-        folder: 'social',
-        icon: Share2,
-        color: '#EC4899',
-        colorDim: 'rgba(236,72,153,0.15)',
-        status: 'active',
-        tags: ['Social Media', 'Agendamento', 'Analytics'],
+        id: 'redacao',
+        name: 'FBR-REDAÇÃO',
+        description: 'Estúdio de redação assistida por IA. Produz artigos, newsletters e conteúdo editorial com voz de marca consistente e SEO integrado.',
+        folder: 'redacao',
+        icon: PenLine,
+        color: '#8B5CF6',
+        colorDim: 'rgba(139,92,246,0.15)',
+        status: '98%',
+        tags: ['Copywriting', 'Editorial', 'IA Gerativa'],
         version: 'v1.0',
     },
     {
@@ -112,7 +100,7 @@ const SYSTEMS: FBRSystem[] = [
         icon: Palette,
         color: '#14B8A6',
         colorDim: 'rgba(20,184,166,0.15)',
-        status: 'active',
+        status: '45%',
         tags: ['Branding', 'Assets', 'Design System'],
         version: 'v1.0',
     },
@@ -124,7 +112,7 @@ const SYSTEMS: FBRSystem[] = [
         icon: Video,
         color: '#A78BFA',
         colorDim: 'rgba(167,139,250,0.15)',
-        status: 'active',
+        status: '30%',
         tags: ['Produção', 'Distribuição', 'Formatos'],
         version: 'v1.0',
     },
@@ -136,20 +124,20 @@ const SYSTEMS: FBRSystem[] = [
         icon: Search,
         color: '#22C55E',
         colorDim: 'rgba(34,197,94,0.15)',
-        status: 'active',
+        status: '15%',
         tags: ['SEO', 'Palavras-chave', 'Auditoria'],
         version: 'v1.0',
     },
     {
-        id: 'finance',
-        name: 'FBR-FINANCE',
-        description: 'Hub financeiro central do Grupo Facebrasil. Controla recebimentos, pagamentos, centro de custo por empresa, conciliação automática e auditoria imutável.',
-        folder: 'finance',
-        icon: DollarSign,
-        color: '#10B981',
-        colorDim: 'rgba(16,185,129,0.15)',
-        status: 'active',
-        tags: ['Financeiro', 'Conciliação', 'Auditoria'],
+        id: 'social',
+        name: 'FBR-SOCIAL',
+        description: 'Hub de gestão de redes sociais. Agenda posts, monitora engajamento, analisa concorrentes e gera relatórios de performance cross-platform.',
+        folder: 'social',
+        icon: Share2,
+        color: '#EC4899',
+        colorDim: 'rgba(236,72,153,0.15)',
+        status: '45%',
+        tags: ['Social Media', 'Agendamento', 'Analytics'],
         version: 'v1.0',
     },
     {
@@ -160,8 +148,20 @@ const SYSTEMS: FBRSystem[] = [
         icon: Code2,
         color: '#06B6D4',
         colorDim: 'rgba(6,182,212,0.15)',
-        status: 'active',
+        status: '95%',
         tags: ['Desenvolvimento', 'Infra', 'DevOps'],
+        version: 'v1.0',
+    },
+    {
+        id: 'finance',
+        name: 'FBR-FINANCE',
+        description: 'Hub financeiro central do Grupo Facebrasil. Controla recebimentos, pagamentos, centro de custo por empresa, conciliação automática e auditoria imutável.',
+        folder: 'finance',
+        icon: DollarSign,
+        color: '#10B981',
+        colorDim: 'rgba(16,185,129,0.15)',
+        status: '50%',
+        tags: ['Financeiro', 'Conciliação', 'Auditoria'],
         version: 'v1.0',
     },
 ];
@@ -170,8 +170,8 @@ export default function FBRAppsPage() {
     const params = useParams();
     const locale = params.locale as string;
 
-    const activeSystems = SYSTEMS.filter(s => s.status === 'active');
-    const devSystems = SYSTEMS.filter(s => s.status === 'development');
+    const activeSystems = SYSTEMS;
+    const devSystems: FBRSystem[] = [];
 
     return (
         <div className="min-h-screen">
@@ -300,7 +300,7 @@ function SystemCard({ system }: { system: FBRSystem }) {
                             <>
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full dark:bg-green-500/10 bg-green-50 dark:border-green-500/20 border-green-200 border">
                                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-[10px] font-mono uppercase tracking-wider text-green-600 dark:text-green-400">Live</span>
+                                    <span className="text-[10px] font-mono uppercase tracking-wider text-green-600 dark:text-green-400">{system.status}</span>
                                 </div>
                                 <ExternalLink className="w-4 h-4 dark:text-slate-600 text-gray-300 group-hover:text-current transition-colors" style={{ color: isDev ? undefined : system.color + '80' }} />
                             </>
