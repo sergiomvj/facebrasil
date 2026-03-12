@@ -13,7 +13,9 @@ import {
     Palette,
     ExternalLink,
     Lock,
-    Layers
+    Layers,
+    DollarSign,
+    Code2
 } from 'lucide-react';
 
 interface FBRSystem {
@@ -132,11 +134,35 @@ const SYSTEMS: FBRSystem[] = [
         description: 'Motor de otimização de buscas. Inteligência semântica, análise de concorrentes, sugestão de palavras-chave e auditoria técnica automatizada.',
         folder: 'seo',
         icon: Search,
-        color: '#64748B',
-        colorDim: 'rgba(100,116,139,0.12)',
-        status: 'development',
+        color: '#22C55E',
+        colorDim: 'rgba(34,197,94,0.15)',
+        status: 'active',
         tags: ['SEO', 'Palavras-chave', 'Auditoria'],
-        version: 'Em desenvolvimento',
+        version: 'v1.0',
+    },
+    {
+        id: 'finance',
+        name: 'FBR-FINANCE',
+        description: 'Hub financeiro central do Grupo Facebrasil. Controla recebimentos, pagamentos, centro de custo por empresa, conciliação automática e auditoria imutável.',
+        folder: 'finance',
+        icon: DollarSign,
+        color: '#10B981',
+        colorDim: 'rgba(16,185,129,0.15)',
+        status: 'active',
+        tags: ['Financeiro', 'Conciliação', 'Auditoria'],
+        version: 'v1.0',
+    },
+    {
+        id: 'dev',
+        name: 'FBR-DEV',
+        description: 'Central de desenvolvimento do ecossistema FBR. Gerencia projetos, repositórios, deploys, custos de infraestrutura e ciclo de vida de todos os produtos do grupo.',
+        folder: 'dev',
+        icon: Code2,
+        color: '#06B6D4',
+        colorDim: 'rgba(6,182,212,0.15)',
+        status: 'active',
+        tags: ['Desenvolvimento', 'Infra', 'DevOps'],
+        version: 'v1.0',
     },
 ];
 
