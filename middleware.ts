@@ -12,7 +12,8 @@ export async function middleware(request: NextRequest) {
     if (
         path.startsWith('/_next') ||
         path.startsWith('/api/auth/callback') ||
-        /\.(svg|png|jpg|jpeg|gif|webp|ico)$/.test(path)
+        path.startsWith('/fbrapps/') ||
+        /\.(svg|png|jpg|jpeg|gif|webp|ico|html|css|js|woff|woff2|ttf)$/.test(path)
     ) {
         return NextResponse.next()
     }
