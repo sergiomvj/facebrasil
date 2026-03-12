@@ -170,8 +170,13 @@ export default function FBRAppsPage() {
     const params = useParams();
     const locale = params.locale as string;
 
+    const getPercentage = (status: string) => parseInt(status.replace('%', '')) || 0;
+
+    const launch19Mar = SYSTEMS.filter(s => getPercentage(s.status) >= 80);
+    const launch26Mar = SYSTEMS.filter(s => getPercentage(s.status) >= 45 && getPercentage(s.status) <= 79);
+    const launch02Apr = SYSTEMS.filter(s => getPercentage(s.status) < 45);
+
     const activeSystems = SYSTEMS;
-    const devSystems: FBRSystem[] = [];
 
     return (
         <div className="min-h-screen">
@@ -199,18 +204,27 @@ export default function FBRAppsPage() {
                 </p>
 
                 {/* Stats bar */}
-                <div className="flex flex-wrap gap-6 mt-6 pt-6 border-t dark:border-white/10 border-gray-200">
+                <div className="flex flex-wrap gap-8 mt-6 pt-6 border-t dark:border-white/10 border-gray-200">
                     <div>
-                        <p className="text-2xl font-black" style={{ color: '#F97316' }}>{activeSystems.length}</p>
-                        <p className="text-xs dark:text-slate-500 text-gray-400 uppercase tracking-wider font-medium">Sistemas Ativos</p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                            <p className="text-xs dark:text-slate-500 text-gray-400 uppercase tracking-wider font-semibold">Lançamento em 19/3</p>
+                        </div>
+                        <p className="text-2xl font-black" style={{ color: '#F97316' }}>{launch19Mar.length} <span className="text-xs font-normal text-slate-500 ml-1">apps</span></p>
                     </div>
                     <div>
-                        <p className="text-2xl font-black dark:text-white text-gray-700">{SYSTEMS.length}</p>
-                        <p className="text-xs dark:text-slate-500 text-gray-400 uppercase tracking-wider font-medium">Total de Apps</p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            <p className="text-xs dark:text-slate-500 text-gray-400 uppercase tracking-wider font-semibold">Lançamento em 26/3</p>
+                        </div>
+                        <p className="text-2xl font-black dark:text-white text-gray-700">{launch26Mar.length} <span className="text-xs font-normal text-slate-500 ml-1">apps</span></p>
                     </div>
                     <div>
-                        <p className="text-2xl font-black" style={{ color: '#22C55E' }}>{devSystems.length}</p>
-                        <p className="text-xs dark:text-slate-500 text-gray-400 uppercase tracking-wider font-medium">Em Desenvolvimento</p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                            <p className="text-xs dark:text-slate-500 text-gray-400 uppercase tracking-wider font-semibold">Lançamento em 02/04</p>
+                        </div>
+                        <p className="text-2xl font-black" style={{ color: '#64748B' }}>{launch02Apr.length} <span className="text-xs font-normal text-slate-500 ml-1">apps</span></p>
                     </div>
                 </div>
             </div>
@@ -218,7 +232,7 @@ export default function FBRAppsPage() {
             {/* Active Systems Grid */}
             <div className="mb-4">
                 <p className="text-xs font-mono uppercase tracking-widest dark:text-slate-500 text-gray-400 mb-5">
-                    // sistemas operacionais
+                    // ecossistema operacional
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {activeSystems.map((system) => (
@@ -226,27 +240,13 @@ export default function FBRAppsPage() {
                     ))}
                 </div>
             </div>
-
-            {/* In Development Systems */}
-            {devSystems.length > 0 && (
-                <div className="mt-10">
-                    <p className="text-xs font-mono uppercase tracking-widest dark:text-slate-500 text-gray-400 mb-5">
-                        // em desenvolvimento
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {devSystems.map((system) => (
-                            <SystemCard key={system.id} system={system} />
-                        ))}
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
 
 function SystemCard({ system }: { system: FBRSystem }) {
     const Icon = system.icon;
-    const isDev = system.status === 'development';
+    const isDev = false;
 
     const cardContent = (
         <div
