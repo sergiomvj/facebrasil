@@ -21,7 +21,8 @@ import {
     Users,
     Trophy,
     UserCheck,
-    BrainCircuit
+    BrainCircuit,
+    Layers
 } from 'lucide-react';
 
 interface NavItem {
@@ -49,6 +50,7 @@ const navItems: NavItem[] = [
     { name: 'FacebrasilShop', href: '/admin/shop', icon: Star, allowedRoles: ['ADMIN'] },
     { name: 'Conversor de Imagens', href: '/admin/tools/image-converter', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Configurações', href: '/admin/settings', icon: Settings, allowedRoles: ['ADMIN', 'EDITOR'] },
+    { name: 'Sistemas FBR', href: '/admin/fbrapps', icon: Layers, allowedRoles: ['ADMIN'] },
 ];
 
 export default function AdminSidebar() {
