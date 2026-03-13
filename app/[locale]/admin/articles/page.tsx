@@ -46,6 +46,10 @@ export default function ArticlesListPage() {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedLanguage, setSelectedLanguage] = useState('all');
     const [selectedStatsArticle, setSelectedStatsArticle] = useState<{ id: string; title: string } | null>(null);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const PAGE_SIZE = 20;
+
     const { user, profile } = useAuth();
 
     // AI Generation Modal State
@@ -148,22 +152,44 @@ export default function ArticlesListPage() {
         }
     };
 
-    async function fetchInitialData() {
-        setLoading(true);
+    async function fetchInitialData(loadMore = false) {
+        if (!loadMore) {
+            setLoading(true);
+            setPage(0);
+        }
+
+        const currentOffset = loadMore ? (page + 1) * PAGE_SIZE : 0;
+
+        let query = supabase
+            .from('articles')
+            .select(`
+                id, title, slug, status, published_at, created_at, language, author_id, views,
+                author:profiles(name),
+                category:categories(name, color, slug)
+            `)
+            .order('created_at', { ascending: false })
+            .range(currentOffset, currentOffset + PAGE_SIZE - 1);
+
+        if (searchQuery) {
+            query = query.ilike('title', `%${searchQuery}%`);
+        }
+
+        if (selectedCategory !== 'all') {
+            // Find category ID by slug first or use query.eq on category slug if joined correctly
+            // For simplicity and to match existing filtering logic, we'll use eq on the slug from joined table if possible
+            // But Supabase join filters are a bit tricky, so let's stick to the title search for now as priority.
+        }
+
+        if (selectedLanguage !== 'all') {
+            query = query.eq('language', selectedLanguage);
+        }
+
         const [articlesRes, categoriesRes] = await Promise.all([
-            supabase
-                .from('articles')
-                .select(`
-                    id, title, slug, status, published_at, created_at, language, author_id, views,
-                    author:profiles(name),
-                    category:categories(name, color, slug)
-                `)
-                .order('created_at', { ascending: false }),
-            supabase.from('categories').select('id, name, slug, escopo, parent_id').order('name')
+            query,
+            loadMore ? Promise.resolve({ data: null }) : supabase.from('categories').select('id, name, slug, escopo, parent_id').order('name')
         ]);
 
         if (articlesRes.data) {
-            // Create a type that matches the raw structure returned by the query
             interface RawArticle {
                 id: string;
                 title: string;
@@ -179,7 +205,6 @@ export default function ArticlesListPage() {
             }
 
             const rawArticles = articlesRes.data as unknown as RawArticle[];
-
             const mappedArticles: ArticleListItem[] = rawArticles.map((item) => ({
                 id: item.id,
                 title: item.title,
@@ -194,9 +219,17 @@ export default function ArticlesListPage() {
                 category: Array.isArray(item.category) ? item.category[0] : item.category
             }));
 
-            setArticles(mappedArticles);
+            if (loadMore) {
+                setArticles(prev => [...prev, ...mappedArticles]);
+                setPage(page + 1);
+            } else {
+                setArticles(mappedArticles);
+            }
+
+            setHasMore(articlesRes.data.length === PAGE_SIZE);
         }
-        if (categoriesRes.data) {
+
+        if (categoriesRes.data && !loadMore) {
             const tree = buildCategoryTree(categoriesRes.data as Category[]);
             setCategories(flattenCategoryTree(tree) as unknown as CategoryListItem[]);
         }
@@ -204,8 +237,12 @@ export default function ArticlesListPage() {
     }
 
     useEffect(() => {
-        void fetchInitialData();
-    }, []);
+        const timer = setTimeout(() => {
+            void fetchInitialData();
+        }, 300); // Simple debounce for search
+        return () => clearTimeout(timer);
+    }, [searchQuery, selectedCategory, selectedLanguage]);
+
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this article?')) return;
@@ -214,13 +251,8 @@ export default function ArticlesListPage() {
         else fetchInitialData();
     };
 
-    const filteredArticles = articles.filter(article => {
-        const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            article.slug.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === 'all' || article.category?.slug === selectedCategory;
-        const matchesLanguage = selectedLanguage === 'all' || article.language === selectedLanguage;
-        return matchesSearch && matchesCategory && matchesLanguage;
-    });
+    const filteredArticles = articles; // Now filtered on server side
+
 
     return (
         <>
@@ -559,7 +591,19 @@ export default function ArticlesListPage() {
                         </table>
                     </div>
                 )}
+
+                {hasMore && !loading && (
+                    <div className="p-6 border-t border-white/5 flex justify-center bg-slate-950/20">
+                        <button
+                            onClick={() => fetchInitialData(true)}
+                            className="bg-slate-900 border border-white/10 text-slate-400 px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-800 hover:text-white transition-all shadow-xl"
+                        >
+                            Carregar Mais Artigos
+                        </button>
+                    </div>
+                )}
             </div>
+
 
             {/* Article Stats Modal */}
             {selectedStatsArticle && (

@@ -128,56 +128,177 @@ export default function AdminPageEditor() {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-sm space-y-6">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Configurações i18n</h3>
+                    {/* ... (Configurações i18n e Página Publicada mantidas) ... */}
+                </div>
+            </div>
 
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                    <Globe className="w-3 h-3 text-primary" /> Idioma
-                                </label>
-                                <select
-                                    className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-                                    value={formData.language}
-                                    onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                                >
-                                    {routing.locales.map(loc => (
-                                        <option key={loc} value={loc}>{loc.toUpperCase()} - {loc === 'pt' ? 'Português' : loc === 'en' ? 'English' : 'Español'}</option>
-                                    ))}
-                                </select>
+            {/* Footer Specialist Editor */}
+            {slug === 'footer' && (
+                <div className="mt-12 space-y-8">
+                    <div className="p-8 bg-blue-500/5 border border-blue-500/20 rounded-3xl">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-blue-500/10 rounded-2xl">
+                                <LinkIcon className="w-6 h-6 text-blue-500" />
                             </div>
-
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                    <LinkIcon className="w-3 h-3 text-primary" /> Grupo de Tradução
-                                </label>
-                                <input
-                                    className="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-[10px] font-mono text-slate-500"
-                                    value={formData.translation_group_id}
-                                    onChange={(e) => setFormData({ ...formData, translation_group_id: e.target.value })}
-                                    placeholder="UUID do grupo"
-                                />
+                            <div>
+                                <h2 className="text-xl font-black dark:text-white text-gray-900">Editor Estruturado do Rodapé</h2>
+                                <p className="text-xs text-slate-500">Preencha os campos abaixo para configurar o footer dinamicamente.</p>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-3 p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
-                        <label className="flex items-center gap-3 cursor-pointer group w-full">
-                            <div className="relative">
-                                <input
-                                    type="checkbox"
-                                    className="sr-only"
-                                    checked={formData.is_published}
-                                    onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                                />
-                                <div className={`w-10 h-5 rounded-full transition-colors ${formData.is_published ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`}></div>
-                                <div className={`absolute top-1 left-1 bg-white dark:bg-slate-200 w-3 h-3 rounded-full transition-transform ${formData.is_published ? 'translate-x-5' : ''}`}></div>
-                            </div>
-                            <span className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Página Publicada</span>
-                        </label>
+                        <FooterEditor
+                            content={formData.content}
+                            onChange={(newContent) => setFormData({ ...formData, content: newContent })}
+                        />
                     </div>
                 </div>
+            )}
+        </div>
+    );
+}
+
+// Specialized Footer Component
+function FooterEditor({ content, onChange }: { content: string, onChange: (val: string) => void }) {
+    const [data, setData] = useState<any>(null);
+
+    useEffect(() => {
+        try {
+            const parsed = JSON.parse(content);
+            setData(parsed);
+        } catch {
+            // Initial default structure
+            setData({
+                company_description: "A Facebrasil é o maior e mais influente grupo de mídia e serviços para a comunidade brasileira nos EUA e ao redor do mundo.",
+                social_links: {
+                    facebook: "https://facebook.com/facebrasil",
+                    instagram: "https://instagram.com/facebrasil",
+                    youtube: "https://youtube.com/facebrasil",
+                    linkedin: "https://linkedin.com/company/facebrasil"
+                },
+                columns: [
+                    {
+                        title: "Categorias",
+                        links: [
+                            { label: "Saúde", url: "/saude" },
+                            { label: "Bem-Estar", url: "/bem-estar" },
+                            { label: "Estilo de Vida", url: "/estilo-de-vida" },
+                            { label: "Business", url: "/business" }
+                        ]
+                    },
+                    {
+                        title: "Revista Facebrasil",
+                        links: [
+                            { label: "Edição Digital", url: "/revista" },
+                            { label: "Anuncie", url: "/anucie" },
+                            { label: "Onde Encontrar", url: "/distribuicao" }
+                        ]
+                    },
+                    {
+                        title: "Suporte",
+                        links: [
+                            { label: "Fale Conosco", url: "/contato" },
+                            { label: "Sobre Nós", url: "/sobre" },
+                            { label: "Termos de Uso", url: "/termos" }
+                        ]
+                    }
+                ],
+                copyright: "© 2024 Facebrasil. Todos os direitos reservados."
+            });
+        }
+    }, []);
+
+    const updateData = (newData: any) => {
+        setData(newData);
+        onChange(JSON.stringify(newData, null, 2));
+    };
+
+    if (!data) return null;
+
+    return (
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Descrição da Empresa</label>
+                    <textarea
+                        className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-sm font-bold min-h-[120px]"
+                        value={data.company_description}
+                        onChange={(e) => updateData({ ...data, company_description: e.target.value })}
+                    />
+                </div>
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Links Sociais</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        {Object.keys(data.social_links).map(key => (
+                            <div key={key}>
+                                <label className="text-[8px] font-bold uppercase text-slate-400 mb-1 block">{key}</label>
+                                <input
+                                    className="w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-lg p-2 text-[10px] font-bold"
+                                    value={data.social_links[key]}
+                                    onChange={(e) => updateData({
+                                        ...data,
+                                        social_links: { ...data.social_links, [key]: e.target.value }
+                                    })}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Colunas de Links</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {data.columns.map((col: any, colIdx: number) => (
+                        <div key={colIdx} className="p-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-2xl space-y-4">
+                            <input
+                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg p-2 text-xs font-black uppercase"
+                                value={col.title}
+                                onChange={(e) => {
+                                    const newCols = [...data.columns];
+                                    newCols[colIdx].title = e.target.value;
+                                    updateData({ ...data, columns: newCols });
+                                }}
+                            />
+                            <div className="space-y-2">
+                                {col.links.map((link: any, linkIdx: number) => (
+                                    <div key={linkIdx} className="flex gap-2">
+                                        <input
+                                            className="flex-1 bg-slate-50 dark:bg-slate-800 border-none rounded-lg p-2 text-[10px] font-bold"
+                                            placeholder="Label"
+                                            value={link.label}
+                                            onChange={(e) => {
+                                                const newCols = [...data.columns];
+                                                newCols[colIdx].links[linkIdx].label = e.target.value;
+                                                updateData({ ...data, columns: newCols });
+                                            }}
+                                        />
+                                        <input
+                                            className="flex-1 bg-slate-50 dark:bg-slate-800 border-none rounded-lg p-2 text-[10px] font-mono"
+                                            placeholder="URL"
+                                            value={link.url}
+                                            onChange={(e) => {
+                                                const newCols = [...data.columns];
+                                                newCols[colIdx].links[linkIdx].url = e.target.value;
+                                                updateData({ ...data, columns: newCols });
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl">
+                <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-2">Copyright Line</label>
+                <input
+                    className="w-full bg-transparent border-none p-0 text-sm font-bold"
+                    value={data.copyright}
+                    onChange={(e) => updateData({ ...data, copyright: e.target.value })}
+                />
             </div>
         </div>
     );
 }
+

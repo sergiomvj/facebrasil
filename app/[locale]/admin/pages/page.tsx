@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { fetchStaticPages, StaticPage } from '@/lib/static-pages-service';
 import { Link, routing } from '@/i18n/routing';
-import { Edit2, Eye, Plus, Search, Globe } from 'lucide-react';
+import { Edit2, Eye, Plus, Search, Globe, Link as LinkIcon } from 'lucide-react';
+
 
 export default function AdminPagesPage() {
     const [pages, setPages] = useState<StaticPage[]>([]);
@@ -46,7 +47,26 @@ export default function AdminPagesPage() {
                 </button>
             </div>
 
+            <div className="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 mb-8 text-white shadow-xl flex items-center justify-between border border-blue-400/20">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md">
+                        <LinkIcon className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-black uppercase tracking-tight">Configurações do Rodapé</h2>
+                        <p className="text-xs text-blue-100 font-medium">Edite os links, texto de sobre e redes sociais que aparecem em todo o site.</p>
+                    </div>
+                </div>
+                <Link
+                    href="/admin/pages/footer"
+                    className="px-6 py-2 bg-white text-blue-600 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition-all shadow-lg"
+                >
+                    Editar Rodapé
+                </Link>
+            </div>
+
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-2xl">
+
                 <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col md:flex-row items-center gap-4">
                     <div className="relative flex-1 w-full">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

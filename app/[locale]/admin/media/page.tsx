@@ -19,34 +19,92 @@ export default function MediaLibraryPage() {
     const [uploading, setUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [currentBucket, setCurrentBucket] = useState('blog-assets');
+    const AVAILABLE_BUCKETS = ['blog-assets', 'avatars'];
+    const PAGE_SIZE = 40;
 
-    async function fetchMedia() {
-        setLoading(true);
 
-        // List files from Supabase Storage (now using 'blog-assets')
-        const { data, error } = await supabase.storage
-            .from('blog-assets')
-            .list();
+    async function fetchMedia(loadMore = false) {
+        if (!loadMore) {
+            setLoading(true);
+            setPage(0);
+        }
 
-        if (!error && data) {
-            const mediaFiles: MediaFile[] = data.map((file: any) => ({
-                id: file.id,
-                filename: file.name,
-                url: supabase.storage.from('blog-assets').getPublicUrl(file.name).data.publicUrl,
-                type: file.metadata?.mimetype || 'image/jpeg',
-                size: file.metadata?.size || 0,
-                created_at: file.created_at || new Date().toISOString(),
-            }));
+        const currentOffset = loadMore ? (page + 1) * PAGE_SIZE : 0;
 
-            setMedia(mediaFiles);
+        // Função interna para listar arquivos recursivamente
+        const listRecursive = async (path: string = ''): Promise<MediaFile[]> => {
+            const { data, error } = await supabase.storage
+                .from(currentBucket)
+                .list(path, {
+                    sortBy: { column: 'created_at', order: 'desc' }
+                });
+
+            if (error || !data) return [];
+
+            let files: MediaFile[] = [];
+
+            for (const item of data) {
+                const fullPath = path ? `${path}/${item.name}` : item.name;
+
+                // Se for um objeto com id, é um arquivo (ou pode ser categorizado pelo mimetype)
+                // Pastas no Supabase list() geralmente não têm id ou mimetype
+                if (item.id && item.metadata) {
+                    files.push({
+                        id: item.id,
+                        filename: fullPath,
+                        url: supabase.storage.from(currentBucket).getPublicUrl(fullPath).data.publicUrl,
+                        type: item.metadata.mimetype || 'image/jpeg',
+                        size: item.metadata.size || 0,
+                        created_at: item.created_at || new Date().toISOString(),
+                    });
+                } else if (!item.id && item.name !== '.emptyFolderPlaceholder') {
+                    // É uma "pasta"
+                    const subFiles = await listRecursive(fullPath);
+                    files = [...files, ...subFiles];
+                }
+            }
+
+            return files;
+        };
+
+        try {
+            // Note: Pagination with recursion is tricky here since list() pagination applies to the current level.
+            // For now, we fetch everything (up to a reasonable limit) or we flatten the structure.
+            // To maintain pagination, we would need a more complex solution or a flat index table.
+            // Given the typical number of media files in a blog, fetching the top level recursive items is safer.
+
+            const allFiles = await listRecursive('');
+
+            // Sort by date locally since recursion loses the global sort
+            const sortedFiles = allFiles.sort((a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+
+            // Apply manual pagination on the flattened result
+            const paginatedFiles = sortedFiles.slice(currentOffset, currentOffset + PAGE_SIZE);
+
+            if (loadMore) {
+                setMedia(prev => [...prev, ...paginatedFiles]);
+                setPage(page + 1);
+            } else {
+                setMedia(paginatedFiles);
+            }
+
+            setHasMore(sortedFiles.length > currentOffset + PAGE_SIZE);
+        } catch (err) {
+            console.error('Error fetching media:', err);
         }
 
         setLoading(false);
     }
 
+
     useEffect(() => {
         void fetchMedia();
-    }, []);
+    }, [currentBucket]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -86,7 +144,7 @@ export default function MediaLibraryPage() {
         // but trying client-side first if Delete RLS is open. If not, it will fail silently.
         // I will add a quick alert if it errors out just in case.
         const { error } = await supabase.storage
-            .from('blog-assets')
+            .from(currentBucket)
             .remove([filename]);
 
         if (error) {
@@ -137,16 +195,33 @@ export default function MediaLibraryPage() {
                 </label>
             </div>
 
-            {/* Search */}
-            <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-slate-400 text-gray-500" />
-                <input
-                    type="text"
-                    placeholder="Buscar arquivos..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-lg dark:bg-slate-900 bg-white border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+            {/* Bucket Selection and Search */}
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border dark:border-white/10 border-gray-200">
+                    {AVAILABLE_BUCKETS.map(bucket => (
+                        <button
+                            key={bucket}
+                            onClick={() => setCurrentBucket(bucket)}
+                            className={`px-4 py-2 rounded-lg font-bold transition-all ${currentBucket === bucket
+                                    ? 'bg-primary text-white shadow-lg'
+                                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                }`}
+                        >
+                            {bucket === 'blog-assets' ? 'Blog/Assets' : 'Avatares'}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-slate-400 text-gray-500" />
+                    <input
+                        type="text"
+                        placeholder="Buscar arquivos..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 rounded-xl dark:bg-slate-900 bg-white border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                </div>
             </div>
 
             {/* Upload Progress */}
@@ -170,56 +245,72 @@ export default function MediaLibraryPage() {
                     <p className="dark:text-slate-400 text-gray-600">Nenhuma mídia encontrada</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {filteredMedia.map((item) => (
-                        <div
-                            key={item.id}
-                            onClick={() => setSelectedMedia(item)}
-                            className="dark:bg-slate-900 bg-white rounded-xl overflow-hidden border dark:border-white/10 border-gray-200 cursor-pointer hover:border-primary transition-colors group"
-                        >
-                            <div className="aspect-square bg-slate-800 relative">
-                                {item.type.startsWith('image/') ? (
-                                    <img
-                                        src={item.url}
-                                        alt={item.filename}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <ImageIcon className="w-12 h-12 text-slate-600" />
-                                    </div>
-                                )}
+                <div className="space-y-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {filteredMedia.map((item) => (
+                            <div
+                                key={item.id}
+                                onClick={() => setSelectedMedia(item)}
+                                className="dark:bg-slate-900 bg-white rounded-xl overflow-hidden border dark:border-white/10 border-gray-200 cursor-pointer hover:border-primary transition-colors group"
+                            >
+                                <div className="aspect-square bg-slate-800 relative">
+                                    {item.type.startsWith('image/') ? (
+                                        <img
+                                            src={item.url}
+                                            alt={item.filename}
+                                            className="w-full h-full object-cover"
+                                            loading="lazy"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <ImageIcon className="w-12 h-12 text-slate-600" />
+                                        </div>
+                                    )}
 
-                                {/* Hover Actions */}
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            copyUrl(item.url);
-                                        }}
-                                        className="p-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors"
-                                    >
-                                        <Copy className="w-5 h-5 text-white" />
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteMedia(item.filename);
-                                        }}
-                                        className="p-2 bg-red-500/80 hover:bg-red-500 rounded-lg backdrop-blur-sm transition-colors"
-                                    >
-                                        <Trash2 className="w-5 h-5 text-white" />
-                                    </button>
+                                    {/* Hover Actions */}
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                copyUrl(item.url);
+                                            }}
+                                            className="p-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors"
+                                        >
+                                            <Copy className="w-5 h-5 text-white" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteMedia(item.filename);
+                                            }}
+                                            className="p-2 bg-red-500/80 hover:bg-red-500 rounded-lg backdrop-blur-sm transition-colors"
+                                        >
+                                            <Trash2 className="w-5 h-5 text-white" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="p-3">
+                                    <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{item.filename}</p>
+                                    <p className="text-xs dark:text-slate-400 text-gray-600">{formatFileSize(item.size)}</p>
                                 </div>
                             </div>
+                        ))}
+                    </div>
 
-                            <div className="p-3">
-                                <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{item.filename}</p>
-                                <p className="text-xs dark:text-slate-400 text-gray-600">{formatFileSize(item.size)}</p>
-                            </div>
+                    {hasMore && !searchTerm && (
+                        <div className="flex justify-center pt-8">
+                            <button
+                                onClick={() => fetchMedia(true)}
+                                disabled={loading}
+                                className="px-8 py-3 bg-slate-900 border border-white/10 rounded-xl text-white font-bold hover:bg-slate-800 transition-all disabled:opacity-50"
+                            >
+                                {loading ? 'Carregando...' : 'Carregar Mais Mídias'}
+                            </button>
                         </div>
-                    ))}
+                    )}
                 </div>
+
             )}
 
             {/* Media Detail Modal */}

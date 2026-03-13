@@ -39,28 +39,15 @@ export async function standaloneConvertImage(formData: FormData) {
         const metadata = await image.metadata();
 
         const webpBuffer = await image.webp({ quality: 90 }).toBuffer();
-        const fileName = `converted-${Date.now()}.webp`;
 
-        const supabaseAdmin = getSupabaseAdmin();
-        const { error: uploadError } = await supabaseAdmin
-            .storage
-            .from('ads')
-            .upload(fileName, webpBuffer, {
-                contentType: 'image/webp',
-                upsert: true
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabaseAdmin
-            .storage
-            .from('ads')
-            .getPublicUrl(fileName);
+        // Retornar Base64 para garantir que o atributo 'download' funcione no navegador sem problemas de CORS
+        const base64Str = webpBuffer.toString('base64');
+        const finalUrl = `data:image/webp;base64,${base64Str}`;
 
         return {
             success: true,
-            url: publicUrl,
-            info: `Convertido para WebP Otimizado (${metadata.width}x${metadata.height}) e salvo no Storage.`
+            url: finalUrl,
+            info: `Convertido para WebP Otimizado (${metadata.width}x${metadata.height}). Pronto para download.`
         };
     } catch (err: any) {
         return { success: false, error: 'Erro na conversão: ' + err.message };
