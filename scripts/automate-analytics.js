@@ -58,16 +58,21 @@ async function runAutomation() {
             let shouldIncrement = false;
 
             if (ageInHours < 24) {
-                // < 24h -> Incrementa sempre (assume-se que o script roda a cada 3 min)
+                // < 24h -> Incrementa sempre (assume-se que o script roda a cada 3-5 min)
                 shouldIncrement = true;
-            } else if (currentMinute % 15 === 0) {
-                // > 24h -> Incrementa a cada 15 min
-                shouldIncrement = true;
+            } else {
+                // > 24h -> Incrementa com probabilidade de 1/5 para simular +1 a cada 15 min 
+                // se o script rodar a cada 3 min. Ou simplesmente usar o modulo mas de forma mais flexível.
+                // Vou manter o modulo mas sugerir execução frequente.
+                if (currentMinute % 15 === 0 || currentMinute % 15 === 1 || currentMinute % 15 === 2) {
+                    shouldIncrement = true;
+                }
             }
 
             if (shouldIncrement) {
-                const { error: updErr } = await supabase.rpc('increment_article_views', { article_id: article.id });
+                const { error: updErr } = await supabase.rpc('increment_article_views', { p_article_id: article.id });
                 if (updErr) {
+                    console.error(`Erro ao incrementar via RPC para ${article.id}:`, updErr.message);
                     await supabase.from('articles').update({ views: (article.views || 0) + 1 }).eq('id', article.id);
                 }
                 updatedCount++;

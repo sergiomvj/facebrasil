@@ -39,6 +39,38 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
     const [showXP, setShowXP] = useState(false);
     const [favLoading, setFavLoading] = useState(false);
 
+    // ----- SAVE SESSION LOGIC (Consolidated) -----
+    const saveSession = useCallback((isFinal: boolean = false) => {
+        if (savedRef.current) return;
+        if (isFinal) savedRef.current = true;
+        
+        // Final active time calc
+        if (document.visibilityState === 'visible') {
+            activeTimeRef.current += Math.round((Date.now() - lastActiveRef.current) / 1000);
+            lastActiveRef.current = Date.now(); // reset to avoid double counting if called again
+        }
+
+        const totalSecs = activeTimeRef.current;
+        const bounced = totalSecs < 5;
+        const referrer = document.referrer ? new URL(document.referrer).hostname : 'direct';
+
+        const payload = {
+            p_article_id: articleId,
+            p_session_id: sessionId.current,
+            p_user_id: user?.id || null,
+            p_read_time_seconds: totalSecs,
+            p_scroll_depth: scrollDepthRef.current,
+            p_completed: completedRef.current,
+            p_bounced: bounced,
+            p_translator_used: translatorUsedRef.current,
+            p_translator_lang: translatorLangRef.current,
+            p_referrer: referrer,
+            p_country_code: null,
+        };
+
+        void (async () => { try { await supabase.rpc('upsert_article_read', payload); } catch { } })();
+    }, [articleId, user?.id]);
+
     // ----- RESET TRACKER ON ARTICLE CHANGE -----
     useEffect(() => {
         // Generate new session and reset tracking refs
@@ -57,12 +89,21 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
         setFavCount(0);
     }, [articleId]);
 
-    // ----- INCREMENT VIEWS (when articleId changes and not yet tracked for THIS id) -----
+    // ----- INITIAL VIEW TRACKING -----
+    // We rely solely on upsert_article_read now. 
+    // It handles the "is_new_session" check server-side to prevent double-counting.
     useEffect(() => {
         if (viewTrackedRef.current === articleId) return;
         viewTrackedRef.current = articleId;
-        void (async () => { try { await supabase.rpc('increment_article_views', { p_article_id: articleId }); } catch { } })();
-    }, [articleId]);
+        
+        // Trigger an initial "ping" after 1s to record the view immediately
+        // but avoid recording bots/scrapers that bounce in < 1s.
+        const timer = setTimeout(() => {
+            saveSession();
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [articleId, saveSession]);
 
     // ----- FETCH INITIAL FAV STATE -----
     useEffect(() => {
@@ -124,42 +165,10 @@ export default function ArticleReaderTracker({ articleId }: ArticleReaderTracker
         return () => window.removeEventListener('article-translated', onTranslate);
     }, []);
 
-    // ----- SAVE SESSION ON EXIT -----
-    const saveSession = useCallback(() => {
-        if (savedRef.current) return;
-        savedRef.current = true;
-
-        // Final active time calc
-        if (document.visibilityState === 'visible') {
-            activeTimeRef.current += Math.round((Date.now() - lastActiveRef.current) / 1000);
-        }
-
-        const totalSecs = activeTimeRef.current;
-        const bounced = totalSecs < 5;
-        const referrer = document.referrer ? new URL(document.referrer).hostname : 'direct';
-
-        const payload = {
-            p_article_id: articleId,
-            p_session_id: sessionId.current,
-            p_user_id: user?.id || null,
-            p_read_time_seconds: totalSecs,
-            p_scroll_depth: scrollDepthRef.current,
-            p_completed: completedRef.current,
-            p_bounced: bounced,
-            p_translator_used: translatorUsedRef.current,
-            p_translator_lang: translatorLangRef.current,
-            p_referrer: referrer,
-        };
-
-        // Use sendBeacon for reliability on page unload
-        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-        // Fallback via supabase rpc (works when tab stays open)
-        void (async () => { try { await supabase.rpc('upsert_article_read', payload); } catch { } })();
-    }, [articleId, user?.id]);
 
     useEffect(() => {
-        const onUnload = () => saveSession();
-        const onVisChange = () => { if (document.visibilityState === 'hidden') saveSession(); };
+        const onUnload = () => saveSession(true);
+        const onVisChange = () => { if (document.visibilityState === 'hidden') saveSession(true); };
         window.addEventListener('beforeunload', onUnload);
         document.addEventListener('visibilitychange', onVisChange);
         return () => {
