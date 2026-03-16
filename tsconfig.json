@@ -39,6 +39,7 @@
   "exclude": [
     "node_modules",
     "_legacy",
-    "backup_admin"
+    "backup_admin",
+    "supabase/functions"
   ]
 }
