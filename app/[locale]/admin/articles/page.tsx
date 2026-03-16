@@ -10,6 +10,7 @@ import { deleteArticle, upsertArticle, updateArticleScheduleDate } from '@/app/a
 import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
+import { formatDateAmerican } from '@/lib/utils';
 import ArticleStatsModal from '@/components/admin/ArticleStatsModal';
 
 interface ArticleListItem {
@@ -535,7 +536,7 @@ export default function ArticlesListPage() {
                                                 </span>
                                                 <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium">
                                                     <Calendar className="w-3 h-3" />
-                                                    {new Date(post.published_at || post.created_at).toLocaleDateString()}
+                                                    {formatDateAmerican(post.published_at || post.created_at)}
                                                 </div>
                                             </div>
                                         </td>

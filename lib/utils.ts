@@ -59,3 +59,27 @@ export function ensureHttps(url: string | null | undefined): string {
   }
   return url;
 }
+/**
+ * Formata uma data para o padrão americano (MM/DD/YY)
+ * Inclui o horário por padrão, conforme solicitado pelo usuário.
+ */
+export function formatDateAmerican(date: string | Date | null | undefined, includeTime = true): string {
+  if (!date) return '';
+  
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = String(d.getFullYear()).slice(-2);
+  
+  const datePart = `${month}/${day}/${year}`;
+  
+  if (includeTime) {
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${datePart} ${hours}:${minutes}`;
+  }
+  
+  return datePart;
+}

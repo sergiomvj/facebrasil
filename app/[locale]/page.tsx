@@ -18,6 +18,7 @@ import AdSpace from '@/components/AdSpace';
 
 import { Metadata } from 'next';
 import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
+import { formatDateAmerican } from '@/lib/utils';
 
 // Force dynamic revalidation
 export const revalidate = 60;
@@ -254,7 +255,7 @@ export default async function Home({
                         {post.title}
                       </h3>
                       <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                        <span className="capitalize">{new Date(post.publishedAt).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US')}</span>
+                        <span className="capitalize">{formatDateAmerican(post.publishedAt)}</span>
                       </div>
                     </div>
                   </div>

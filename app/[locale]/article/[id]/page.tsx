@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getTranslations } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
+import { formatDateAmerican } from '@/lib/utils';
 
 interface PageProps {
     params: Promise<{
@@ -124,7 +125,7 @@ export default async function ArticlePage({ params }: PageProps) {
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
                             <div className="flex items-center gap-2 text-sm">
                                 <Calendar className="w-4 h-4" />
-                                <span>{new Date(article.publishedAt).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US')}</span>
+                                <span>{formatDateAmerican(article.publishedAt)}</span>
                             </div>
                         </div>
                         {/* Translator */}
