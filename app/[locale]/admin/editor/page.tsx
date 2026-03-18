@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Link, routing } from '@/i18n/routing';
 import { upsertArticle } from '@/app/actions/article-actions';
-import { generateMetadata } from '@/app/actions/ai-actions';
+import { generateMetadata, generateSEOStrategy, generateSEOTitle } from '@/app/actions/ai-actions';
 import { sendArticlesToTV } from '@/app/actions/tv-facebrasil-actions';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
 
@@ -37,6 +37,11 @@ function EditorContent() {
     const [articleLanguage, setArticleLanguage] = useState('pt');
     const [translationGroupId, setTranslationGroupId] = useState('');
     const [colocarHero, setColocarHero] = useState(false);
+    
+    // SEO Strategy State
+    const [seoKeywords, setSeoKeywords] = useState<string[]>([]);
+    const [isGeneratingSEO, setIsGeneratingSEO] = useState(false);
+    const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
 
     const handleGenerateSlug = async () => {
         if (!content && !title) return alert('Escreva algum conteúdo ou título primeiro');
@@ -58,6 +63,39 @@ function EditorContent() {
             if (result.success && result.content) setExcerpt(result.content);
         } finally {
             setGeneratingExcerpt(false);
+        }
+    };
+
+    const handleAggregateSEO = async () => {
+        if (!socialSummary) return alert('Por favor, gere ou escreva um "Resumo para Social" primeiro.');
+        setIsGeneratingSEO(true);
+        try {
+            const result = await generateSEOStrategy(socialSummary);
+            if (result.success && result.keywords) {
+                setSeoKeywords(result.keywords);
+            } else {
+                alert('Erro ao gerar estratégia de SEO: ' + result.error);
+            }
+        } finally {
+            setIsGeneratingSEO(false);
+        }
+    };
+
+    const handleGenerateTitle = async () => {
+        if (!content || content === '<p></p>') return alert('Escreva o conteúdo do artigo primeiro.');
+        if (seoKeywords.length === 0) return alert('Agregue a Estratégia de SEO primeiro para obter melhores resultados.');
+        
+        setIsGeneratingTitle(true);
+        try {
+            const textContent = content.replace(/<[^>]*>/g, '');
+            const result = await generateSEOTitle(textContent, seoKeywords);
+            if (result.success && result.title) {
+                setTitle(result.title);
+            } else {
+                alert('Erro ao gerar título: ' + result.error);
+            }
+        } finally {
+            setIsGeneratingTitle(false);
         }
     };
 
@@ -102,6 +140,18 @@ function EditorContent() {
                     setFeaturedImageUrl(img?.url || '');
                 } catch (e) {
                     setFeaturedImageUrl('');
+                }
+
+                // Load existing SEO keywords from ai_context
+                try {
+                    if (post.ai_context) {
+                        const context = typeof post.ai_context === 'string' ? JSON.parse(post.ai_context) : post.ai_context;
+                        if (context && Array.isArray(context.seoKeywords)) {
+                            setSeoKeywords(context.seoKeywords);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error parsing ai_context for SEO keywords');
                 }
             }
         } else {
@@ -161,7 +211,8 @@ function EditorContent() {
             language: articleLanguage,
             translation_group_id: translationGroupId || null,
             colocar_hero: colocarHero,
-            author_id: authorId || null
+            author_id: authorId || null,
+            ai_context: seoKeywords.length > 0 ? { seoKeywords } : null
         };
 
         const result = await upsertArticle(payload, articleId || undefined);
@@ -220,13 +271,29 @@ function EditorContent() {
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 <div className="xl:col-span-2 space-y-6">
-                    <input
-                        type="text"
-                        placeholder="Article Title Here..."
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full bg-transparent text-5xl md:text-6xl font-black tracking-tight placeholder:text-slate-800 focus:outline-none"
-                    />
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <label className="text-xs text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                Título do Artigo <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full">Gerado por IA</span>
+                            </label>
+                            <button
+                                onClick={handleGenerateTitle}
+                                disabled={isGeneratingTitle}
+                                className="flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-purple-500/10 text-purple-400 border border-purple-500/20 px-4 py-2 rounded-xl hover:bg-purple-500/20 transition-all disabled:opacity-50"
+                            >
+                                <Sparkles className="w-4 h-4" />
+                                {isGeneratingTitle ? 'Criando Título...' : 'Criar Título do Artigo'}
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="O título será gerado pela IA após você inserir o conteúdo e as palavras-chave..."
+                            value={title}
+                            readOnly
+                            className="w-full bg-slate-900/50 text-3xl md:text-5xl font-black tracking-tight placeholder:text-slate-700/50 focus:outline-none border border-white/5 rounded-2xl p-6 text-slate-300 select-none opacity-80 cursor-not-allowed"
+                            title="O título deve ser gerado através do botão 'Criar Título do Artigo'"
+                        />
+                    </div>
 
                     <EditorRichText
                         content={content}
@@ -245,9 +312,49 @@ function EditorContent() {
                 </div>
 
                 <div className="space-y-6">
+                    {/* SEO Strategy Card */}
+                    <div className="bg-slate-900 border border-purple-500/20 rounded-2xl p-6 space-y-6 shadow-[0_0_30px_-10px_rgba(168,85,247,0.1)]">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-purple-400">Estratégia SEO</h3>
+                            <div className="p-1.5 bg-purple-500/10 rounded-lg">
+                                <Sparkles className="w-4 h-4 text-purple-400" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <button
+                                onClick={handleAggregateSEO}
+                                disabled={isGeneratingSEO}
+                                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-300 font-black transition-all text-sm disabled:opacity-50"
+                            >
+                                {isGeneratingSEO ? 'Analisando Estratégia...' : 'Agregar Estratégia de SEO'}
+                            </button>
+
+                            {seoKeywords.length > 0 ? (
+                                <div className="space-y-3 pt-4 border-t border-white/5">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Palavras-chave Foco:</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {seoKeywords.map((keyword, idx) => (
+                                            <span key={idx} className="text-xs bg-slate-950 border border-white/10 text-slate-300 px-3 py-1.5 rounded-lg font-medium">
+                                                {keyword}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 leading-relaxed mt-2 italic">
+                                        Use o botão &quot;Criar Título do Artigo&quot; para gerar um título otimizado usando estas palavras-chave.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="text-center pt-4 border-t border-white/5">
+                                    <p className="text-xs text-slate-500">Crie ou gere o &quot;Resumo para Social&quot; no final da página antes de agregar a estratégia SEO.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Publication Settings */}
                     <div className="bg-slate-900 border border-white/5 rounded-2xl p-6 space-y-6">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Meta & SEO</h3>
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Meta & Settings</h3>
 
                         <div className="space-y-4">
                             <div className="space-y-1">

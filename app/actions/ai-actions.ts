@@ -97,3 +97,62 @@ export async function generateMetadata(content: string, type: 'slug' | 'excerpt'
         return { success: false, error: error.message };
     }
 }
+
+export async function generateSEOStrategy(socialSummary: string): Promise<{ success: boolean; keywords?: string[]; error?: string }> {
+    try {
+        const prompt = `Analise o seguinte resumo de artigo e BUSQUE 3 a 5 palavras-chave ou frases curtas altamente relevantes para SEO desse artigo. Retorne APENAS um array JSON de strings, sem formatação markdown ou explicações. Resumo: "${socialSummary}".`;
+
+        const completion = await getOpenAI().chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: 'Você é um especialista em SEO. Retorne sempre JSON válido.' },
+                { role: 'user', content: prompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.5,
+        });
+
+        const responseText = completion.choices[0]?.message?.content;
+        if (!responseText) throw new Error('Empty response');
+
+        const parsed = JSON.parse(responseText);
+        // Sometimes the AI wraps it in a "keywords" key, sometimes it's just the array
+        const keywords = Array.isArray(parsed) ? parsed : (parsed.keywords || Object.values(parsed)[0]);
+        
+        return { 
+            success: true, 
+            keywords: Array.isArray(keywords) ? keywords : [] 
+        };
+    } catch (error: any) {
+        console.error('SEO Strategy Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function generateSEOTitle(content: string, keywords: string[]): Promise<{ success: boolean; title?: string; error?: string }> {
+    try {
+        const prompt = `Com base nos melhores termos chave para o artigo apontados pela estratégia de SEO produza um titulo com no máximo 150 caracteres que seja de alto impacto para o leitor.
+        Conteúdo: "${content.substring(0, 1500)}".
+        Palavras-chave: ${keywords.join(', ')}.
+        Retorne no formato JSON com a chave "title".`;
+
+        const completion = await getOpenAI().chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: 'Você é um redator sênior e especialista em SEO. Retorne sempre JSON válido.' },
+                { role: 'user', content: prompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.8,
+        });
+
+        const responseText = completion.choices[0]?.message?.content;
+        if (!responseText) throw new Error('Empty response');
+
+        const parsed = JSON.parse(responseText);
+        return { success: true, title: parsed.title };
+    } catch (error: any) {
+        console.error('SEO Title Error:', error);
+        return { success: false, error: error.message };
+    }
+}
