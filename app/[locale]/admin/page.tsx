@@ -98,12 +98,12 @@ export default function AdminDashboard() {
                     ? Math.round((articles.reduce((sum, a) => sum + (a.read_time || 0), 0) / articles.length) * 60)
                     : 0;
 
-            const fbrArticles = articles.filter(a => a.category_id === fbrCatId);
+            const fbrArticles = articles.filter(a => a.category_id === fbrCatId && new Date(a.published_at) >= startOfMonth);
             const articlesFbrNews = fbrArticles.length;
             const viewsFbrNews = fbrArticles.reduce((sum, a) => sum + (a.views || 0), 0);
             
             const fbrArticleIds = new Set(fbrArticles.map(a => a.id));
-            const fbrReads = reads.filter(r => fbrArticleIds.has(r.article_id));
+            const fbrReads = reads.filter(r => fbrArticleIds.has(r.article_id) && new Date(r.created_at) >= startOfMonth);
             const avgReadTimeFbr = fbrReads.length > 0
                 ? Math.round(fbrReads.reduce((sum, r) => sum + (r.read_time_seconds || 0), 0) / fbrReads.length)
                 : fbrArticles.length > 0
