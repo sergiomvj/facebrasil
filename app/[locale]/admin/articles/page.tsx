@@ -547,7 +547,7 @@ export default function ArticlesListPage() {
                                             {post.views || 0}
                                         </td>
                                         <td className="p-4 text-right pr-6">
-                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                                            <div className="flex items-center justify-end gap-1">
                                                 <button
                                                     onClick={() => setSelectedStatsArticle({ id: post.id, title: post.title })}
                                                     className="p-2 text-slate-400 hover:text-accent-yellow rounded-lg hover:bg-accent-yellow/10 transition-colors"
