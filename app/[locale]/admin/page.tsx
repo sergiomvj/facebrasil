@@ -3,29 +3,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { FileText, Eye, Video, FolderOpen, TrendingUp, Clock } from 'lucide-react';
+import { FileText, Eye, Video, FolderOpen, TrendingUp, Clock, Calendar, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 interface DashboardStats {
+    publishedThisMonth: number;
+    viewsThisMonth: number;
+    avgReadTime: number;
     totalArticles: number;
-    publishedArticles: number;
-    draftArticles: number;
-    totalViews: number;
-    pendingVideos: number;
+    postsEuReporterMonth: number;
     activeCategories: number;
+    articlesFbrNews: number;
+    viewsFbrNews: number;
+    avgReadTimeFbr: number;
 }
 
 export default function AdminDashboard() {
     const params = useParams();
     const locale = (params.locale as string) || 'pt';
     const [stats, setStats] = useState<DashboardStats>({
+        publishedThisMonth: 0,
+        viewsThisMonth: 0,
+        avgReadTime: 0,
         totalArticles: 0,
-        publishedArticles: 0,
-        draftArticles: 0,
-        totalViews: 0,
-        pendingVideos: 0,
+        postsEuReporterMonth: 0,
         activeCategories: 0,
+        articlesFbrNews: 0,
+        viewsFbrNews: 0,
+        avgReadTimeFbr: 0,
     });
     interface RecentArticle {
         id: string;
@@ -44,40 +50,69 @@ export default function AdminDashboard() {
         console.log('[Dashboard] Fetching data...');
 
         try {
-            // Fetch total, published, and draft counts correctly (handling > 1000 items)
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+            const startStr = startOfMonth.toISOString();
+
             const [
                 { count: totalCount },
-                { count: publishedCount },
-                { count: draftCount },
-                { data: viewsData },
-                { data: videos },
+                { count: publishedThisMonth },
+                { data: allArticlesViews },
+                { data: allReads },
+                { data: fbrNewsCategory },
                 { data: categories },
-                { data: recent }
+                { data: recent },
+                { count: euReporterThisMonth }
             ] = await Promise.all([
                 supabase.from('articles').select('*', { count: 'exact', head: true }),
-                supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'PUBLISHED'),
-                supabase.from('articles').select('*', { count: 'exact', head: true }).eq('status', 'DRAFT'),
-                supabase.from('articles').select('views'),
-                supabase.from('user_video_reports').select('id').eq('status', 'PENDING'),
+                supabase.from('articles').select('*', { count: 'exact', head: true })
+                    .eq('status', 'PUBLISHED')
+                    .gte('published_at', startStr),
+                supabase.from('articles').select('id, views, category_id'),
+                supabase.from('article_reads').select('read_time_seconds, article_id, created_at'),
+                supabase.from('categories').select('id').eq('slug', 'fbr-news').single(),
                 supabase.from('categories').select('id'),
                 supabase.from('articles').select(`
                     id, title, slug, status, created_at,
                     author:profiles(name)
-                `).order('created_at', { ascending: false }).limit(5)
+                `).order('created_at', { ascending: false }).limit(5),
+                supabase.from('user_video_reports').select('*', { count: 'exact', head: true })
+                    .gte('created_at', startStr)
             ]);
 
-            const totalViews = viewsData?.reduce((sum, a) => sum + (a.views || 0), 0) || 0;
+            const fbrCatId = fbrNewsCategory?.id;
 
-            const finalStats = {
+            const articles = allArticlesViews || [];
+            const reads = allReads || [];
+
+            const viewsThisMonth = reads.filter(r => new Date(r.created_at) >= startOfMonth).length;
+
+            const avgReadTime = reads.length > 0
+                ? Math.round(reads.reduce((sum, r) => sum + (r.read_time_seconds || 0), 0) / reads.length)
+                : 0;
+
+            const fbrArticles = articles.filter(a => a.category_id === fbrCatId);
+            const articlesFbrNews = fbrArticles.length;
+            const viewsFbrNews = fbrArticles.reduce((sum, a) => sum + (a.views || 0), 0);
+            
+            const fbrArticleIds = new Set(fbrArticles.map(a => a.id));
+            const fbrReads = reads.filter(r => fbrArticleIds.has(r.article_id));
+            const avgReadTimeFbr = fbrReads.length > 0
+                ? Math.round(fbrReads.reduce((sum, r) => sum + (r.read_time_seconds || 0), 0) / fbrReads.length)
+                : 0;
+
+            setStats({
+                publishedThisMonth: publishedThisMonth || 0,
+                viewsThisMonth,
+                avgReadTime,
                 totalArticles: totalCount || 0,
-                publishedArticles: publishedCount || 0,
-                draftArticles: draftCount || 0,
-                totalViews,
-                pendingVideos: videos?.length || 0,
+                postsEuReporterMonth: euReporterThisMonth || 0,
                 activeCategories: categories?.length || 0,
-            };
-
-            setStats(finalStats);
+                articlesFbrNews,
+                viewsFbrNews,
+                avgReadTimeFbr
+            });
             setRecentArticles((recent as unknown as RecentArticle[]) || []);
         } catch (error) {
             console.error('[Dashboard] Error fetching dashboard data:', error);
@@ -90,49 +125,24 @@ export default function AdminDashboard() {
         void fetchDashboardData();
     }, []);
 
-    const statCards = [
-        {
-            title: 'Total de Artigos',
-            value: stats.totalArticles,
-            icon: FileText,
-            color: 'text-blue-500',
-            bgColor: 'bg-blue-500/10',
-        },
-        {
-            title: 'Publicados',
-            value: stats.publishedArticles,
-            icon: TrendingUp,
-            color: 'text-green-500',
-            bgColor: 'bg-green-500/10',
-        },
-        {
-            title: 'Rascunhos',
-            value: stats.draftArticles,
-            icon: Clock,
-            color: 'text-amber-500',
-            bgColor: 'bg-amber-500/10',
-        },
-        {
-            title: 'Visualizações Totais',
-            value: stats.totalViews.toLocaleString(),
-            icon: Eye,
-            color: 'text-purple-500',
-            bgColor: 'bg-purple-500/10',
-        },
-        {
-            title: 'Vídeos Pendentes',
-            value: stats.pendingVideos,
-            icon: Video,
-            color: 'text-red-500',
-            bgColor: 'bg-red-500/10',
-        },
-        {
-            title: 'Categorias Ativas',
-            value: stats.activeCategories,
-            icon: FolderOpen,
-            color: 'text-indigo-500',
-            bgColor: 'bg-indigo-500/10',
-        },
+    const formatTime = (secs: number) => {
+        if (secs < 60) return `${secs}s`;
+        return `${Math.floor(secs / 60)}m ${secs % 60}s`;
+    };
+
+    const topRowCards = [
+        { title: 'Publicados no mês', value: stats.publishedThisMonth, icon: Calendar, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+        { title: 'Visualizações do mês', value: stats.viewsThisMonth.toLocaleString(), icon: Eye, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10' },
+        { title: 'Tempo de Leitura Médio', value: formatTime(stats.avgReadTime), icon: Clock, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
+        { title: 'Total de artigos', value: stats.totalArticles.toLocaleString(), icon: FileText, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+        { title: 'Posts Eu-reporter do mês', value: stats.postsEuReporterMonth.toLocaleString(), icon: Video, color: 'text-green-500', bgColor: 'bg-green-500/10' },
+    ];
+
+    const bottomRowCards = [
+        { title: 'Categorias Ativas', value: stats.activeCategories, icon: FolderOpen, color: 'text-slate-400', bgColor: 'bg-slate-500/10' },
+        { title: 'Artigos FBR-News', value: stats.articlesFbrNews.toLocaleString(), icon: FileText, color: 'text-rose-500', bgColor: 'bg-rose-500/10' },
+        { title: 'Visualizações FBR-News', value: stats.viewsFbrNews.toLocaleString(), icon: BarChart2, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
+        { title: 'Tempo Médio FBR-News', value: formatTime(stats.avgReadTimeFbr), icon: Clock, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
     ];
 
     if (loading) {
@@ -178,29 +188,50 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                         <h3 className="text-xl font-black dark:text-white text-gray-900 mb-1">Moderar Vídeos</h3>
-                        <p className="dark:text-slate-400 text-gray-600 text-sm">
-                            {stats.pendingVideos} vídeo{stats.pendingVideos !== 1 ? 's' : ''} aguardando aprovação
-                        </p>
+                        <p className="dark:text-slate-400 text-gray-600 text-sm">Acessar painel de videoreportagem e comunidade</p>
                     </div>
                 </Link>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statCards.map((card) => {
+            {/* Stats Grid - Row 1 */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {topRowCards.map((card) => {
                     const Icon = card.icon;
                     return (
                         <div
                             key={card.title}
-                            className="dark:bg-slate-900 bg-white rounded-xl p-6 border dark:border-white/10 border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                            className="dark:bg-slate-900 bg-white rounded-xl p-4 border dark:border-white/10 border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                         >
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <p className="text-sm dark:text-slate-400 text-gray-600 mb-1">{card.title}</p>
-                                    <p className="text-3xl font-black dark:text-white text-gray-900">{card.value}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest dark:text-slate-400 text-gray-600 mb-1">{card.title}</p>
+                                    <p className="text-2xl font-black dark:text-white text-gray-900">{card.value}</p>
                                 </div>
-                                <div className={`p-3 rounded-lg ${card.bgColor}`}>
-                                    <Icon className={`w-6 h-6 ${card.color}`} />
+                                <div className={`p-2 rounded-lg ${card.bgColor} hidden sm:block`}>
+                                    <Icon className={`w-5 h-5 ${card.color}`} />
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Stats Grid - Row 2 */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {bottomRowCards.map((card) => {
+                    const Icon = card.icon;
+                    return (
+                        <div
+                            key={card.title}
+                            className="dark:bg-slate-900 bg-white rounded-xl p-4 border dark:border-white/10 border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest dark:text-slate-400 text-gray-600 mb-1">{card.title}</p>
+                                    <p className="text-xl font-black dark:text-white text-gray-900">{card.value}</p>
+                                </div>
+                                <div className={`p-2 rounded-lg ${card.bgColor} hidden sm:block`}>
+                                    <Icon className={`w-4 h-4 ${card.color}`} />
                                 </div>
                             </div>
                         </div>
