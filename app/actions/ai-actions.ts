@@ -131,7 +131,7 @@ export async function generateSEOStrategy(socialSummary: string): Promise<{ succ
 
 export async function generateSEOTitle(content: string, keywords: string[]): Promise<{ success: boolean; title?: string; error?: string }> {
     try {
-        const prompt = `Com base nos melhores termos chave para o artigo apontados pela estratégia de SEO produza um titulo com no máximo 150 caracteres que seja de alto impacto para o leitor.
+        const prompt = `Com base nos melhores termos chave para o artigo apontados pela estratégia de SEO produza um titulo com no máximo 85 caracteres que seja de alto impacto para o leitor.
         Conteúdo: "${content.substring(0, 1500)}".
         Palavras-chave: ${keywords.join(', ')}.
         Retorne no formato JSON com a chave "title".`;
