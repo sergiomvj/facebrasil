@@ -26,6 +26,7 @@ interface UpdateArticlePayload {
     colocar_hero?: boolean;
     language?: string;
     translation_group_id?: string | null;
+    seo_applied?: boolean;
 }
 
 export async function upsertArticle(payload: UpdateArticlePayload, id?: string) {

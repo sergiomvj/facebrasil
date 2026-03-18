@@ -156,3 +156,34 @@ export async function generateSEOTitle(content: string, keywords: string[]): Pro
         return { success: false, error: error.message };
     }
 }
+
+export async function applySEOStrategy(content: string, keywords: string[]): Promise<{ success: boolean; content?: string; error?: string }> {
+    try {
+        const prompt = `Aqui está o conteúdo HTML de um artigo e uma lista de palavras-chave de SEO.
+        Reescreva ou ajuste o texto para incluir essas palavras-chave de forma muito natural e com bom senso, preservando o máximo possível a fluidez original.
+        TODAS as vezes que uma das palavras-chave foco aparecer (ou for inserida), envolva-a na tag <strong> para deixá-la em negrito e ajudar no SEO.
+        Preserve estritamente as outras marcações HTML originais (p, h2, ul, etc.).
+        Conteúdo HTML: "${content}".
+        Palavras-chave: ${keywords.join(', ')}.
+        Retorne um objeto JSON contendo a chave "content" com o HTML modificado inteiro. Não adicione marcação markdown solta, apenas o JSON.`;
+
+        const completion = await getOpenAI().chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: 'Você é um editor sênior focado em SEO. Retorne apenas JSON válido contendo a chave content.' },
+                { role: 'user', content: prompt }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.5,
+        });
+
+        const responseText = completion.choices[0]?.message?.content;
+        if (!responseText) throw new Error('Empty response');
+
+        const parsed = JSON.parse(responseText);
+        return { success: true, content: parsed.content };
+    } catch (error: any) {
+        console.error('Apply SEO Strategy Error:', error);
+        return { success: false, error: error.message };
+    }
+}

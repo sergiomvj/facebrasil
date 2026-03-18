@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Link, routing } from '@/i18n/routing';
 import { upsertArticle } from '@/app/actions/article-actions';
-import { generateMetadata, generateSEOStrategy, generateSEOTitle } from '@/app/actions/ai-actions';
+import { generateMetadata, generateSEOStrategy, generateSEOTitle, applySEOStrategy } from '@/app/actions/ai-actions';
 import { sendArticlesToTV } from '@/app/actions/tv-facebrasil-actions';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
 
@@ -42,6 +42,11 @@ function EditorContent() {
     const [seoKeywords, setSeoKeywords] = useState<string[]>([]);
     const [isGeneratingSEO, setIsGeneratingSEO] = useState(false);
     const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+    
+    // SEO Application Content State
+    const [seoApplied, setSeoApplied] = useState(false);
+    const [isApplyingSEO, setIsApplyingSEO] = useState(false);
+    const [seoReviewContent, setSeoReviewContent] = useState<string | null>(null);
 
     const handleGenerateSlug = async () => {
         if (!content && !title) return alert('Escreva algum conteúdo ou título primeiro');
@@ -74,10 +79,27 @@ function EditorContent() {
             if (result.success && result.keywords) {
                 setSeoKeywords(result.keywords);
             } else {
-                alert('Erro ao gerar estratégia de SEO: ' + result.error);
+                alert('Erro ao buscar termos chave: ' + result.error);
             }
         } finally {
             setIsGeneratingSEO(false);
+        }
+    };
+
+    const handleApplySEO = async () => {
+        if (!content || content === '<p></p>') return alert('Escreva o conteúdo do artigo primeiro.');
+        if (seoKeywords.length === 0) return alert('Busque os termos chave primeiro.');
+        
+        setIsApplyingSEO(true);
+        try {
+            const result = await applySEOStrategy(content, seoKeywords);
+            if (result.success && result.content) {
+                setSeoReviewContent(result.content);
+            } else {
+                alert('Erro ao aplicar SEO no texto: ' + result.error);
+            }
+        } finally {
+            setIsApplyingSEO(false);
         }
     };
 
@@ -133,6 +155,7 @@ function EditorContent() {
                 setArticleLanguage(post.language || 'pt');
                 setTranslationGroupId(post.translation_group_id || '');
                 setColocarHero(post.colocar_hero || false);
+                setSeoApplied(post.seo_applied || false);
 
                 // Parse featured_image if JSON string or object
                 try {
@@ -212,6 +235,7 @@ function EditorContent() {
             translation_group_id: translationGroupId || null,
             colocar_hero: colocarHero,
             author_id: authorId || null,
+            seo_applied: seoApplied,
             ai_context: seoKeywords.length > 0 ? { seoKeywords } : null
         };
 
@@ -327,7 +351,7 @@ function EditorContent() {
                                 disabled={isGeneratingSEO}
                                 className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-300 font-black transition-all text-sm disabled:opacity-50"
                             >
-                                {isGeneratingSEO ? 'Analisando Estratégia...' : 'Agregar Estratégia de SEO'}
+                                {isGeneratingSEO ? 'Buscando Termos...' : 'Buscar Termos Chave'}
                             </button>
 
                             {seoKeywords.length > 0 ? (
@@ -343,10 +367,24 @@ function EditorContent() {
                                     <p className="text-[10px] text-slate-500 leading-relaxed mt-2 italic">
                                         Use o botão &quot;Criar Título do Artigo&quot; para gerar um título otimizado usando estas palavras-chave.
                                     </p>
+                                    <button
+                                        onClick={handleApplySEO}
+                                        disabled={isApplyingSEO || seoApplied}
+                                        className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl border font-black transition-all text-sm mt-4
+                                            ${seoApplied 
+                                                ? 'bg-slate-800 border-white/5 text-slate-500 cursor-not-allowed' 
+                                                : 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20 text-green-400'
+                                            }`}
+                                    >
+                                        {seoApplied 
+                                            ? 'SEO Aplicado ao Texto'
+                                            : isApplyingSEO ? 'Gerando Novo Texto...' : 'Utilizar Estratégia de SEO'
+                                        }
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="text-center pt-4 border-t border-white/5">
-                                    <p className="text-xs text-slate-500">Crie ou gere o &quot;Resumo para Social&quot; no final da página antes de agregar a estratégia SEO.</p>
+                                    <p className="text-xs text-slate-500">Crie ou gere o &quot;Resumo para Social&quot; no final da página antes de buscar termos chave.</p>
                                 </div>
                             )}
                         </div>
@@ -495,6 +533,44 @@ function EditorContent() {
                     </div>
                 </div>
             </div>
+
+            {/* SEO Strategy Review Modal */}
+            {seoReviewContent && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+                    <div className="bg-slate-900 border border-green-500/30 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-slate-900/50">
+                            <div>
+                                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-green-400" />
+                                    Revisão de Estratégia SEO
+                                </h2>
+                                <p className="text-sm text-slate-400 mt-1">A IA reescreveu trechos do texto inserindo as palavras-chave foco em <strong>negrito</strong> para melhorar a indexabilidade.</p>
+                            </div>
+                        </div>
+                        <div className="p-8 overflow-y-auto flex-1 prose prose-invert prose-green max-w-none text-slate-300 bg-slate-950/50">
+                            <div dangerouslySetInnerHTML={{ __html: seoReviewContent }} />
+                        </div>
+                        <div className="p-6 border-t border-white/5 flex items-center gap-3 justify-end bg-slate-900/50">
+                            <button
+                                onClick={() => setSeoReviewContent(null)}
+                                className="px-6 py-3 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                            >
+                                Descartar Alterações
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setContent(seoReviewContent);
+                                    setSeoApplied(true);
+                                    setSeoReviewContent(null);
+                                }}
+                                className="px-8 py-3 rounded-xl text-sm font-black bg-green-500 hover:bg-green-400 text-slate-950 transition-all shadow-lg shadow-green-500/20"
+                            >
+                                Aceitar Texto Otimizado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

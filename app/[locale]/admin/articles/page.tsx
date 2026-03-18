@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, BrainCircuit, X, Type, FileImage, FileText, CheckCircle2 } from 'lucide-react';
+import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, BrainCircuit, X, Type, FileImage, FileText, CheckCircle2, Key } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +25,7 @@ interface ArticleListItem {
     author_id: string | null;
     author: { name: string } | null;
     category: { name: string; color: string; slug: string } | null;
+    seo_applied: boolean;
 }
 
 interface CategoryListItem {
@@ -164,7 +165,7 @@ export default function ArticlesListPage() {
         let query = supabase
             .from('articles')
             .select(`
-                id, title, slug, status, published_at, created_at, language, author_id, views,
+                id, title, slug, status, published_at, created_at, language, author_id, views, seo_applied,
                 author:profiles(name),
                 category:categories(name, color, slug)
             `)
@@ -203,6 +204,7 @@ export default function ArticlesListPage() {
                 author_id: string | null;
                 author: { name: string } | { name: string }[] | null;
                 category: { name: string; color: string; slug: string } | { name: string; color: string; slug: string }[] | null;
+                seo_applied: boolean;
             }
 
             const rawArticles = articlesRes.data as unknown as RawArticle[];
@@ -217,7 +219,8 @@ export default function ArticlesListPage() {
                 language: item.language,
                 author_id: item.author_id,
                 author: Array.isArray(item.author) ? item.author[0] : item.author,
-                category: Array.isArray(item.category) ? item.category[0] : item.category
+                category: Array.isArray(item.category) ? item.category[0] : item.category,
+                seo_applied: item.seo_applied || false
             }));
 
             if (loadMore) {
@@ -555,6 +558,19 @@ export default function ArticlesListPage() {
                                                 <Link href={`/article/${post.slug}`} target="_blank" className="p-2 text-slate-400 hover:text-blue-400 rounded-lg hover:bg-blue-400/10 transition-colors" title="View">
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
+
+                                                {/* SEO Status Indicator Loop */}
+                                                <button
+                                                    disabled={post.seo_applied}
+                                                    className={`p-2 rounded-lg transition-colors ${
+                                                        post.seo_applied 
+                                                            ? 'text-slate-600 bg-transparent cursor-default' 
+                                                            : 'text-red-400 hover:text-red-300 hover:bg-red-400/10'
+                                                    }`}
+                                                    title={post.seo_applied ? "Estratégia SEO já aplicada" : "Pendente aplicação SEO"}
+                                                >
+                                                    <Key className="w-4 h-4" />
+                                                </button>
 
                                                 {/* Schedule Button Logic */}
                                                 {(post.status === 'DRAFT' || post.status === 'DRAFT-IA') && (
