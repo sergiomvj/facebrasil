@@ -177,9 +177,7 @@ export default function ArticlesListPage() {
         }
 
         if (selectedCategory !== 'all') {
-            // Find category ID by slug first or use query.eq on category slug if joined correctly
-            // For simplicity and to match existing filtering logic, we'll use eq on the slug from joined table if possible
-            // But Supabase join filters are a bit tricky, so let's stick to the title search for now as priority.
+            query = query.eq('category_id', selectedCategory);
         }
 
         if (selectedLanguage !== 'all') {
@@ -474,7 +472,7 @@ export default function ArticlesListPage() {
                         >
                             <option value="all">All Categories</option>
                             {categories.map(cat => (
-                                <option key={cat.id} value={cat.slug}>
+                                <option key={cat.id} value={cat.id}>
                                     {'\u00A0'.repeat((cat.depth || 0) * 4)} {cat.name}
                                 </option>
                             ))}
