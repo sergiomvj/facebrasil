@@ -71,7 +71,7 @@ export default function AdminDashboard() {
                 supabase.from('articles').select('*', { count: 'exact', head: true })
                     .eq('status', 'PUBLISHED')
                     .gte('published_at', startStr),
-                supabase.from('articles').select('id, views, category_id, read_time'),
+                supabase.from('articles').select('id, views, category_id, read_time, published_at'),
                 supabase.from('article_reads').select('read_time_seconds, article_id, created_at'),
                 supabase.from('categories').select('id').eq('slug', 'fbr-news').single(),
                 supabase.from('categories').select('id'),
@@ -89,7 +89,8 @@ export default function AdminDashboard() {
             const reads = allReads || [];
 
             const totalViews = articles.reduce((sum, a) => sum + (a.views || 0), 0);
-            const viewsThisMonth = reads.filter(r => new Date(r.created_at) >= startOfMonth).length;
+            const publishedThisMonthArticles = articles.filter(a => new Date(a.published_at) >= startOfMonth);
+            const viewsThisMonth = publishedThisMonthArticles.reduce((sum, a) => sum + (a.views || 0), 0);
 
             const avgReadTime = reads.length > 0
                 ? Math.round(reads.reduce((sum, r) => sum + (r.read_time_seconds || 0), 0) / reads.length)
