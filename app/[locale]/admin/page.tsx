@@ -13,6 +13,7 @@ interface DashboardStats {
     avgReadTime: number;
     totalArticles: number;
     postsEuReporterMonth: number;
+    totalViews: number;
     activeCategories: number;
     articlesFbrNews: number;
     viewsFbrNews: number;
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
         avgReadTime: 0,
         totalArticles: 0,
         postsEuReporterMonth: 0,
+        totalViews: 0,
         activeCategories: 0,
         articlesFbrNews: 0,
         viewsFbrNews: 0,
@@ -86,6 +88,7 @@ export default function AdminDashboard() {
             const articles = allArticlesViews || [];
             const reads = allReads || [];
 
+            const totalViews = articles.reduce((sum, a) => sum + (a.views || 0), 0);
             const viewsThisMonth = reads.filter(r => new Date(r.created_at) >= startOfMonth).length;
 
             const avgReadTime = reads.length > 0
@@ -108,6 +111,7 @@ export default function AdminDashboard() {
                 avgReadTime,
                 totalArticles: totalCount || 0,
                 postsEuReporterMonth: euReporterThisMonth || 0,
+                totalViews,
                 activeCategories: categories?.length || 0,
                 articlesFbrNews,
                 viewsFbrNews,
@@ -143,6 +147,7 @@ export default function AdminDashboard() {
         { title: 'Artigos FBR-News', value: stats.articlesFbrNews.toLocaleString(), icon: FileText, color: 'text-rose-500', bgColor: 'bg-rose-500/10' },
         { title: 'Visualizações FBR-News', value: stats.viewsFbrNews.toLocaleString(), icon: BarChart2, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
         { title: 'Tempo Médio FBR-News', value: formatTime(stats.avgReadTimeFbr), icon: Clock, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
+        { title: 'Total de visualizações', value: stats.totalViews.toLocaleString(), icon: TrendingUp, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
     ];
 
     if (loading) {
@@ -217,7 +222,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Stats Grid - Row 2 */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 {bottomRowCards.map((card) => {
                     const Icon = card.icon;
                     return (
