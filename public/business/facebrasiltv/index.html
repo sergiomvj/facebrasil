@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Facebrasil — Manifesto Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #00C07A;
+    --verde-dark: #009960;
+    --amarelo: #FFD200;
+    --azul: #003F8A;
+    --azul-light: #1A5FBB;
+    --creme: #F9F4EC;
+    --carvao: #0E0E0E;
+    --cinza: #666;
+    --cinza-light: #E8E3DA;
+    --branco: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--carvao);
+    color: var(--creme);
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ─── NAVIGATION ─── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 500;
+    padding: 20px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(14,14,14,0.95) 0%, transparent 100%);
+    backdrop-filter: blur(2px);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--verde);
+    text-transform: uppercase;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(249,244,236,0.5);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--verde); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px 60px 80px;
+    overflow: hidden;
+  }
+
+  .hero-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,192,122,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,192,122,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+  }
+
+  .orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,192,122,0.18) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    animation: drift1 12s ease-in-out infinite alternate;
+  }
+
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,63,138,0.25) 0%, transparent 70%);
+    bottom: 100px; left: -50px;
+    animation: drift2 15s ease-in-out infinite alternate;
+  }
+
+  .orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,210,0,0.08) 0%, transparent 70%);
+    top: 40%; right: 20%;
+    animation: drift3 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift1 { to { transform: translate(-40px, 60px); } }
+  @keyframes drift2 { to { transform: translate(60px, -40px); } }
+  @keyframes drift3 { to { transform: translate(-30px, 30px); } }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--verde);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 8rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--verde);
+  }
+
+  .hero-subtitle {
+    margin-top: 40px;
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: rgba(249,244,236,0.65);
+    max-width: 520px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-meta {
+    margin-top: 60px;
+    display: flex;
+    gap: 60px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--verde);
+    line-height: 1;
+  }
+
+  .meta-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(249,244,236,0.4);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px;
+    left: 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.2s forwards;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--verde);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; transform: scaleX(1); }
+    50% { opacity: 1; transform: scaleX(1.5); transform-origin: left; }
+  }
+
+  .scroll-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(249,244,236,0.35);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTION BASE ─── */
+  section {
+    padding: 120px 60px;
+    position: relative;
+  }
+
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--verde);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-tag::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--verde);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--verde);
+  }
+
+  /* ─── MANIFESTO ─── */
+  .manifesto {
+    background: var(--creme);
+    color: var(--carvao);
+  }
+
+  .manifesto-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .manifesto-left .section-tag { color: var(--azul); }
+  .manifesto-left .section-tag::before { background: var(--azul); }
+  .manifesto-left .section-title em { color: var(--azul); }
+
+  .manifesto-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 2.5vw, 2rem);
+    line-height: 1.5;
+    font-style: italic;
+    color: var(--azul);
+    border-left: 3px solid var(--verde);
+    padding-left: 32px;
+    margin-bottom: 40px;
+  }
+
+  .manifesto-body p {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: rgba(14,14,14,0.75);
+    margin-bottom: 20px;
+  }
+
+  .manifesto-body strong { color: var(--azul); font-weight: 500; }
+
+  .manifesto-pill {
+    display: inline-block;
+    background: var(--azul);
+    color: white;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 100px;
+    margin-top: 8px;
+  }
+
+  /* ─── PROPOSTA DE VALOR ─── */
+  .valor-grid {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: rgba(249,244,236,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .valor-card {
+    background: rgba(249,244,236,0.03);
+    padding: 48px 36px;
+    border: 1px solid rgba(249,244,236,0.07);
+    transition: background 0.4s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .valor-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--verde);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+    transform-origin: left;
+  }
+
+  .valor-card:hover::before { transform: scaleX(1); }
+  .valor-card:hover { background: rgba(0,192,122,0.06); }
+
+  .valor-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--verde);
+    margin-bottom: 28px;
+  }
+
+  .valor-icon {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .valor-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+
+  .valor-desc {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: rgba(249,244,236,0.55);
+  }
+
+  /* ─── ARQUITETURA ─── */
+  .arquitetura {
+    background: #0A0A0A;
+  }
+
+  .arquitetura-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+    margin-bottom: 80px;
+  }
+
+  .arquitetura-intro {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(249,244,236,0.55);
+  }
+
+  .engines-diagram {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .diagram-tower {
+    background: linear-gradient(135deg, rgba(0,192,122,0.12) 0%, rgba(0,63,138,0.12) 100%);
+    border: 1px solid rgba(0,192,122,0.25);
+    border-radius: 8px;
+    padding: 28px 40px;
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .diagram-tower::after {
+    content: '';
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 24px;
+    background: rgba(0,192,122,0.4);
+  }
+
+  .tower-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--verde);
+    margin-bottom: 4px;
+  }
+
+  .tower-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .engines-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    position: relative;
+  }
+
+  .engine-card {
+    background: rgba(249,244,236,0.03);
+    border: 1px solid rgba(249,244,236,0.1);
+    border-radius: 8px;
+    padding: 36px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+  }
+
+  .engine-card:hover {
+    border-color: var(--verde);
+    background: rgba(0,192,122,0.06);
+    transform: translateY(-4px);
+  }
+
+  .engine-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--verde);
+    margin-bottom: 20px;
+  }
+
+  .engine-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .engine-items {
+    list-style: none;
+  }
+
+  .engine-items li {
+    font-size: 0.82rem;
+    color: rgba(249,244,236,0.5);
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(249,244,236,0.05);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .engine-items li::before {
+    content: '→';
+    color: var(--verde);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .engine-accent {
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 0 8px 0 80px;
+    opacity: 0.08;
+  }
+
+  .ea-1 { background: var(--verde); }
+  .ea-2 { background: var(--amarelo); }
+  .ea-3 { background: var(--azul-light); }
+  .ea-4 { background: #FF6B6B; }
+
+  /* ─── PIPELINE ─── */
+  .pipeline-section {
+    background: var(--creme);
+    color: var(--carvao);
+  }
+
+  .pipeline-section .section-tag { color: var(--azul); }
+  .pipeline-section .section-tag::before { background: var(--azul); }
+
+  .pipeline-container {
+    max-width: 1200px;
+    margin: 60px auto 0;
+  }
+
+  .pipeline-steps {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pipeline-steps::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 40px;
+    bottom: 40px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--azul) 0%, var(--verde) 100%);
+  }
+
+  .pipeline-step {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 40px;
+    padding: 32px 0;
+    border-bottom: 1px solid rgba(14,14,14,0.08);
+    align-items: start;
+    transition: all 0.3s;
+  }
+
+  .pipeline-step:hover .step-content { transform: translateX(6px); }
+
+  .step-dot {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--carvao);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--verde);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    border: 2px solid rgba(0,192,122,0.3);
+  }
+
+  .step-content { transition: transform 0.3s; }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--carvao);
+  }
+
+  .step-desc {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: rgba(14,14,14,0.6);
+    margin-bottom: 16px;
+  }
+
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .step-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding: 4px 12px;
+    border-radius: 4px;
+    background: rgba(0,63,138,0.08);
+    color: var(--azul);
+    border: 1px solid rgba(0,63,138,0.15);
+  }
+
+  /* ─── FORMATOS ─── */
+  .formatos-grid {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .formato-card {
+    border-radius: 12px;
+    padding: 48px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s;
+  }
+
+  .formato-card:hover { transform: translateY(-6px); }
+
+  .fc-1 {
+    background: linear-gradient(135deg, #003F8A 0%, #001F45 100%);
+    border: 1px solid rgba(26,95,187,0.3);
+  }
+
+  .fc-2 {
+    background: linear-gradient(135deg, #1A1A1A 0%, #0A0A0A 100%);
+    border: 1px solid rgba(0,192,122,0.2);
+  }
+
+  .fc-3 {
+    background: linear-gradient(135deg, #1C1400 0%, #0A0A0A 100%);
+    border: 1px solid rgba(255,210,0,0.2);
+  }
+
+  .formato-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+
+  .fb-1 { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+  .fb-2 { background: rgba(0,192,122,0.15); color: var(--verde); }
+  .fb-3 { background: rgba(255,210,0,0.12); color: var(--amarelo); }
+
+  .formato-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .formato-duration {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: rgba(249,244,236,0.4);
+    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  .formato-desc {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: rgba(249,244,236,0.6);
+    margin-bottom: 28px;
+  }
+
+  .formato-specs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .spec-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: rgba(249,244,236,0.5);
+  }
+
+  .spec-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--verde);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* ─── METRICAS ─── */
+  .metricas {
+    background: var(--azul);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metricas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(0,192,122,0.15) 0%, transparent 60%);
+  }
+
+  .metricas-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .metrica-cell {
+    background: rgba(0,0,0,0.2);
+    padding: 48px 36px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .metrica-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .mv-verde { color: var(--verde); }
+  .mv-amarelo { color: var(--amarelo); }
+  .mv-branco { color: white; }
+
+  .metrica-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+  }
+
+  /* ─── RECEITA ─── */
+  .receita-section { background: #0A0A0A; }
+
+  .receita-streams {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .stream-card {
+    background: rgba(249,244,236,0.03);
+    border: 1px solid rgba(249,244,236,0.08);
+    border-radius: 12px;
+    padding: 40px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    transition: all 0.4s;
+  }
+
+  .stream-card:hover {
+    background: rgba(249,244,236,0.06);
+    border-color: rgba(249,244,236,0.16);
+    transform: translateY(-3px);
+  }
+
+  .stream-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--verde);
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+
+  .stream-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .stream-desc {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(249,244,236,0.45);
+  }
+
+  /* ─── ROADMAP ─── */
+  .roadmap-section {
+    background: var(--creme);
+    color: var(--carvao);
+  }
+
+  .roadmap-section .section-tag { color: var(--azul); }
+  .roadmap-section .section-tag::before { background: var(--azul); }
+
+  .roadmap-phases {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .phase-card {
+    border-radius: 12px;
+    padding: 44px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-1 {
+    background: white;
+    border: 2px solid var(--verde);
+  }
+
+  .phase-2 {
+    background: var(--carvao);
+    color: var(--creme);
+  }
+
+  .phase-3 {
+    background: var(--azul);
+    color: white;
+  }
+
+  .phase-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--verde);
+    margin-bottom: 8px;
+  }
+
+  .phase-period {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .phase-milestones {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .phase-milestones li {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .phase-milestones li::before {
+    content: '✓';
+    font-size: 0.75rem;
+    color: var(--verde);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .phase-1 .phase-milestones li { color: rgba(14,14,14,0.7); }
+  .phase-2 .phase-milestones li { color: rgba(249,244,236,0.65); }
+  .phase-3 .phase-milestones li { color: rgba(255,255,255,0.7); }
+
+  .phase-kpi {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(14,14,14,0.1);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+
+  .phase-2 .phase-kpi, .phase-3 .phase-kpi { border-color: rgba(255,255,255,0.1); }
+
+  .kpi-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--verde);
+    margin-bottom: 2px;
+  }
+
+  /* ─── DIFERENCIAIS ─── */
+  .diferenciais { background: var(--carvao); }
+
+  .diferenciais-list {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .diferencial-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 200px;
+    gap: 40px;
+    align-items: center;
+    background: rgba(249,244,236,0.03);
+    border: 1px solid rgba(249,244,236,0.06);
+    padding: 32px 40px;
+    transition: all 0.3s;
+  }
+
+  .diferencial-row:hover {
+    background: rgba(0,192,122,0.05);
+    border-color: rgba(0,192,122,0.15);
+  }
+
+  .d-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: rgba(249,244,236,0.1);
+  }
+
+  .d-content {}
+
+  .d-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .d-desc {
+    font-size: 0.88rem;
+    color: rgba(249,244,236,0.45);
+    line-height: 1.6;
+  }
+
+  .d-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--verde);
+    background: rgba(0,192,122,0.1);
+    border: 1px solid rgba(0,192,122,0.2);
+    padding: 6px 14px;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* ─── CLOSING ─── */
+  .closing {
+    background: var(--creme);
+    color: var(--carvao);
+    text-align: center;
+    padding: 160px 60px;
+  }
+
+  .closing-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--azul);
+    margin-bottom: 28px;
+  }
+
+  .closing-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    max-width: 800px;
+    margin: 0 auto 32px;
+  }
+
+  .closing-title em { color: var(--azul); font-style: italic; }
+
+  .closing-sub {
+    font-size: 1.05rem;
+    color: rgba(14,14,14,0.55);
+    max-width: 500px;
+    margin: 0 auto 60px;
+    line-height: 1.7;
+  }
+
+  .closing-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--azul);
+    color: white;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 18px 40px;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .closing-cta:hover {
+    background: var(--azul-light);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,63,138,0.3);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: #050505;
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(249,244,236,0.06);
+  }
+
+  .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--verde);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: rgba(249,244,236,0.2);
+  }
+
+  .footer-url {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: rgba(249,244,236,0.3);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .footer-url:hover { color: var(--verde); }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 20px 30px; }
+    section { padding: 80px 30px; }
+    .hero { padding: 120px 30px 60px; }
+    .valor-grid { grid-template-columns: repeat(2, 1fr); }
+    .engines-row { grid-template-columns: repeat(2, 1fr); }
+    .formatos-grid { grid-template-columns: 1fr; }
+    .metricas-grid { grid-template-columns: repeat(2, 1fr); }
+    .roadmap-phases { grid-template-columns: 1fr; }
+    .receita-streams { grid-template-columns: 1fr; }
+    .diferencial-row { grid-template-columns: 1fr; gap: 12px; }
+    .d-number { display: none; }
+    .manifesto-inner { grid-template-columns: 1fr; gap: 40px; }
+    .arquitetura-header { grid-template-columns: 1fr; gap: 40px; }
+    .hero-meta { flex-wrap: wrap; gap: 30px; }
+    .nav-links { display: none; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">TV Facebrasil</div>
+  <ul class="nav-links">
+    <li><a href="#manifesto">Manifesto</a></li>
+    <li><a href="#arquitetura">Arquitetura</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#formatos">Formatos</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-orb orb-3"></div>
+
+  <p class="hero-eyebrow">Manifesto Tecnológico — 2026</p>
+  <h1 class="hero-title">
+    Do Artigo<br>à <em>Tela</em>
+  </h1>
+  <p class="hero-subtitle">
+    Como a Facebrasil está transformando 16 anos de jornalismo comunitário numa plataforma audiovisual automatizada para a comunidade brasileira nos EUA.
+  </p>
+
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-number">16</span>
+      <span class="meta-label">Anos de editorial</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-number">85%</span>
+      <span class="meta-label">Taxa de automação</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-number">50+</span>
+      <span class="meta-label">Vídeos por mês</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-number">3</span>
+      <span class="meta-label">Formatos simultâneos</span>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll para explorar</span>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto" id="manifesto">
+  <div class="manifesto-inner">
+    <div class="manifesto-left">
+      <p class="section-tag">01 — Manifesto</p>
+      <h2 class="section-title">Por que <em>existimos</em></h2>
+      <span class="manifesto-pill">fbr.news</span>
+    </div>
+    <div>
+      <blockquote class="manifesto-quote">
+        "A TV Facebrasil não é mais um canal de vídeo — é o jornalismo comunitário encontrando sua próxima forma de existir."
+      </blockquote>
+      <div class="manifesto-body">
+        <p>
+          A Facebrasil nasceu como revista impressa servindo à comunidade brasileira na Flórida. Por <strong>16 anos ininterruptos</strong>, construímos uma autoridade editorial única: não somos um portal latino genérico, somos a voz específica dos brasileiros que escolheram os Estados Unidos como lar.
+        </p>
+        <p>
+          O mundo mudou. O consumo de informação migrou do texto para o audiovisual — e nossa comunidade não é diferente. Brasileiros nos EUA assistem vídeos no YouTube enquanto dirigem pelas I-95, consomem Reels no intervalo do trabalho, ligam o celular para se sentir mais perto do Brasil.
+        </p>
+        <p>
+          A TV Facebrasil nasce dessa percepção: <strong>o nosso maior ativo não é tecnológico, é editorial</strong>. São 16 anos de histórias, entrevistas, análises e guias práticos que nunca foram vistos — apenas lidos. É chegada a hora de mostrar.
+        </p>
+        <p>
+          A automação inteligente não é um atalho — é o que nos permite escalar sem perder a alma. Cada vídeo carrega a mesma voz que construímos ao longo de uma década e meia: próxima, informada e genuinamente comprometida com quem vive entre dois países.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROPOSTA DE VALOR -->
+<section style="padding: 0 60px 120px; background: var(--creme);">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <p class="section-tag" style="color: var(--azul);">
+      <span style="display:block;width:24px;height:1px;background:var(--azul);"></span>
+      Proposta de Valor
+    </p>
+    <h2 class="section-title reveal" style="color: var(--carvao);">
+      Quatro <em style="color:var(--azul);">pilares</em> inabaláveis
+    </h2>
+  </div>
+  <div class="valor-grid reveal" style="max-width:1200px;margin:40px auto 0;">
+    <div class="valor-card" style="background:rgba(14,14,14,0.97);border:1px solid rgba(0,192,122,0.15);">
+      <p class="valor-number">01</p>
+      <div class="valor-icon">📺</div>
+      <h3 class="valor-name">Acessibilidade</h3>
+      <p class="valor-desc">Conteúdo consumível a qualquer momento: vídeos individuais para consulta rápida ou VideoContainers para uma experiência imersiva de maratona.</p>
+    </div>
+    <div class="valor-card" style="background:rgba(14,14,14,0.97);border:1px solid rgba(0,192,122,0.15);">
+      <p class="valor-number">02</p>
+      <div class="valor-icon">🏆</div>
+      <h3 class="valor-name">Autoridade Local</h3>
+      <p class="valor-desc">16 anos de credibilidade editorial agora em formato mais envolvente. Nenhum outro canal tem esse histórico com a comunidade brasileira nos EUA.</p>
+    </div>
+    <div class="valor-card" style="background:rgba(14,14,14,0.97);border:1px solid rgba(0,192,122,0.15);">
+      <p class="valor-number">03</p>
+      <div class="valor-icon">⚡</div>
+      <h3 class="valor-name">Conveniência</h3>
+      <p class="valor-desc">Informação essencial em vídeo para quem tem pouco tempo. A comunidade brasileira nos EUA vive ocupada — entregamos o essencial no formato que cabe na rotina.</p>
+    </div>
+    <div class="valor-card" style="background:rgba(14,14,14,0.97);border:1px solid rgba(0,192,122,0.15);">
+      <p class="valor-number">04</p>
+      <div class="valor-icon">🤝</div>
+      <h3 class="valor-name">Conexão Emocional</h3>
+      <p class="valor-desc">Histórias da comunidade contadas com rostos, vozes e identidade visual. Ver e ouvir cria vínculos que o texto sozinho não consegue.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ARQUITETURA -->
+<section class="arquitetura" id="arquitetura">
+  <div class="arquitetura-header reveal">
+    <div>
+      <p class="section-tag">02 — Arquitetura</p>
+      <h2 class="section-title">Quatro <em>engines</em>,<br>uma orquestra</h2>
+    </div>
+    <p class="arquitetura-intro">
+      O sistema é construído sobre quatro motores independentes coordenados por uma Control Tower central. Cada engine opera de forma assíncrona, comunicando-se via APIs RESTful — garantindo escalabilidade modular e resiliência operacional.
+    </p>
+  </div>
+
+  <div class="engines-diagram">
+    <div class="diagram-tower reveal">
+      <p class="tower-label">Camada Central</p>
+      <p class="tower-name">Control Tower — Orquestração & Monitoramento</p>
+    </div>
+    <div class="engines-row">
+      <div class="engine-card reveal">
+        <div class="engine-accent ea-1"></div>
+        <p class="engine-number">ENGINE 01</p>
+        <h3 class="engine-name">Intake Engine</h3>
+        <ul class="engine-items">
+          <li>Captura de artigos via API CMS</li>
+          <li>Scoring inteligente ML</li>
+          <li>Priorização editorial</li>
+          <li>Arquivo histórico (3.200+ artigos)</li>
+          <li>Fila de produção gerenciada</li>
+        </ul>
+      </div>
+      <div class="engine-card reveal">
+        <div class="engine-accent ea-2"></div>
+        <p class="engine-number">ENGINE 02</p>
+        <h3 class="engine-name">Processing Engine</h3>
+        <ul class="engine-items">
+          <li>Análise semântica com IA</li>
+          <li>Geração automática de roteiro</li>
+          <li>Adaptação Master + Short</li>
+          <li>Quality Gate automatizado</li>
+          <li>Versionamento completo</li>
+        </ul>
+      </div>
+      <div class="engine-card reveal">
+        <div class="engine-accent ea-3"></div>
+        <p class="engine-number">ENGINE 03</p>
+        <h3 class="engine-name">Production Engine</h3>
+        <ul class="engine-items">
+          <li>Síntese de avatar virtual</li>
+          <li>Text-to-Speech em PT-BR</li>
+          <li>Motion graphics automatizados</li>
+          <li>Edição e renderização</li>
+          <li>Geração de thumbnails</li>
+        </ul>
+      </div>
+      <div class="engine-card reveal">
+        <div class="engine-accent ea-4"></div>
+        <p class="engine-number">ENGINE 04</p>
+        <h3 class="engine-name">Distribution Engine</h3>
+        <ul class="engine-items">
+          <li>Publicação multi-plataforma</li>
+          <li>Agendamento automatizado</li>
+          <li>Agregação em VideoContainers</li>
+          <li>SEO e metadados otimizados</li>
+          <li>Analytics & feedback loop</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="pipeline-section" id="pipeline">
+  <div style="max-width:1200px; margin:0 auto;">
+    <p class="section-tag">03 — Pipeline</p>
+    <h2 class="section-title reveal" style="color:var(--carvao);">Do artigo ao <em style="color:var(--azul);">YouTube</em><br>em 6 etapas</h2>
+  </div>
+
+  <div class="pipeline-container">
+    <div class="pipeline-steps">
+
+      <div class="pipeline-step reveal">
+        <div class="step-dot">01</div>
+        <div class="step-content">
+          <h3 class="step-title">Captura & Análise</h3>
+          <p class="step-desc">O Intake Engine monitora continuamente o CMS da Facebrasil e a base histórica. Cada artigo recebe um score multifatorial que considera performance histórica, sazonalidade, diversidade temática e potencial visual. Artigos acima do threshold entram automaticamente na fila de produção.</p>
+          <div class="step-tags">
+            <span class="step-tag">WordPress API</span>
+            <span class="step-tag">ML Scoring</span>
+            <span class="step-tag">Python</span>
+            <span class="step-tag">Polling 6h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step reveal">
+        <div class="step-dot">02</div>
+        <div class="step-content">
+          <h3 class="step-title">Roteirização com IA</h3>
+          <p class="step-desc">O Processing Engine analisa semanticamente o artigo e gera dois roteiros simultâneos: o Master (5–8 min, formato completo) e o Short (60–90s, para Reels e Shorts). A IA preserva a voz editorial da Facebrasil, adaptando o conteúdo para linguagem audiovisual natural — não é transcrição, é reinterpretação.</p>
+          <div class="step-tags">
+            <span class="step-tag">GPT-4 / Claude</span>
+            <span class="step-tag">Roteiro Master</span>
+            <span class="step-tag">Roteiro Short</span>
+            <span class="step-tag">Validação Semântica</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step reveal">
+        <div class="step-dot">03</div>
+        <div class="step-content">
+          <h3 class="step-title">Produção Audiovisual</h3>
+          <p class="step-desc">O Production Engine coordena três fluxos paralelos: síntese do avatar virtual (HeyGen / Synthesia), geração de voz em português brasileiro natural (ElevenLabs / Azure TTS) e criação de motion graphics, b-roll e infográficos animados. Todos os elementos são compostos e renderizados de forma automatizada.</p>
+          <div class="step-tags">
+            <span class="step-tag">Avatar Sintético</span>
+            <span class="step-tag">ElevenLabs TTS</span>
+            <span class="step-tag">Remotion / Lottie</span>
+            <span class="step-tag">Runway ML</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step reveal">
+        <div class="step-dot">04</div>
+        <div class="step-content">
+          <h3 class="step-title">Quality Gate</h3>
+          <p class="step-desc">Checkpoint automatizado verifica consistência técnica, sincronização áudio-vídeo, qualidade de renderização e conformidade com os padrões editoriais da Facebrasil. Casos fora da tolerância são sinalizados para revisão humana — mantendo a automatização em 85–90% sem abrir mão da qualidade.</p>
+          <div class="step-tags">
+            <span class="step-tag">Análise Automática</span>
+            <span class="step-tag">Revisão Humana Opcional</span>
+            <span class="step-tag">Threshold Configurável</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step reveal">
+        <div class="step-dot">05</div>
+        <div class="step-content">
+          <h3 class="step-title">Agregação em VideoContainers</h3>
+          <p class="step-desc">A cada 5 vídeos produzidos, o sistema agrega automaticamente um VideoContainer temático: uma playlist estruturada de 60–90 min otimizada para Lives e Estreias no YouTube. Cada container recebe identidade visual própria, intro animado e thumbnail personalizada. É o formato que transforma a TV Facebrasil num canal de programação real.</p>
+          <div class="step-tags">
+            <span class="step-tag">Agregação Automática</span>
+            <span class="step-tag">Lives & Estreias</span>
+            <span class="step-tag">60–90 min</span>
+            <span class="step-tag">Identidade Visual</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step reveal">
+        <div class="step-dot">06</div>
+        <div class="step-content">
+          <h3 class="step-title">Publicação & Monitoramento</h3>
+          <p class="step-desc">O Distribution Engine publica simultaneamente nos três formatos: vídeo standard no YouTube, Short para YouTube Shorts e Reels, e o VideoContainer como Estreia agendada. SEO e metadados são gerados automaticamente. O feedback loop de analytics alimenta continuamente o algoritmo de scoring do Intake Engine — o sistema aprende com cada publicação.</p>
+          <div class="step-tags">
+            <span class="step-tag">YouTube API</span>
+            <span class="step-tag">Instagram Reels</span>
+            <span class="step-tag">SEO Automático</span>
+            <span class="step-tag">Analytics Loop</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FORMATOS -->
+<section id="formatos" style="padding: 120px 60px; background: var(--carvao);">
+  <div style="max-width:1200px; margin:0 auto;">
+    <p class="section-tag">04 — Formatos</p>
+    <h2 class="section-title reveal">Três <em>experiências</em>,<br>um artigo de origem</h2>
+  </div>
+
+  <div class="formatos-grid">
+    <div class="formato-card fc-1 reveal">
+      <span class="formato-badge fb-1">Formato Principal</span>
+      <h3 class="formato-title">Mini-Documentário</h3>
+      <p class="formato-duration">⏱ 5–8 minutos · YouTube Standard</p>
+      <p class="formato-desc">O formato de maior profundidade editorial. Ideal para histórias de sucesso, perfis de empreendedores, guias de imigração e análises de mercado. Estrutura narrativa clássica: abertura impactante, desenvolvimento contextualizado e call-to-action.</p>
+      <div class="formato-specs">
+        <div class="spec-item"><div class="spec-dot"></div><span>Avatar apresentador em cenário de estúdio</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>B-roll com stock footage + infográficos</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Música de fundo adaptativa por tema</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Legendas bilíngues PT/EN automáticas</span></div>
+      </div>
+    </div>
+
+    <div class="formato-card fc-2 reveal">
+      <span class="formato-badge fb-2">Formato Notícia</span>
+      <h3 class="formato-title">Bancada de Notícias</h3>
+      <p class="formato-duration">⏱ 2–4 minutos · YouTube + Site</p>
+      <p class="formato-desc">Apresentador virtual em newsroom profissional. Ideal para atualizações legislativas, oportunidades de emprego, dicas práticas e notícias da comunidade. Formato dinâmico com gráficos animados e bullets visuais.</p>
+      <div class="formato-specs">
+        <div class="spec-item"><div class="spec-dot"></div><span>Cenário newsroom com lower thirds</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Gráficos dinâmicos com dados reais</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Ritmo acelerado, pontos objetivos</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Versão áudio-only para podcast</span></div>
+      </div>
+    </div>
+
+    <div class="formato-card fc-3 reveal">
+      <span class="formato-badge fb-3">Formato Viral</span>
+      <h3 class="formato-title">FB Shorts</h3>
+      <p class="formato-duration">⏱ 60–90 segundos · Reels + Shorts + TikTok</p>
+      <p class="formato-desc">Corte vertical e dinâmico do vídeo master, otimizado para consumo mobile. Gera tráfego orgânico massivo e serve como porta de entrada para o conteúdo completo. Gerado automaticamente a partir do roteiro Short independente.</p>
+      <div class="formato-specs">
+        <div class="spec-item"><div class="spec-dot"></div><span>Formato 9:16 vertical nativo</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Gancho nos primeiros 3 segundos</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>Captions animadas on-screen</span></div>
+        <div class="spec-item"><div class="spec-dot"></div><span>CTA para vídeo completo</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MÉTRICAS -->
+<section class="metricas">
+  <div class="metricas-inner">
+    <p class="section-tag" style="color:var(--verde);">05 — Capacidade de Produção</p>
+    <h2 class="section-title reveal">Números que<br><em>escalam</em></h2>
+    <div class="metricas-grid reveal">
+      <div class="metrica-cell">
+        <div class="metrica-value mv-verde">50+</div>
+        <p class="metrica-unit">Vídeos por mês</p>
+      </div>
+      <div class="metrica-cell">
+        <div class="metrica-value mv-amarelo">90%</div>
+        <p class="metrica-unit">Taxa de automação</p>
+      </div>
+      <div class="metrica-cell">
+        <div class="metrica-value mv-branco">$15</div>
+        <p class="metrica-unit">Custo médio por vídeo</p>
+      </div>
+      <div class="metrica-cell">
+        <div class="metrica-value mv-verde">95<span style="font-size:1.5rem;">min</span></div>
+        <p class="metrica-unit">Tempo médio de produção</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECEITA -->
+<section class="receita-section">
+  <div style="max-width:1200px; margin:0 auto;">
+    <p class="section-tag">06 — Modelo de Receita</p>
+    <h2 class="section-title reveal">Quatro <em>streams</em><br>de monetização</h2>
+  </div>
+  <div class="receita-streams reveal">
+    <div class="stream-card">
+      <div class="stream-pct">40%</div>
+      <div>
+        <h3 class="stream-name">Publicidade Nativa</h3>
+        <p class="stream-desc">Patrocínio de segmentos temáticos ("Dica de Saúde by Florida Blue", "Guia Jurídico by Escritório X"). Mid-roll ads em vídeos longos. Formato integrado ao conteúdo, não interruptivo.</p>
+      </div>
+    </div>
+    <div class="stream-card">
+      <div class="stream-pct">30%</div>
+      <div>
+        <h3 class="stream-name">Parcerias Corporativas</h3>
+        <p class="stream-desc">Escritórios de advocacia de imigração, contabilidades especializadas em brasileiros, seguradoras e imobiliárias. Pacotes anuais com presença garantida em formatos premium.</p>
+      </div>
+    </div>
+    <div class="stream-card">
+      <div class="stream-pct">20%</div>
+      <div>
+        <h3 class="stream-name">Assinatura FB+</h3>
+        <p class="stream-desc">Plano premium sem anúncios: acesso a conteúdo exclusivo, cursos práticos sobre vida nos EUA e consultoria mensal. $9,99/mês ou $99/ano. Canal de relacionamento direto.</p>
+      </div>
+    </div>
+    <div class="stream-card">
+      <div class="stream-pct">10%</div>
+      <div>
+        <h3 class="stream-name">Afiliados & Marketplace</h3>
+        <p class="stream-desc">Links de produtos e serviços mencionados nos vídeos — cursos, ferramentas, serviços financeiros para imigrantes. Comissão por conversão, alinhado ao conteúdo editorial.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="roadmap-section" id="roadmap">
+  <div style="max-width:1200px; margin:0 auto;">
+    <p class="section-tag">07 — Roadmap</p>
+    <h2 class="section-title reveal" style="color:var(--carvao);">Três fases para<br><em style="color:var(--azul);">escalar</em></h2>
+  </div>
+  <div class="roadmap-phases">
+    <div class="phase-card phase-1 reveal">
+      <p class="phase-num">FASE 01</p>
+      <h3 class="phase-period">Meses 1–2<br>MVP</h3>
+      <ul class="phase-milestones">
+        <li>Pipeline básico funcional end-to-end</li>
+        <li>Formato Bancada de Notícias como piloto</li>
+        <li>10 vídeos de teste e validação</li>
+        <li>Distribuição no site próprio + YouTube</li>
+        <li>Revisão humana em 100% dos outputs</li>
+        <li>Ajuste de qualidade e parâmetros</li>
+      </ul>
+      <div class="phase-kpi" style="border-color:rgba(14,14,14,0.1); color:var(--carvao);">
+        <span class="kpi-value">10</span>
+        vídeos · 100% revisão humana
+      </div>
+    </div>
+    <div class="phase-card phase-2 reveal">
+      <p class="phase-num" style="color:var(--verde);">FASE 02</p>
+      <h3 class="phase-period">Meses 3–4<br>Automação</h3>
+      <ul class="phase-milestones">
+        <li>Quality Gates automatizados ativos</li>
+        <li>Adicionar formato Mini-Documentário</li>
+        <li>Lançar FB Shorts multi-plataforma</li>
+        <li>Distribuição no Instagram e TikTok</li>
+        <li>Primeiros VideoContainers ao vivo</li>
+        <li>Revisão humana reduzida a 30%</li>
+      </ul>
+      <div class="phase-kpi">
+        <span class="kpi-value" style="color:var(--verde);">30</span>
+        vídeos/mês · 70% automatizado
+      </div>
+    </div>
+    <div class="phase-card phase-3 reveal">
+      <p class="phase-num" style="color:var(--amarelo);">FASE 03</p>
+      <h3 class="phase-period">Meses 5–6<br>Escala</h3>
+      <ul class="phase-milestones">
+        <li>Machine Learning para scoring refinado</li>
+        <li>VideoContainers programáticos semanais</li>
+        <li>Lives automatizadas com programação</li>
+        <li>50+ vídeos/mês em regime de cruzeiro</li>
+        <li>Revisão humana reduzida a 10%</li>
+        <li>Feedback loop de analytics ativo</li>
+      </ul>
+      <div class="phase-kpi">
+        <span class="kpi-value" style="color:var(--amarelo);">50+</span>
+        vídeos/mês · 90% automatizado
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFERENCIAIS -->
+<section class="diferenciais">
+  <div style="max-width:1200px; margin:0 auto;">
+    <p class="section-tag">08 — Posicionamento</p>
+    <h2 class="section-title reveal">O que nos torna<br><em>incopiáveis</em></h2>
+  </div>
+  <div class="diferenciais-list reveal">
+    <div class="diferencial-row">
+      <div class="d-number">01</div>
+      <div class="d-content">
+        <h3 class="d-title">Autoridade de 16 Anos</h3>
+        <p class="d-desc">Nenhum canal rival tem a credibilidade construída pela Facebrasil junto à comunidade brasileira nos EUA. A confiança editorial não se fabrica — é conquistada ao longo do tempo.</p>
+      </div>
+      <div class="d-badge">Inimitável</div>
+    </div>
+    <div class="diferencial-row">
+      <div class="d-number">02</div>
+      <div class="d-content">
+        <h3 class="d-title">Foco Hiper-Segmentado</h3>
+        <p class="d-desc">Não somos um canal latino genérico. Somos especificamente para brasileiros nos EUA — uma audiência de 1,6 milhão de pessoas com necessidades muito específicas e alta disposição para consumir conteúdo relevante.</p>
+      </div>
+      <div class="d-badge">Nicho Premium</div>
+    </div>
+    <div class="diferencial-row">
+      <div class="d-number">03</div>
+      <div class="d-content">
+        <h3 class="d-title">Automação com Alma Editorial</h3>
+        <p class="d-desc">A automação serve à voz, não ao contrário. O sistema é treinado para preservar o tom jornalístico da Facebrasil — próximo, informado e humano — em escala industrial.</p>
+      </div>
+      <div class="d-badge">Tecnologia Própria</div>
+    </div>
+    <div class="diferencial-row">
+      <div class="d-number">04</div>
+      <div class="d-content">
+        <h3 class="d-title">Conteúdo Evergreen + Trending</h3>
+        <p class="d-desc">16 anos de arquivo produz conteúdo evergreen de altíssimo valor (imigração, documentação, saúde) enquanto o sistema acompanha tendências em tempo real. Biblioteca permanente e reação rápida coexistem.</p>
+      </div>
+      <div class="d-badge">Dupla Estratégia</div>
+    </div>
+    <div class="diferencial-row">
+      <div class="d-number">05</div>
+      <div class="d-content">
+        <h3 class="d-title">Experiência Multi-Modal</h3>
+        <p class="d-desc">O mesmo conteúdo alcança a audiência em qualquer contexto: vídeo longo no YouTube para quem tem tempo, Short no Instagram para a pausa do trabalho, áudio no Spotify para o trajeto de carro.</p>
+      </div>
+      <div class="d-badge">Onipresença</div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing">
+  <p class="closing-eyebrow">TV Facebrasil — 2026 e além</p>
+  <h2 class="closing-title">
+    A próxima era do<br>jornalismo <em>brasileiro</em><br>nos EUA começa agora.
+  </h2>
+  <p class="closing-sub">
+    Cada artigo publicado nos últimos 16 anos é uma história esperando ser vista. O pipeline está pronto. A voz está construída. É hora de mostrar.
+  </p>
+  <a href="https://fbr.news" class="closing-cta" target="_blank">
+    Visitar fbr.news
+    <span>→</span>
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Facebrasil</div>
+  <div class="footer-copy">© 2026 · Manifesto Tecnológico TV Facebrasil</div>
+  <a href="https://fbr.news" class="footer-url" target="_blank">fbr.news →</a>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, (entry.target.dataset.delay || 0));
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+  reveals.forEach((el, i) => {
+    el.dataset.delay = (i % 4) * 80;
+    observer.observe(el);
+  });
+
+  // Staggered reveal for grid children
+  document.querySelectorAll('.valor-grid, .engines-row, .formatos-grid, .roadmap-phases, .receita-streams').forEach(grid => {
+    Array.from(grid.children).forEach((child, i) => {
+      child.style.transitionDelay = `${i * 100}ms`;
+    });
+  });
+
+  // Animated counters
+  const counters = document.querySelectorAll('.metrica-value');
+  const counterObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.5s';
+          el.style.opacity = '1';
+        }, 200);
+        counterObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(c => counterObs.observe(c));
+</script>
+
+</body>
+</html>

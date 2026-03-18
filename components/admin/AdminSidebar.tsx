@@ -22,12 +22,18 @@ import {
     Trophy,
     UserCheck,
     BrainCircuit,
-    Layers
+    Layers,
+    HelpCircle,
+    MessageCircle,
+    LifeBuoy
 } from 'lucide-react';
+import LeonChat from './LeonChat';
 
 interface NavItem {
     name: string;
-    href: string;
+    href?: string;
+    action?: 'leonChat';
+    isExternal?: boolean;
     icon: React.ComponentType<{ className?: string }>;
     allowedRoles?: string[]; // Arrays of roles allowed, undefined means all logged in users who reach the panel
 }
@@ -51,6 +57,9 @@ const navItems: NavItem[] = [
     { name: 'Conversor de Imagens', href: '/admin/tools/image-converter', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Configurações', href: '/admin/settings', icon: Settings, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Sistemas FBR', href: '/admin/fbrapps', icon: Layers, allowedRoles: ['ADMIN'] },
+    { name: 'Ajuda', href: '/admin/help', icon: HelpCircle },
+    { name: 'Ajuda do Leon', action: 'leonChat', icon: MessageCircle },
+    { name: 'Suporte Dev', href: 'https://t.me/ChiaraGarcia_bot', isExternal: true, icon: LifeBuoy },
 ];
 
 export default function AdminSidebar() {
@@ -60,6 +69,7 @@ export default function AdminSidebar() {
     const { user, profile } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isLeonOpen, setIsLeonOpen] = useState(false);
 
     return (
         <>
@@ -118,12 +128,57 @@ export default function AdminSidebar() {
                             }
 
                             const Icon = item.icon;
-                            const fullHref = `/${locale}${item.href}`;
-                            const isActive = pathname === fullHref || (item.href !== '/admin' && pathname.startsWith(fullHref));
+                            let fullHref = '';
+                            if (item.href && !item.isExternal) fullHref = `/${locale}${item.href}`;
+                            else if (item.href && item.isExternal) fullHref = item.href;
+                            
+                            const isActive = (!item.isExternal && fullHref && (pathname === fullHref || (item.href !== '/admin' && pathname.startsWith(fullHref))));
+
+                            if (item.action === 'leonChat') {
+                                return (
+                                    <button
+                                        key={item.name}
+                                        onClick={() => {
+                                            setIsLeonOpen(true);
+                                            setIsOpen(false);
+                                        }}
+                                        className={`
+                                            w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                                            dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100
+                                            ${isCollapsed ? 'justify-center' : ''}
+                                        `}
+                                        title={isCollapsed ? item.name : undefined}
+                                    >
+                                        <Icon className="w-5 h-5 flex-shrink-0 text-blue-500" />
+                                        {!isCollapsed && <span className="font-medium text-left">{item.name}</span>}
+                                    </button>
+                                );
+                            }
+
+                            if (item.isExternal) {
+                                return (
+                                    <a
+                                        key={item.name}
+                                        href={fullHref}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => setIsOpen(false)}
+                                        className={`
+                                            flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                                            dark:text-slate-300 text-gray-700 dark:hover:bg-slate-800 hover:bg-gray-100
+                                            ${isCollapsed ? 'justify-center' : ''}
+                                        `}
+                                        title={isCollapsed ? item.name : undefined}
+                                    >
+                                        <Icon className="w-5 h-5 flex-shrink-0 text-green-500" />
+                                        {!isCollapsed && <span className="font-medium">{item.name}</span>}
+                                    </a>
+                                );
+                            }
 
                             return (
                                 <Link
-                                    key={item.href}
+                                    key={item.href || item.name}
                                     href={fullHref}
                                     onClick={() => setIsOpen(false)}
                                     className={`
@@ -176,6 +231,7 @@ export default function AdminSidebar() {
                     </div>
                 </div>
             </aside>
+            <LeonChat isOpen={isLeonOpen} onClose={() => setIsLeonOpen(false)} />
         </>
     );
 }

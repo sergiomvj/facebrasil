@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FBR-News — Sistema Inteligente de Geração Editorial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:        #0E9AA7;
+      --brand-dim:    rgba(14,154,167,0.22);
+      --brand-faint:  rgba(14,154,167,0.07);
+      --accent:       #22D3EE;
+      --accent-dim:   rgba(34,211,238,0.18);
+      --accent-faint: rgba(34,211,238,0.05);
+      --teal:         #0E9AA7;
+      --teal-dim:     rgba(14,154,167,0.22);
+      --teal-faint:   rgba(14,154,167,0.07);
+      --python:       #F0A500;
+      --python-dim:   rgba(240,165,0,0.2);
+      --python-faint: rgba(240,165,0,0.06);
+      --shared:       #34D399;
+      --shared-dim:   rgba(52,211,153,0.18);
+      --shared-faint: rgba(52,211,153,0.05);
+      --dark:         #07090F;
+      --dark-2:       #0C0F1C;
+      --dark-3:       #111528;
+      --dark-4:       #191E36;
+      --dark-5:       #222845;
+      --slate:        #7278A0;
+      --slate-light:  #A0A8CC;
+      --white:        #EDF0FF;
+      --green:        #34D399;
+      --red:          #F87171;
+      --amber:        #FBBF24;
+      --violet:       #A78BFA;
+      --pink:         #F472B6;
+      --grid-line:    rgba(14,154,167,0.05);
+      --gutter:       2rem;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--dark); color: var(--white);
+      font-family: 'Inter', sans-serif; font-size: 15px;
+      line-height: 1.75; overflow-x: hidden;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+    .glow-a { position: fixed; top: -25vh; left: -15vw; width: 80vw; height: 80vh; background: radial-gradient(ellipse, rgba(14,154,167,0.09) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+    .glow-b { position: fixed; bottom: -25vh; right: -15vw; width: 80vw; height: 80vh; background: radial-gradient(ellipse, rgba(240,165,0,0.06) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+    .glow-c { position: fixed; top: 40vh; left: 50%; width: 60vw; height: 60vh; transform: translateX(-50%); background: radial-gradient(ellipse, rgba(52,211,153,0.04) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+
+    .wrapper { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 0 var(--gutter); }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem; background: rgba(7,9,15,0.88);
+      backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid var(--grid-line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.05rem; letter-spacing: -.04em; color: var(--white); }
+    .nav-logo span { color: var(--brand); }
+    .nav-badge { font-family: 'JetBrains Mono', monospace; font-size: .55rem; font-weight: 500; letter-spacing: .12em; color: var(--brand); background: var(--brand-faint); border: 1px solid var(--brand-dim); padding: .15rem .55rem; border-radius: 99px; margin-left: .6rem; vertical-align: middle; }
+    .nav-links { display: flex; gap: 1.6rem; list-style: none; }
+    .nav-links a { font-size: .68rem; color: var(--slate); text-decoration: none; transition: color .2s; font-family: 'JetBrains Mono', monospace; }
+    .nav-links a:hover { color: var(--white); }
+    @media(max-width:720px){ .nav-links { display: none; } }
+
+    /* ─── HERO ─── */
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 9rem 0 7rem; border-bottom: 1px solid var(--grid-line); }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); border: 1px solid var(--brand-dim); background: var(--brand-faint); padding: .38rem 1rem; border-radius: 99px; margin-bottom: 2.8rem; animation: fadeUp .7s ease both; }
+    .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 8px var(--brand); animation: pulsate 2.2s infinite; }
+    @keyframes pulsate { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .hero-title { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: clamp(3rem, 9vw, 5.8rem); line-height: .96; letter-spacing: -.04em; color: var(--white); animation: fadeUp .8s .1s ease both; }
+    .hero-title .accent { color: var(--brand); }
+    .hero-title .muted { color: var(--slate); }
+    .hero-sub { margin-top: 2.2rem; font-size: 1.05rem; color: var(--slate-light); max-width: 640px; font-weight: 300; line-height: 1.9; animation: fadeUp .8s .2s ease both; }
+    .hero-sub strong { color: var(--white); font-weight: 500; }
+    .hero-pills { margin-top: 3rem; display: flex; flex-wrap: wrap; gap: .9rem; animation: fadeUp .8s .3s ease both; }
+    .hpill { display: flex; align-items: center; gap: .5rem; font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--slate); padding: .42rem 1rem; border: 1px solid var(--dark-4); border-radius: 8px; background: rgba(255,255,255,0.018); }
+    .hpill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .d-t { background: var(--brand); box-shadow: 0 0 6px var(--brand); }
+    .d-p { background: var(--python); box-shadow: 0 0 6px var(--python); }
+    .d-s { background: var(--shared); box-shadow: 0 0 6px var(--shared); }
+    .d-v { background: var(--violet); box-shadow: 0 0 6px var(--violet); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 6.5rem 0; border-bottom: 1px solid var(--grid-line); }
+    .stag { font-family: 'JetBrains Mono', monospace; font-size: .63rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); margin-bottom: 1rem; }
+    .stag-py  { color: var(--python); }
+    .stag-sh  { color: var(--shared); }
+    .stag-vio { color: var(--violet); }
+    .stitle { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.1; letter-spacing: -.03em; color: var(--white); margin-bottom: 1.1rem; }
+    .slead { font-size: .97rem; color: var(--slate-light); max-width: 640px; font-weight: 300; margin-bottom: 3.5rem; line-height: 1.85; }
+    .slead strong { color: var(--white); font-weight: 500; }
+
+    .fade-in { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    /* ─── ARCH SPLIT ─── */
+    .arch-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    @media(max-width:660px){ .arch-split { grid-template-columns: 1fr; } }
+
+    .arch-panel { border-radius: 18px; overflow: hidden; }
+    .arch-panel.frontend { border: 1px solid var(--teal-dim); }
+    .arch-panel.python   { border: 1px solid var(--python-dim); }
+    .arch-header { padding: 1.2rem 1.6rem; display: flex; align-items: center; gap: .7rem; }
+    .arch-panel.frontend .arch-header { background: var(--teal-faint); }
+    .arch-panel.python   .arch-header { background: var(--python-faint); }
+    .arch-icon  { font-size: 1.1rem; }
+    .arch-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; color: var(--white); }
+    .arch-sub   { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; margin-top: .1rem; }
+    .arch-panel.frontend .arch-sub { color: var(--brand); }
+    .arch-panel.python   .arch-sub { color: var(--python); }
+    .arch-items { padding: .8rem 0; }
+    .arch-item {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .75rem 1.6rem; border-bottom: 1px solid rgba(14,154,167,0.06);
+      transition: background .2s;
+    }
+    .arch-panel.python .arch-item { border-bottom-color: rgba(240,165,0,0.06); }
+    .arch-item:last-child { border-bottom: none; }
+    .arch-item:hover { background: rgba(255,255,255,0.02); }
+    .arch-item-icon { font-size: .9rem; margin-top: .1rem; flex-shrink: 0; }
+    .arch-item-name { font-family: 'JetBrains Mono', monospace; font-size: .75rem; margin-bottom: .2rem; }
+    .arch-panel.frontend .arch-item-name { color: var(--accent); }
+    .arch-panel.python   .arch-item-name { color: var(--python); }
+    .arch-item-desc { font-size: .8rem; color: var(--slate-light); line-height: 1.55; }
+    .arch-item-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: .55rem; letter-spacing: .12em; text-transform: uppercase; padding: .12rem .5rem; border-radius: 4px; margin-top: .3rem; }
+    .tag-api  { background: rgba(14,154,167,0.12); color: var(--brand); border: 1px solid var(--brand-dim); }
+    .tag-rls  { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid var(--shared-dim); }
+    .tag-sched { background: rgba(240,165,0,0.1); color: var(--python); border: 1px solid var(--python-dim); }
+    .tag-scrap { background: rgba(167,139,250,0.1); color: var(--violet); border: 1px solid rgba(167,139,250,0.25); }
+
+    /* ─── INSIGHT CARDS ─── */
+    .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+    @media(max-width:660px){ .insight-grid { grid-template-columns: 1fr; } }
+    .icard { padding: 2rem 2.2rem; border: 1px solid var(--dark-4); border-radius: 16px; background: rgba(255,255,255,0.02); transition: border-color .25s, background .25s; }
+    .icard:hover { border-color: var(--brand-dim); background: var(--brand-faint); }
+    .icard.hi { border-color: var(--brand-dim); background: var(--brand-faint); }
+    .icard-icon  { font-size: 1.6rem; display: block; margin-bottom: 1rem; }
+    .icard-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: -.02em; color: var(--white); margin-bottom: .55rem; }
+    .icard-body  { font-size: .88rem; color: var(--slate-light); line-height: 1.7; }
+
+    /* ─── SOURCES TABLE ─── */
+    .src-table { width: 100%; border-collapse: collapse; margin-bottom: 3rem; }
+    .src-table th { font-family: 'JetBrains Mono', monospace; font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--slate); padding: .6rem 1rem; border-bottom: 1px solid var(--dark-4); text-align: left; }
+    .src-table td { padding: .85rem 1rem; border-bottom: 1px solid rgba(14,154,167,0.07); font-size: .86rem; color: var(--slate-light); vertical-align: top; }
+    .src-table tr:hover td { background: rgba(14,154,167,0.03); }
+    .src-name { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--accent); font-weight: 500; }
+    .src-lib  { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--python); }
+    .src-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: .55rem; letter-spacing: .1em; padding: .12rem .45rem; border-radius: 4px; margin-left: .4rem; }
+    .badge-api    { background: var(--brand-faint); color: var(--brand); border: 1px solid var(--brand-dim); }
+    .badge-scrape { background: rgba(167,139,250,0.1); color: var(--violet); border: 1px solid rgba(167,139,250,0.25); }
+    .badge-free   { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid var(--shared-dim); }
+
+    /* ─── CONFIG BLOCK ─── */
+    .config-block { background: var(--dark-3); border: 1px solid rgba(14,154,167,0.15); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; }
+    .config-header { padding: .8rem 1.4rem; background: var(--brand-faint); border-bottom: 1px solid rgba(14,154,167,0.1); }
+    .config-header span { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--brand); letter-spacing: .1em; }
+    .config-body { padding: 1.2rem 1.4rem; }
+    pre.config-code { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--slate-light); line-height: 1.8; white-space: pre-wrap; }
+    pre.config-code .key { color: var(--accent); }
+    pre.config-code .val { color: var(--green); }
+    pre.config-code .num { color: var(--amber); }
+    pre.config-code .cmt { color: var(--slate); opacity: .7; }
+    pre.config-code .py  { color: var(--python); }
+
+    /* ─── WARNING/INFO BLOCK ─── */
+    .info-block { display: flex; gap: 1rem; align-items: flex-start; padding: 1.4rem 1.6rem; border-radius: 12px; border: 1px solid var(--brand-dim); background: var(--brand-faint); margin-bottom: 3rem; }
+    .info-block.warn { border-color: rgba(240,165,0,0.35); background: rgba(240,165,0,0.05); }
+    .info-icon  { font-size: 1.2rem; flex-shrink: 0; margin-top: .1rem; }
+    .info-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .95rem; color: var(--brand); margin-bottom: .3rem; }
+    .info-block.warn .info-title { color: var(--python); }
+    .info-body  { font-size: .85rem; color: var(--slate-light); line-height: 1.65; }
+    .info-body strong { color: var(--white); }
+
+    /* ─── SHARED GRID ─── */
+    .shared-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+    @media(max-width:660px){ .shared-grid { grid-template-columns: 1fr 1fr; } }
+    .swd { padding: 1.5rem 1.6rem; border: 1px solid var(--teal-dim); border-radius: 14px; background: var(--teal-faint); transition: border-color .2s, background .2s; }
+    .swd:hover { border-color: var(--brand); background: rgba(14,154,167,0.1); }
+    .swd-icon { font-size: 1.4rem; margin-bottom: .75rem; display: block; }
+    .swd-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .95rem; color: var(--white); margin-bottom: .4rem; }
+    .swd-tag  { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); margin-bottom: .5rem; }
+    .swd-desc { font-size: .8rem; color: var(--slate-light); line-height: 1.6; }
+
+    /* ─── STACK CARDS ─── */
+    .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; margin-bottom: 2.5rem; }
+    @media(max-width:660px){ .stack-grid { grid-template-columns: 1fr; } }
+    .stack-card { padding: 1.5rem 1.6rem; border: 1px solid var(--dark-4); border-radius: 14px; background: rgba(255,255,255,0.015); transition: border-color .2s; }
+    .stack-card:hover { border-color: var(--brand-dim); }
+    .stack-card.hi { border-color: var(--brand-dim); background: var(--brand-faint); }
+    .stack-card.py { border-color: var(--python-dim); background: var(--python-faint); }
+    .stack-logo  { font-size: 1.3rem; margin-bottom: .7rem; display: block; }
+    .stack-name  { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; color: var(--white); margin-bottom: .25rem; }
+    .stack-type  { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .1em; color: var(--brand); margin-bottom: .45rem; }
+    .stack-card.py .stack-type { color: var(--python); }
+    .stack-desc  { font-size: .8rem; color: var(--slate-light); line-height: 1.6; }
+    .stack-libs  { margin-top: .6rem; }
+    .stack-lib   { font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--slate); display: block; line-height: 1.7; }
+
+    /* ─── TOKEN BAR ─── */
+    .metric-bar { display: flex; gap: 1.2rem; align-items: stretch; margin-bottom: 2.5rem; }
+    .met-item { flex: 1; padding: 1.2rem 1.4rem; border-radius: 12px; border: 1px solid var(--dark-4); text-align: center; }
+    .met-item.bad  { border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+    .met-item.good { border-color: var(--shared-dim); background: var(--shared-faint); }
+    .met-item.neu  { border-color: var(--brand-dim); background: var(--brand-faint); }
+    .met-label { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: .5rem; }
+    .met-item.bad  .met-label { color: var(--red); }
+    .met-item.good .met-label { color: var(--green); }
+    .met-item.neu  .met-label { color: var(--brand); }
+    .met-num { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 2rem; letter-spacing: -.04em; }
+    .met-item.bad  .met-num { color: var(--red); }
+    .met-item.good .met-num { color: var(--green); }
+    .met-item.neu  .met-num { color: var(--brand); }
+    .met-desc { font-size: .78rem; color: var(--slate-light); margin-top: .3rem; line-height: 1.5; }
+    .met-arrow { display: flex; align-items: center; color: var(--slate); font-size: 1.2rem; }
+
+    /* ─── TIMELINE ─── */
+    .tl { position: relative; padding-left: 2.5rem; }
+    .tl::before { content: ''; position: absolute; left: .55rem; top: 0; bottom: 0; width: 1px; background: var(--dark-4); }
+    .tlitem { position: relative; margin-bottom: 3rem; }
+    .tlitem::before { content: ''; position: absolute; left: -2.1rem; top: .3rem; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 10px rgba(14,154,167,0.5); }
+    .tlb { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--brand); margin-bottom: .35rem; }
+    .tlt { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--white); margin-bottom: .5rem; }
+    .tld  { font-size: .88rem; color: var(--slate-light); line-height: 1.7; }
+    .tld2 { margin-top: .4rem; font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--violet); }
+    .tl-status { display: inline-flex; align-items: center; gap: .4rem; font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; padding: .2rem .7rem; border-radius: 99px; margin-top: .5rem; }
+    .tl-status.active { background: var(--brand-faint); color: var(--brand); border: 1px solid var(--brand-dim); }
+    .tl-status.planned { background: rgba(240,165,0,0.07); color: var(--python); border: 1px solid var(--python-dim); }
+
+    /* ─── PROFILE CARDS ─── */
+    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; margin-bottom: 2.5rem; }
+    @media(max-width:660px){ .profile-grid { grid-template-columns: 1fr 1fr; } }
+    .pcard { padding: 1.4rem 1.5rem; border: 1px solid var(--dark-4); border-radius: 12px; background: rgba(255,255,255,0.015); transition: border-color .2s; }
+    .pcard:hover { border-color: var(--brand-dim); }
+    .pcard-emoji { font-size: 1.3rem; margin-bottom: .6rem; display: block; }
+    .pcard-name  { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .9rem; color: var(--white); margin-bottom: .3rem; }
+    .pcard-niche { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .1em; color: var(--brand); margin-bottom: .45rem; }
+    .pcard-desc  { font-size: .78rem; color: var(--slate-light); line-height: 1.55; }
+
+    /* ─── DIVIDER LABEL ─── */
+    .divider-label { display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 2rem; font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--slate); }
+    .divider-label::before, .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--dark-4); }
+
+    /* ─── FOOTER ─── */
+    footer { padding: 3rem 0; border-top: 1px solid var(--grid-line); }
+    .ft-inner { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+    .ft-brand { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.25rem; letter-spacing: -.04em; }
+    .ft-brand span { color: var(--brand); }
+    .ft-meta { font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: var(--slate); text-align: right; line-height: 1.8; }
+  </style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-a"></div>
+<div class="glow-b"></div>
+<div class="glow-c"></div>
+
+<nav>
+  <div>
+    <span class="nav-logo">FBR<span>·</span>News</span>
+    <span class="nav-badge">v1.0 · CONCEITO</span>
+  </div>
+  <ul class="nav-links">
+    <a href="#visao">// visão</a>
+    <a href="#arquitetura">// arquitetura</a>
+    <a href="#fontes">// fontes</a>
+    <a href="#perfis">// perfis</a>
+    <a href="#stack">// stack</a>
+    <a href="#roadmap">// roadmap</a>
+  </ul>
+</nav>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section id="visao" class="hero">
+    <div class="hero-eyebrow">
+      <div class="pulse-dot"></div>
+      Grupo de Mídia · Plataforma Editorial Multi-Tenant
+    </div>
+    <h1 class="hero-title">
+      FBR<span class="accent">·</span>News<br>
+      <span class="muted">Tendências em</span><br>
+      <span class="muted">tempo real</span>
+    </h1>
+    <p class="hero-sub">
+      Plataforma <strong>multi-tenant</strong> para automação de descoberta de tendências e geração de ideias editoriais. Scraping inteligente de múltiplas fontes, <strong>perfis customizáveis por nicho</strong> e isolamento total de dados entre publicações via Row Level Security.
+    </p>
+    <div class="hero-pills">
+      <div class="hpill"><div class="dot d-t"></div>Next.js + Supabase</div>
+      <div class="hpill"><div class="dot d-p"></div>Python Scraping Services</div>
+      <div class="hpill"><div class="dot d-s"></div>Multi-Tenant RLS</div>
+      <div class="hpill"><div class="dot d-v"></div>Perfis Customizáveis</div>
+    </div>
+  </section>
+
+  <!-- PROBLEMA / SOLUÇÃO -->
+  <section id="problema" class="fade-in">
+    <div class="stag">// contexto & motivação</div>
+    <h2 class="stitle">O Problema Editorial</h2>
+    <p class="slead">
+      Grupos de mídia com dezenas de publicações enfrentam o desafio de manter cada veículo abastecido com pautas <strong>relevantes e oportunas</strong>. A pesquisa manual de tendências é fragmentada, demorada e impossível de escalar.
+    </p>
+
+    <div class="metric-bar">
+      <div class="met-item bad">
+        <div class="met-label">Antes</div>
+        <div class="met-num">3–4h</div>
+        <div class="met-desc">por dia em pesquisa manual de tendências por editor</div>
+      </div>
+      <div class="met-arrow">→</div>
+      <div class="met-item good">
+        <div class="met-label">Depois</div>
+        <div class="met-num">&lt;15min</div>
+        <div class="met-desc">revisão de pautas geradas automaticamente</div>
+      </div>
+      <div class="met-arrow">=</div>
+      <div class="met-item neu">
+        <div class="met-label">Ganho</div>
+        <div class="met-num">∞×</div>
+        <div class="met-desc">escala — 1 sistema para todas as publicações</div>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="icard hi">
+        <span class="icard-icon">📰</span>
+        <div class="icard-title">Dezenas de Publicações</div>
+        <div class="icard-body">Revistas, portais, blogs e canais com nichos distintos — gastronomia, tecnologia, finanças, saúde, estilo de vida — cada um exigindo fontes e temas diferentes.</div>
+      </div>
+      <div class="icard">
+        <span class="icard-icon">🔍</span>
+        <div class="icard-title">Fontes Dispersas</div>
+        <div class="icard-body">Jornalistas monitoram Google Trends, Reddit, Twitter, portais concorrentes e dados governamentais de forma manual e descoordenada, sem histórico nem padronização.</div>
+      </div>
+      <div class="icard">
+        <span class="icard-icon">⚡</span>
+        <div class="icard-title">Janela de Oportunidade</div>
+        <div class="icard-body">Tendências têm vida curta. Uma pauta relevante hoje pode ser irrelevante amanhã. A velocidade de identificação é um diferencial competitivo crítico.</div>
+      </div>
+      <div class="icard">
+        <span class="icard-icon">🧩</span>
+        <div class="icard-title">Zero Reutilização</div>
+        <div class="icard-body">Descobertas de uma publicação não chegam às outras. O conhecimento editorial é siloed por redação, perdendo oportunidades de cobertura cruzada.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARQUITETURA -->
+  <section id="arquitetura" class="fade-in">
+    <div class="stag">// arquitetura do sistema</div>
+    <h2 class="stitle">Arquitetura Híbrida</h2>
+    <p class="slead">
+      <strong>Next.js</strong> concentra interface e camada de API. <strong>Serviços Python</strong> independentes gerenciam scraping de forma assíncrona. Supabase com RLS garante isolamento total entre tenants.
+    </p>
+
+    <div class="arch-split">
+      <!-- FRONTEND -->
+      <div class="arch-panel frontend">
+        <div class="arch-header">
+          <div class="arch-icon">🌐</div>
+          <div>
+            <div class="arch-title">Frontend & API Layer</div>
+            <div class="arch-sub">NEXT.JS · REACT · SUPABASE</div>
+          </div>
+        </div>
+        <div class="arch-items">
+          <div class="arch-item">
+            <div class="arch-item-icon">⚛️</div>
+            <div>
+              <div class="arch-item-name">Next.js 14+</div>
+              <div class="arch-item-desc">Aplicação principal com SSR/CSR híbrido, App Router e rotas de API para comunicação com serviços Python.</div>
+              <span class="arch-item-tag tag-api">API ROUTES</span>
+            </div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-icon">🎨</div>
+            <div>
+              <div class="arch-item-name">Tailwind CSS</div>
+              <div class="arch-item-desc">Design system consistente e responsivo com componentes reutilizáveis por todas as publicações do grupo.</div>
+            </div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-icon">🗄️</div>
+            <div>
+              <div class="arch-item-name">Supabase</div>
+              <div class="arch-item-desc">PostgreSQL + Auth + Storage + Realtime. Row Level Security para isolamento de dados entre tenants sem overhead de infraestrutura.</div>
+              <span class="arch-item-tag tag-rls">RLS POLICIES</span>
+            </div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-icon">🔑</div>
+            <div>
+              <div class="arch-item-name">Auth Multi-Tenant</div>
+              <div class="arch-item-desc">Cada publicação tem seu próprio espaço isolado. Editores acessam apenas os dados do seu veículo.</div>
+              <span class="arch-item-tag tag-rls">TENANT ISOLATION</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PYTHON SERVICES -->
+      <div class="arch-panel python">
+        <div class="arch-header">
+          <div class="arch-icon">🐍</div>
+          <div>
+            <div class="arch-title">Python Scraping Services</div>
+            <div class="arch-sub">MICROSERVIÇOS · DESACOPLADOS</div>
+          </div>
+        </div>
+        <div class="arch-items">
+          <div class="arch-item">
+            <div class="arch-item-icon">📈</div>
+            <div>
+              <div class="arch-item-name">pytrends</div>
+              <div class="arch-item-desc">Coleta de dados do Google Trends: volume de busca, tópicos relacionados, sazonalidade e comparações geográficas.</div>
+              <span class="arch-item-tag tag-api">GOOGLE API</span>
+            </div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-icon">🤖</div>
+            <div>
+              <div class="arch-item-name">praw</div>
+              <div class="arch-item-desc">Reddit API oficial — posts hot, subreddits por nicho, comentários e métricas de engajamento por tópico.</div>
+              <span class="arch-item-tag tag-api">REDDIT API</span>
+            </div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-icon">📡</div>
+            <div>
+              <div class="arch-item-name">feedparser + Playwright</div>
+              <div class="arch-item-desc">RSS de portais e concorrentes via feedparser. Playwright para scraping de plataformas sem API aberta.</div>
+              <span class="arch-item-tag tag-scrap">WEB SCRAPING</span>
+            </div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-icon">⏰</div>
+            <div>
+              <div class="arch-item-name">APScheduler</div>
+              <div class="arch-item-desc">Jobs agendados por tenant e fonte. Frequência configurável: horária, diária ou sob demanda por publicação.</div>
+              <span class="arch-item-tag tag-sched">SCHEDULER</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-block" style="margin-top:2rem;">
+      <div class="info-icon">🔒</div>
+      <div>
+        <div class="info-title">Isolamento Multi-Tenant via Row Level Security</div>
+        <div class="info-body">Nenhum dado de uma publicação é acessível por outra. <strong>Políticas RLS do Supabase</strong> garantem que cada tenant enxergue exclusivamente suas pautas, perfis de scraping e histórico de tendências — sem necessidade de bancos separados.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FONTES DE DADOS -->
+  <section id="fontes" class="fade-in">
+    <div class="stag stag-py">// coleta de dados</div>
+    <h2 class="stitle">Fontes & Estratégia de Scraping</h2>
+    <p class="slead">
+      Seis categorias de fontes mapeadas. <strong>APIs oficiais têm prioridade</strong> para garantir conformidade legal e estabilidade. Web scraping é estratégia complementar para fontes sem API pública.
+    </p>
+
+    <table class="src-table">
+      <thead>
+        <tr>
+          <th>Fonte</th>
+          <th>Biblioteca</th>
+          <th>Dados Coletados</th>
+          <th>Tipo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="src-name">Google Trends</span></td>
+          <td><span class="src-lib">pytrends</span></td>
+          <td>Volume de busca, tópicos relacionados, sazonalidade regional</td>
+          <td><span class="src-badge badge-api">API OFICIAL</span></td>
+        </tr>
+        <tr>
+          <td><span class="src-name">Reddit</span></td>
+          <td><span class="src-lib">praw</span></td>
+          <td>Posts hot, subreddits por nicho, engajamento orgânico, perguntas da audiência</td>
+          <td><span class="src-badge badge-api">API OFICIAL</span></td>
+        </tr>
+        <tr>
+          <td><span class="src-name">RSS / News Feeds</span></td>
+          <td><span class="src-lib">feedparser</span></td>
+          <td>Publicações de portais de notícias, blogs especializados e concorrentes</td>
+          <td><span class="src-badge badge-free">LIVRE</span></td>
+        </tr>
+        <tr>
+          <td><span class="src-name">Redes Sociais</span></td>
+          <td><span class="src-lib">Playwright</span></td>
+          <td>Hashtags emergentes, posts virais, métricas de engajamento público</td>
+          <td><span class="src-badge badge-scrape">SCRAPING</span></td>
+        </tr>
+        <tr>
+          <td><span class="src-name">Dados Governamentais</span></td>
+          <td><span class="src-lib">requests + feedparser</span></td>
+          <td>Estatísticas públicas, boletins oficiais, releases institucionais</td>
+          <td><span class="src-badge badge-api">API OFICIAL</span></td>
+        </tr>
+        <tr>
+          <td><span class="src-name">Conteúdo Concorrente</span></td>
+          <td><span class="src-lib">Playwright</span></td>
+          <td>Cobertura editorial de portais similares, temas em destaque, frequência de publicação</td>
+          <td><span class="src-badge badge-scrape">SCRAPING</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="config-block">
+      <div class="config-header"><span>scraping_profile_schema · exemplo: revista_gastronomia</span></div>
+      <div class="config-body">
+        <pre class="config-code"><span class="cmt">// Cada publicação define seu próprio perfil de scraping</span>
+<span class="key">tenant_id</span>:       <span class="val">"revista-gastronomia"</span>
+<span class="key">sources</span>: {
+  <span class="py">google_trends</span>:  { <span class="key">keywords</span>: [<span class="val">"receitas", "restaurantes", "gastronomia"</span>], <span class="key">geo</span>: <span class="val">"BR"</span> },
+  <span class="py">reddit</span>:         { <span class="key">subreddits</span>: [<span class="val">"brasil", "gastronomia", "culinaria"</span>], <span class="key">sort</span>: <span class="val">"hot"</span> },
+  <span class="py">rss</span>:            { <span class="key">feeds</span>: [<span class="val">"theguardian.com/food", "epicurious.com/feed"</span>] },
+  <span class="py">competitors</span>:    { <span class="key">domains</span>: [<span class="val">"veja.abril.com.br/tag/gastronomia"</span>] }
+}
+<span class="key">schedule</span>: {
+  <span class="key">google_trends</span>: <span class="val">"0 */6 * * *"</span>,   <span class="cmt">// a cada 6h</span>
+  <span class="key">reddit</span>:        <span class="val">"0 */2 * * *"</span>,   <span class="cmt">// a cada 2h</span>
+  <span class="key">rss</span>:           <span class="val">"*/30 * * * *"</span>    <span class="cmt">// a cada 30min</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="info-block warn">
+      <div class="info-icon">⚖️</div>
+      <div>
+        <div class="info-title">Compliance-First — APIs Oficiais como Prioridade</div>
+        <div class="info-body">Google Trends e Reddit têm APIs oficiais gratuitas — <strong>sempre usar antes de recorrer a scraping</strong>. Playwright é reservado para fontes sem alternativa. Scraping é auditado por publicação e requer aprovação antes de ativar em novos domínios.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERFIS EDITORIAIS -->
+  <section id="perfis" class="fade-in">
+    <div class="stag stag-sh">// personalização por tenant</div>
+    <h2 class="stitle">Perfis Editoriais Customizáveis</h2>
+    <p class="slead">
+      Cada publicação configura <strong>suas próprias fontes, tópicos e frequência</strong>. Uma revista de saúde monitora fontes radicalmente diferentes de um portal tech — o sistema respeita esse contexto.
+    </p>
+
+    <div class="profile-grid">
+      <div class="pcard">
+        <span class="pcard-emoji">🍕</span>
+        <div class="pcard-name">Gastronomia & Lifestyle</div>
+        <div class="pcard-niche">NICHO · FOOD & BEVERAGE</div>
+        <div class="pcard-desc">Trends de receitas, restaurantes em alta, chefs, ingredientes da estação. Foco em Instagram e Pinterest scraping.</div>
+      </div>
+      <div class="pcard">
+        <span class="pcard-emoji">💻</span>
+        <div class="pcard-name">Tecnologia & Startups</div>
+        <div class="pcard-niche">NICHO · TECH & INNOVATION</div>
+        <div class="pcard-desc">Hacker News RSS, subreddits de programação, lançamentos de produtos, rodadas de investimento e IPOs.</div>
+      </div>
+      <div class="pcard">
+        <span class="pcard-emoji">💰</span>
+        <div class="pcard-name">Finanças Pessoais</div>
+        <div class="pcard-niche">NICHO · PERSONAL FINANCE</div>
+        <div class="pcard-desc">Dados do Banco Central, IBGE, Reddit r/investimentos, Tesouro Direto, Selic, câmbio e tendências de consumo.</div>
+      </div>
+      <div class="pcard">
+        <span class="pcard-emoji">🏋️</span>
+        <div class="pcard-name">Saúde & Bem-Estar</div>
+        <div class="pcard-niche">NICHO · HEALTH & FITNESS</div>
+        <div class="pcard-desc">PubMed RSS, Ministério da Saúde, subreddits de fitness, tendências de suplementos e dietas no Google Trends.</div>
+      </div>
+      <div class="pcard">
+        <span class="pcard-emoji">🎬</span>
+        <div class="pcard-name">Entretenimento & Pop</div>
+        <div class="pcard-niche">NICHO · ENTERTAINMENT</div>
+        <div class="pcard-desc">Trending topics por região, lançamentos de streaming, Reddit r/brasil, YouTube Trends API e eventos culturais.</div>
+      </div>
+      <div class="pcard">
+        <span class="pcard-emoji">🏠</span>
+        <div class="pcard-name">Imóveis & Decoração</div>
+        <div class="pcard-niche">NICHO · REAL ESTATE & DESIGN</div>
+        <div class="pcard-desc">Índices FipeZap, Pinterest trends, Houzz RSS, lançamentos de construtoras e tendências de arquitetura.</div>
+      </div>
+    </div>
+
+    <div class="divider-label">workspace compartilhada — recursos centralizados</div>
+
+    <div class="shared-grid">
+      <div class="swd">
+        <span class="swd-icon">📋</span>
+        <div class="swd-name">Dashboard de Pautas</div>
+        <div class="swd-tag">INTERFACE · EDITORIAL</div>
+        <div class="swd-desc">Visualização de tendências por publicação. Filtros por fonte, relevância e janela temporal.</div>
+      </div>
+      <div class="swd">
+        <span class="swd-icon">🔔</span>
+        <div class="swd-name">Alertas em Tempo Real</div>
+        <div class="swd-tag">SUPABASE · REALTIME</div>
+        <div class="swd-desc">Notificações quando novas tendências superam threshold de relevância configurado por publicação.</div>
+      </div>
+      <div class="swd">
+        <span class="swd-icon">📊</span>
+        <div class="swd-name">Histórico & Analytics</div>
+        <div class="swd-tag">DADOS · TEMPORAL</div>
+        <div class="swd-desc">Séries históricas de tendências por nicho. Correlações entre temas e performance de conteúdo.</div>
+      </div>
+      <div class="swd">
+        <span class="swd-icon">⚙️</span>
+        <div class="swd-name">Gerenciador de Perfis</div>
+        <div class="swd-tag">ADMIN · CONFIGURAÇÃO</div>
+        <div class="swd-desc">Interface para editores configurarem fontes, palavras-chave e frequência sem necessidade de código.</div>
+      </div>
+      <div class="swd">
+        <span class="swd-icon">🗂️</span>
+        <div class="swd-name">Banco de Pautas</div>
+        <div class="swd-tag">STORAGE · SUPABASE</div>
+        <div class="swd-desc">Repositório de pautas geradas com status: nova, em produção, publicada, descartada.</div>
+      </div>
+      <div class="swd">
+        <span class="swd-icon">🤝</span>
+        <div class="swd-name">Cross-Publicação</div>
+        <div class="swd-tag">COLABORAÇÃO · OPCIONAL</div>
+        <div class="swd-desc">Tendências marcadas como relevantes para múltiplos veículos — coordenação editorial entre equipes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK TÉCNICA -->
+  <section id="stack" class="fade-in">
+    <div class="stag stag-vio">// tecnologias</div>
+    <h2 class="stitle">Stack Tecnológica</h2>
+    <p class="slead">
+      Cada camada da plataforma foi escolhida para <strong>maximizar velocidade de desenvolvimento</strong>, escalabilidade e custo operacional reduzido — especialmente no crescimento de novos tenants.
+    </p>
+
+    <div class="stack-grid">
+      <div class="stack-card hi">
+        <span class="stack-logo">⚛️</span>
+        <div class="stack-name">Next.js + React</div>
+        <div class="stack-type">FRONTEND · APP LAYER</div>
+        <div class="stack-desc">Framework principal com App Router, Server Components e API Routes. Renderização híbrida para performance editorial.</div>
+        <div class="stack-libs">
+          <span class="stack-lib">next@14+</span>
+          <span class="stack-lib">react@18+</span>
+          <span class="stack-lib">tailwindcss@3</span>
+        </div>
+      </div>
+      <div class="stack-card hi">
+        <span class="stack-logo">🗄️</span>
+        <div class="stack-name">Supabase</div>
+        <div class="stack-type">DATABASE · AUTH · REALTIME</div>
+        <div class="stack-desc">PostgreSQL gerenciado + Auth + RLS + Realtime + Storage. Backbone de dados da plataforma sem overhead de infraestrutura.</div>
+        <div class="stack-libs">
+          <span class="stack-lib">@supabase/supabase-js</span>
+          <span class="stack-lib">@supabase/ssr</span>
+          <span class="stack-lib">postgres (direto via pgvector)</span>
+        </div>
+      </div>
+      <div class="stack-card py">
+        <span class="stack-logo">📈</span>
+        <div class="stack-name">pytrends + praw</div>
+        <div class="stack-type">PYTHON · APIS OFICIAIS</div>
+        <div class="stack-desc">Coleta de dados do Google Trends e Reddit via APIs oficiais. Zero risco legal, alta estabilidade, dados confiáveis.</div>
+        <div class="stack-libs">
+          <span class="stack-lib">pytrends==4.9.2</span>
+          <span class="stack-lib">praw==7.7.1</span>
+          <span class="stack-lib">feedparser==6.0.11</span>
+        </div>
+      </div>
+      <div class="stack-card py">
+        <span class="stack-logo">🎭</span>
+        <div class="stack-name">Playwright + APScheduler</div>
+        <div class="stack-type">PYTHON · SCRAPING · JOBS</div>
+        <div class="stack-desc">Browser automation para fontes sem API. APScheduler orquestra todos os jobs de coleta com configuração por tenant.</div>
+        <div class="stack-libs">
+          <span class="stack-lib">playwright==1.43+</span>
+          <span class="stack-lib">apscheduler==3.10+</span>
+          <span class="stack-lib">httpx + beautifulsoup4</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-block">
+      <div class="config-header"><span>deployment_options · serviços python</span></div>
+      <div class="config-body">
+        <pre class="config-code"><span class="cmt">// Opção A — Docker + Railway/Render (recomendado para iniciar)</span>
+<span class="key">services</span>:
+  <span class="py">scraper-api</span>:
+    <span class="key">build</span>: <span class="val">./python-services</span>
+    <span class="key">environment</span>:
+      <span class="key">SUPABASE_URL</span>: <span class="val">${SUPABASE_URL}</span>
+      <span class="key">SUPABASE_SERVICE_KEY</span>: <span class="val">${SUPABASE_SERVICE_KEY}</span>
+    <span class="key">deploy</span>: { <span class="key">replicas</span>: <span class="num">2</span> }
+
+<span class="cmt">// Opção B — Celery Workers (para escala de 20+ tenants)</span>
+<span class="key">celery</span>:
+  <span class="key">broker</span>: <span class="val">"redis://redis:6379/0"</span>
+  <span class="key">worker_concurrency</span>: <span class="num">8</span>
+  <span class="key">task_routes</span>:
+    <span class="py">scraper.tasks.google_trends</span>: <span class="val">"queue-trends"</span>
+    <span class="py">scraper.tasks.reddit</span>:        <span class="val">"queue-social"</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section id="roadmap" class="fade-in">
+    <div class="stag">// cronograma</div>
+    <h2 class="stitle">Roadmap de Desenvolvimento</h2>
+    <p class="slead">
+      Quatro fases sequenciais com entregas incrementais. <strong>Valor entregue desde a Fase 1</strong> — cada sprint produz algo utilizável pela redação.
+    </p>
+
+    <div class="tl">
+      <div class="tlitem">
+        <div class="tlb">Fase 1 · Semanas 1–2</div>
+        <div class="tlt">Fundação — Supabase + Auth + Next.js</div>
+        <div class="tld">Setup do projeto Next.js com App Router. Modelagem do banco Supabase com schema multi-tenant. Implementação das políticas RLS. Sistema de auth com Supabase Auth e seleção de publicação no login.</div>
+        <div class="tld2">Entregável: Dashboard vazio mas funcional com auth multi-tenant operando</div>
+        <div><span class="tl-status active">● Em Desenvolvimento</span></div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 2 · Semanas 3–4</div>
+        <div class="tlt">Scraping Core — Google Trends + Reddit + RSS</div>
+        <div class="tld">Serviços Python com pytrends, praw e feedparser. Agendamento via APScheduler com configuração por tenant. Pipeline de normalização e armazenamento no Supabase. Primeiras pautas automatizadas chegando ao dashboard.</div>
+        <div class="tld2">Entregável: Fluxo completo — scraping → banco → dashboard, para 2 publicações piloto</div>
+        <div><span class="tl-status planned">○ Planejado</span></div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 3 · Semanas 5–6</div>
+        <div class="tlt">Perfis de Scraping + Interface Editorial</div>
+        <div class="tld">UI para editores configurarem perfis de scraping sem código. Filtros avançados no dashboard por fonte, relevância e data. Sistema de status de pauta (nova, em produção, publicada, descartada). Alertas em tempo real via Supabase Realtime.</div>
+        <div class="tld2">Entregável: Editores autônomos — configuram e gerenciam suas próprias pautas</div>
+        <div><span class="tl-status planned">○ Planejado</span></div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 4 · Semanas 7–8</div>
+        <div class="tlt">Escala, Playwright & Inteligência Editorial</div>
+        <div class="tld">Playwright para redes sociais e fontes sem API. Containerização Docker dos serviços Python. Clustering automático de temas similares. Score de relevância por nicho. Cross-publicação opcional para tendências multi-veículo. Deploy em produção para todos os tenants do grupo.</div>
+        <div class="tld2">Entregável: Plataforma completa em produção para todo o grupo de mídia</div>
+        <div><span class="tl-status planned">○ Planejado</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="ft-inner">
+      <div>
+        <div class="ft-brand">FBR<span>·</span>News</div>
+        <div style="font-size:.78rem;color:var(--slate);margin-top:.35rem;font-family:'Inter',sans-serif;font-weight:300;">Sistema Inteligente de Geração Editorial Multi-Tenant</div>
+      </div>
+      <div class="ft-meta">
+        <div>Conceito v1.0</div>
+        <div>Grupo de Mídia · Março 2026</div>
+        <div style="opacity:.4;margin-top:.3rem">Confidencial · Documento Conceitual</div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

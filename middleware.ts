@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
         path.startsWith('/_next') ||
         path.startsWith('/api/auth/callback') ||
         path.startsWith('/fbrapps/') ||
+        path.startsWith('/business/') ||
         /\.(svg|png|jpg|jpeg|gif|webp|ico|html|css|js|woff|woff2|ttf)$/.test(path)
     ) {
         return NextResponse.next()
