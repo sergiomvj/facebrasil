@@ -24,15 +24,14 @@ import {
     BrainCircuit,
     Layers,
     HelpCircle,
-    MessageCircle,
     LifeBuoy
 } from 'lucide-react';
-import LeonChat from './LeonChat';
+import AdminHelpCenter from './AdminHelpCenter';
 
 interface NavItem {
     name: string;
     href?: string;
-    action?: 'leonChat';
+    action?: 'helpCenter';
     isExternal?: boolean;
     icon: React.ComponentType<{ className?: string }>;
     allowedRoles?: string[]; // Arrays of roles allowed, undefined means all logged in users who reach the panel
@@ -57,8 +56,7 @@ const navItems: NavItem[] = [
     { name: 'Conversor de Imagens', href: '/admin/tools/image-converter', icon: AdImageIcon, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Configurações', href: '/admin/settings', icon: Settings, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Sistemas FBR', href: '/admin/fbrapps', icon: Layers, allowedRoles: ['ADMIN'] },
-    { name: 'Ajuda', href: '/admin/help', icon: HelpCircle },
-    { name: 'Ajuda do Leon', action: 'leonChat', icon: MessageCircle },
+    { name: 'Preciso de Ajuda', action: 'helpCenter', icon: HelpCircle },
     { name: 'Suporte Dev', href: 'https://t.me/ChiaraGarcia_bot', isExternal: true, icon: LifeBuoy },
 ];
 
@@ -69,7 +67,7 @@ export default function AdminSidebar() {
     const { user, profile } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isLeonOpen, setIsLeonOpen] = useState(false);
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
 
     return (
         <>
@@ -134,12 +132,12 @@ export default function AdminSidebar() {
                             
                             const isActive = (!item.isExternal && fullHref && (pathname === fullHref || (item.href !== '/admin' && pathname.startsWith(fullHref))));
 
-                            if (item.action === 'leonChat') {
+                            if (item.action === 'helpCenter') {
                                 return (
                                     <button
                                         key={item.name}
                                         onClick={() => {
-                                            setIsLeonOpen(true);
+                                            setIsHelpOpen(true);
                                             setIsOpen(false);
                                         }}
                                         className={`
@@ -231,7 +229,7 @@ export default function AdminSidebar() {
                     </div>
                 </div>
             </aside>
-            <LeonChat isOpen={isLeonOpen} onClose={() => setIsLeonOpen(false)} />
+            <AdminHelpCenter isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
         </>
     );
 }

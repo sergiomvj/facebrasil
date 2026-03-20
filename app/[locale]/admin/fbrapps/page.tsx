@@ -15,7 +15,8 @@ import {
     Lock,
     Layers,
     DollarSign,
-    Code2
+    Code2,
+    Bot
 } from 'lucide-react';
 
 interface FBRSystem {
@@ -162,6 +163,18 @@ const SYSTEMS: FBRSystem[] = [
         colorDim: 'rgba(16,185,129,0.15)',
         status: '50%',
         tags: ['Financeiro', 'Conciliação', 'Auditoria'],
+        version: 'v1.0',
+    },
+    {
+        id: 'agents',
+        name: 'FBR-AGENTS',
+        description: 'Orquestrador de agentes autônomos e assistentes virtuais. Automatiza suporte, operações de campo e processos de IA com múltiplos modelos e ferramentas personalizadas.',
+        folder: 'agents',
+        icon: Bot,
+        color: '#6366F1',
+        colorDim: 'rgba(99,102,241,0.15)',
+        status: '100%',
+        tags: ['IA Autônoma', 'Orquestração', 'Assistentes'],
         version: 'v1.0',
     },
 ];

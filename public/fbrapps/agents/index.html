@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FBR·Agents — Sistema de Gestão de Agentes Virtuais v3.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:        #6366F1;
+      --brand-dim:    rgba(99,102,241,0.18);
+      --brand-faint:  rgba(99,102,241,0.06);
+      --accent:       #22D3EE;
+      --accent-dim:   rgba(34,211,238,0.18);
+      --accent-faint: rgba(34,211,238,0.05);
+      --mem:          #A78BFA;
+      --mem-dim:      rgba(167,139,250,0.18);
+      --mem-faint:    rgba(167,139,250,0.06);
+      --shared:       #34D399;
+      --shared-dim:   rgba(52,211,153,0.18);
+      --shared-faint: rgba(52,211,153,0.05);
+      --hr:           #F472B6;
+      --hr-dim:       rgba(244,114,182,0.18);
+      --hr-faint:     rgba(244,114,182,0.05);
+      --deleg:        #FB923C;
+      --deleg-dim:    rgba(251,146,60,0.18);
+      --deleg-faint:  rgba(251,146,60,0.05);
+      --dark:         #07090F;
+      --dark-2:       #0C0F1C;
+      --dark-3:       #111528;
+      --dark-4:       #191E36;
+      --dark-5:       #222845;
+      --slate:        #7278A0;
+      --slate-light:  #A0A8CC;
+      --white:        #EDF0FF;
+      --green:        #34D399;
+      --red:          #F87171;
+      --amber:        #FBBF24;
+      --violet:       #A78BFA;
+      --pink:         #F472B6;
+      --grid-line:    rgba(99,102,241,0.05);
+      --gutter:       2rem;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--dark); color: var(--white);
+      font-family: 'Inter', sans-serif; font-size: 15px;
+      line-height: 1.75; overflow-x: hidden;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+    .glow-a { position: fixed; top: -25vh; left: -15vw; width: 80vw; height: 80vh; background: radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+    .glow-b { position: fixed; bottom: -25vh; right: -15vw; width: 80vw; height: 80vh; background: radial-gradient(ellipse, rgba(34,211,238,0.06) 0%, transparent 65%); pointer-events: none; z-index: 0; }
+    .glow-c { position: fixed; top: 40vh; left: 50%; width: 60vw; height: 60vh; transform: translateX(-50%); background: radial-gradient(ellipse, rgba(244,114,182,0.04) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+
+    .wrapper { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 0 var(--gutter); }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem; background: rgba(7,9,15,0.88);
+      backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid var(--grid-line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.05rem; letter-spacing: -.04em; color: var(--white); }
+    .nav-logo span { color: var(--brand); }
+    .nav-badge { font-family: 'JetBrains Mono', monospace; font-size: .55rem; font-weight: 500; letter-spacing: .12em; color: var(--brand); background: var(--brand-faint); border: 1px solid rgba(99,102,241,0.22); padding: .15rem .55rem; border-radius: 99px; margin-left: .6rem; vertical-align: middle; }
+    .nav-links { display: flex; gap: 1.4rem; list-style: none; flex-wrap: wrap; }
+    .nav-links a { font-size: .68rem; color: var(--slate); text-decoration: none; transition: color .2s; font-family: 'JetBrains Mono', monospace; }
+    .nav-links a:hover { color: var(--white); }
+    @media(max-width:720px){ .nav-links { display: none; } }
+
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 9rem 0 7rem; border-bottom: 1px solid var(--grid-line); }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); border: 1px solid rgba(99,102,241,0.22); background: var(--brand-faint); padding: .38rem 1rem; border-radius: 99px; margin-bottom: 2.8rem; animation: fadeUp .7s ease both; }
+    .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 8px var(--brand); animation: pulsate 2.2s infinite; }
+    @keyframes pulsate { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .hero-title { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: clamp(3rem, 9vw, 5.8rem); line-height: .96; letter-spacing: -.04em; color: var(--white); animation: fadeUp .8s .1s ease both; }
+    .hero-title .accent { color: var(--brand); }
+    .hero-title .muted { color: var(--slate); }
+    .hero-sub { margin-top: 2.2rem; font-size: 1.05rem; color: var(--slate-light); max-width: 640px; font-weight: 300; line-height: 1.9; animation: fadeUp .8s .2s ease both; }
+    .hero-sub strong { color: var(--white); font-weight: 500; }
+    .hero-pills { margin-top: 3rem; display: flex; flex-wrap: wrap; gap: .9rem; animation: fadeUp .8s .3s ease both; }
+    .hpill { display: flex; align-items: center; gap: .5rem; font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--slate); padding: .42rem 1rem; border: 1px solid var(--dark-4); border-radius: 8px; background: rgba(255,255,255,0.018); }
+    .hpill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .d-v { background: var(--brand); box-shadow: 0 0 6px var(--brand); }
+    .d-c { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .d-m { background: var(--mem); box-shadow: 0 0 6px var(--mem); }
+    .d-g { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .d-hr { background: var(--hr); box-shadow: 0 0 6px var(--hr); }
+    .d-dl { background: var(--deleg); box-shadow: 0 0 6px var(--deleg); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+    section { padding: 6.5rem 0; border-bottom: 1px solid var(--grid-line); }
+    .stag { font-family: 'JetBrains Mono', monospace; font-size: .63rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand); margin-bottom: 1rem; }
+    .stag-mem { color: var(--mem); }
+    .stag-shared { color: var(--shared); }
+    .stag-hr { color: var(--hr); }
+    .stag-deleg { color: var(--deleg); }
+    .stitle { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.1; letter-spacing: -.03em; color: var(--white); margin-bottom: 1.1rem; }
+    .slead { font-size: .97rem; color: var(--slate-light); max-width: 640px; font-weight: 300; margin-bottom: 3.5rem; line-height: 1.85; }
+    .slead strong { color: var(--white); font-weight: 500; }
+
+    .fade-in { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    /* ─── HIERARCHY ─── */
+    .hier-tree {
+      display: flex; flex-direction: column; gap: 0;
+      margin-bottom: 3rem; position: relative;
+    }
+    .hier-level {
+      display: flex; align-items: stretch;
+      border-radius: 14px; overflow: hidden;
+      border: 1px solid var(--dark-4);
+      margin-bottom: .5rem;
+      transition: border-color .2s;
+    }
+    .hier-level:hover { border-color: rgba(99,102,241,0.2); }
+    .hier-tab {
+      width: 7px; flex-shrink: 0;
+    }
+    .hier-level.director  .hier-tab { background: var(--violet); }
+    .hier-level.manager   .hier-tab { background: var(--brand); }
+    .hier-level.executor  .hier-tab { background: var(--green); }
+    .hier-level.auxiliary .hier-tab { background: var(--amber); }
+    .hier-body {
+      flex: 1; padding: 1.4rem 1.8rem;
+      display: grid; grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 1.2rem; align-items: start;
+    }
+    @media(max-width:700px){ .hier-body { grid-template-columns: 1fr 1fr; } }
+    .hier-header { display: flex; align-items: center; gap: .7rem; }
+    .hier-chip {
+      font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 500;
+      letter-spacing: .1em; padding: .22rem .7rem; border-radius: 5px;
+      text-transform: uppercase;
+    }
+    .director  .hier-chip { background: rgba(167,139,250,0.15); color: var(--violet); border: 1px solid rgba(167,139,250,0.3); }
+    .manager   .hier-chip { background: var(--brand-faint); color: var(--brand); border: 1px solid var(--brand-dim); }
+    .executor  .hier-chip { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .auxiliary .hier-chip { background: rgba(251,191,36,0.1); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); }
+    .hier-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; color: var(--white); }
+    .hier-col-label { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--slate); margin-bottom: .4rem; }
+    .hier-col-val { font-size: .85rem; color: var(--slate-light); line-height: 1.6; }
+    .hier-col-val strong { color: var(--white); font-weight: 500; }
+    .hier-ctx {
+      font-family: 'JetBrains Mono', monospace; font-size: .75rem;
+      font-weight: 500; padding: .35rem .9rem; border-radius: 6px; white-space: nowrap;
+      align-self: center;
+    }
+    .director  .hier-ctx { background: rgba(167,139,250,0.12); color: var(--violet); }
+    .manager   .hier-ctx { background: var(--brand-faint); color: var(--brand); }
+    .executor  .hier-ctx { background: rgba(52,211,153,0.08); color: var(--green); }
+    .auxiliary .hier-ctx { background: rgba(251,191,36,0.08); color: var(--amber); }
+    .hier-caps { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .2rem; }
+    .cap-pill {
+      font-family: 'JetBrains Mono', monospace; font-size: .6rem;
+      padding: .18rem .6rem; border-radius: 4px; border: 1px solid var(--dark-5);
+      color: var(--slate-light);
+    }
+    .cap-pill.active { border-color: rgba(34,211,238,0.3); color: var(--accent); background: var(--accent-faint); }
+    .cap-pill.deleg  { border-color: rgba(251,146,60,0.3); color: var(--deleg); background: var(--deleg-faint); }
+
+    /* ─── DELEGATION FLOW ─── */
+    .deleg-flow {
+      background: var(--dark-3); border: 1px solid var(--deleg-dim);
+      border-radius: 14px; overflow: hidden; margin-bottom: 2.5rem;
+    }
+    .deleg-header {
+      padding: .85rem 1.6rem; background: var(--deleg-faint);
+      border-bottom: 1px solid var(--deleg-dim);
+      display: flex; align-items: center; gap: .7rem;
+    }
+    .deleg-header-label { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--deleg); letter-spacing: .1em; }
+    .deleg-steps {
+      padding: 1.6rem; display: flex; align-items: stretch; gap: 1rem;
+    }
+    @media(max-width:660px){ .deleg-steps { flex-direction: column; } }
+    .dstep {
+      flex: 1; padding: 1.1rem 1.3rem; border-radius: 10px;
+      border: 1px solid var(--dark-4); background: rgba(255,255,255,0.015);
+    }
+    .dstep.active { border-color: var(--deleg-dim); background: var(--deleg-faint); }
+    .dstep-num { font-family: 'JetBrains Mono', monospace; font-size: .58rem; letter-spacing: .15em; color: var(--deleg); margin-bottom: .35rem; }
+    .dstep-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .9rem; color: var(--white); margin-bottom: .3rem; }
+    .dstep-desc { font-size: .78rem; color: var(--slate-light); line-height: 1.6; }
+    .deleg-arrow { display: flex; align-items: center; color: var(--deleg); font-size: .9rem; padding: 0 .1rem; opacity: .6; }
+
+    /* ─── HR MANAGER ─── */
+    .hr-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 3rem; }
+    @media(max-width:660px){ .hr-modes { grid-template-columns: 1fr; } }
+    .hr-mode {
+      padding: 1.6rem 1.8rem; border-radius: 14px;
+      border: 1px solid var(--dark-4); background: rgba(255,255,255,0.015);
+      transition: border-color .2s, background .2s;
+    }
+    .hr-mode:hover { border-color: var(--hr-dim); background: var(--hr-faint); }
+    .hr-mode.primary { border-color: var(--hr-dim); background: var(--hr-faint); }
+    .hr-mode-label { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--hr); margin-bottom: .6rem; }
+    .hr-mode-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--white); margin-bottom: .5rem; }
+    .hr-mode-desc { font-size: .83rem; color: var(--slate-light); line-height: 1.65; }
+
+    .hr-dims { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+    @media(max-width:580px){ .hr-dims { grid-template-columns: 1fr; } }
+    .hr-dim {
+      padding: 1.4rem 1.6rem; border-radius: 12px;
+      border: 1px solid var(--dark-4); background: rgba(255,255,255,0.015);
+    }
+    .hr-dim-pct { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 2rem; letter-spacing: -.04em; margin-bottom: .2rem; }
+    .hr-dim-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .95rem; color: var(--white); margin-bottom: .35rem; }
+    .hr-dim-desc { font-size: .8rem; color: var(--slate-light); line-height: 1.6; }
+    .hr-dim.assertiv .hr-dim-pct { color: var(--brand); }
+    .hr-dim.learn    .hr-dim-pct { color: var(--mem); }
+    .hr-dim.creat    .hr-dim-pct { color: var(--accent); }
+    .hr-dim.punct    .hr-dim-pct { color: var(--green); }
+
+    .hr-thresholds {
+      display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+    }
+    .hr-thr {
+      flex: 1; min-width: 140px; padding: 1.1rem 1.4rem; border-radius: 10px; text-align: center;
+    }
+    .hr-thr.promote { border: 1px solid rgba(52,211,153,0.3); background: rgba(52,211,153,0.06); }
+    .hr-thr.train   { border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.05); }
+    .hr-thr.demote  { border: 1px solid rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+    .hr-thr-label { font-family: 'JetBrains Mono', monospace; font-size: .58rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: .4rem; }
+    .hr-thr.promote .hr-thr-label { color: var(--green); }
+    .hr-thr.train   .hr-thr-label { color: var(--amber); }
+    .hr-thr.demote  .hr-thr-label { color: var(--red); }
+    .hr-thr-num { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.8rem; letter-spacing: -.04em; }
+    .hr-thr.promote .hr-thr-num { color: var(--green); }
+    .hr-thr.train   .hr-thr-num { color: var(--amber); }
+    .hr-thr.demote  .hr-thr-num { color: var(--red); }
+    .hr-thr-cond { font-size: .76rem; color: var(--slate-light); margin-top: .2rem; line-height: 1.5; }
+
+    /* ─── WORKSPACE SPLIT ─── */
+    .ws-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    @media(max-width:660px){ .ws-split { grid-template-columns: 1fr; } }
+    .ws-panel { border-radius: 18px; overflow: hidden; }
+    .ws-panel.individual { border: 1px solid var(--mem-dim); }
+    .ws-panel.shared { border: 1px solid var(--shared-dim); }
+    .ws-header { padding: 1.2rem 1.6rem; display: flex; align-items: center; gap: .7rem; }
+    .ws-panel.individual .ws-header { background: var(--mem-faint); }
+    .ws-panel.shared .ws-header { background: var(--shared-faint); }
+    .ws-icon { font-size: 1.1rem; }
+    .ws-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; color: var(--white); }
+    .ws-subtitle { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; color: var(--slate); margin-top: .1rem; }
+    .ws-panel.individual .ws-subtitle { color: var(--mem); }
+    .ws-panel.shared .ws-subtitle { color: var(--shared); }
+    .ws-files { padding: .8rem 0; }
+    .ws-file { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1.6rem; border-bottom: 1px solid rgba(99,102,241,0.06); transition: background .2s; }
+    .ws-file:last-child { border-bottom: none; }
+    .ws-file:hover { background: rgba(255,255,255,0.02); }
+    .ws-file-icon { font-size: .9rem; margin-top: .1rem; flex-shrink: 0; }
+    .ws-file-name { font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--accent); margin-bottom: .2rem; }
+    .ws-panel.shared .ws-file-name { color: var(--shared); }
+    .ws-file-desc { font-size: .8rem; color: var(--slate-light); line-height: 1.55; }
+    .ws-file-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: .55rem; letter-spacing: .12em; text-transform: uppercase; padding: .12rem .5rem; border-radius: 4px; margin-top: .3rem; }
+    .tag-perm   { background: rgba(99,102,241,0.12); color: var(--brand); border: 1px solid var(--brand-dim); }
+    .tag-tactic { background: rgba(251,191,36,0.1); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); }
+    .tag-index  { background: rgba(167,139,250,0.1); color: var(--mem); border: 1px solid var(--mem-dim); }
+    .tag-shared { background: rgba(52,211,153,0.1); color: var(--shared); border: 1px solid var(--shared-dim); }
+
+    /* ─── MEMORY FLOW ─── */
+    .mem-flow { display: flex; flex-direction: column; gap: 1rem; }
+    .mf-row { display: flex; align-items: stretch; gap: 1rem; }
+    .mf-step { flex: 1; padding: 1.2rem 1.4rem; border-radius: 12px; border: 1px solid var(--dark-4); background: rgba(255,255,255,0.015); transition: border-color .2s; }
+    .mf-step:hover { border-color: rgba(167,139,250,0.25); }
+    .mf-step.hi { border-color: var(--mem-dim); background: var(--mem-faint); }
+    .mf-num { font-family: 'JetBrains Mono', monospace; font-size: .58rem; letter-spacing: .15em; color: var(--mem); margin-bottom: .4rem; }
+    .mf-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .95rem; color: var(--white); margin-bottom: .35rem; }
+    .mf-desc { font-size: .8rem; color: var(--slate-light); line-height: 1.6; }
+    .mf-arrow { display: flex; align-items: center; color: var(--slate); font-size: .9rem; padding: 0 .2rem; }
+
+    /* ─── CONFIG BLOCKS ─── */
+    .config-block { background: var(--dark-3); border: 1px solid rgba(99,102,241,0.15); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; }
+    .config-header { padding: .8rem 1.4rem; background: var(--brand-faint); border-bottom: 1px solid rgba(99,102,241,0.1); }
+    .config-header span { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--brand); letter-spacing: .1em; }
+    .config-body { padding: 1.2rem 1.4rem; }
+    pre.config-code { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--slate-light); line-height: 1.8; white-space: pre-wrap; }
+    pre.config-code .key { color: var(--accent); }
+    pre.config-code .val { color: var(--green); }
+    pre.config-code .num { color: var(--amber); }
+    pre.config-code .cmt { color: var(--slate); opacity: .7; }
+
+    /* ─── WARN BLOCK ─── */
+    .warn-block { display: flex; gap: 1rem; align-items: flex-start; padding: 1.4rem 1.6rem; border-radius: 12px; border: 1px solid rgba(248,113,113,0.35); background: rgba(248,113,113,0.05); margin-bottom: 3rem; }
+    .warn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: .1rem; }
+    .warn-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .95rem; color: var(--red); margin-bottom: .3rem; }
+    .warn-body { font-size: .85rem; color: var(--slate-light); line-height: 1.65; }
+    .warn-body strong { color: var(--white); }
+
+    /* ─── TOKEN BAR ─── */
+    .token-bar { display: flex; gap: 1.2rem; align-items: stretch; margin-bottom: 2.5rem; }
+    .tok-item { flex: 1; padding: 1.2rem 1.4rem; border-radius: 12px; border: 1px solid var(--dark-4); text-align: center; }
+    .tok-item.before { border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+    .tok-item.after  { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); }
+    .tok-label { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: .5rem; }
+    .tok-item.before .tok-label { color: var(--red); }
+    .tok-item.after  .tok-label { color: var(--green); }
+    .tok-num { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 2rem; letter-spacing: -.04em; }
+    .tok-item.before .tok-num { color: var(--red); }
+    .tok-item.after  .tok-num { color: var(--green); }
+    .tok-desc { font-size: .78rem; color: var(--slate-light); margin-top: .3rem; line-height: 1.5; }
+    .tok-arrow { display: flex; align-items: center; color: var(--slate); font-size: 1.2rem; }
+
+    /* ─── SEARCH COMMANDS ─── */
+    .cmd-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 2rem; }
+    .cmd-row { display: flex; align-items: center; gap: 1rem; padding: .8rem 1.2rem; border: 1px solid var(--dark-4); border-radius: 10px; background: rgba(255,255,255,0.015); }
+    .cmd-code { font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--accent); flex: 1; }
+    .cmd-desc { font-size: .82rem; color: var(--slate-light); flex: 1.5; }
+    .cmd-tokens { font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--green); white-space: nowrap; }
+
+    /* ─── INSIGHT CARDS ─── */
+    .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+    @media(max-width:660px){ .insight-grid { grid-template-columns: 1fr; } }
+    .icard { padding: 2rem 2.2rem; border: 1px solid var(--dark-4); border-radius: 16px; background: rgba(255,255,255,0.02); transition: border-color .25s, background .25s; }
+    .icard:hover { border-color: var(--brand-dim); background: var(--brand-faint); }
+    .icard.center { border-color: rgba(99,102,241,0.3); background: var(--brand-faint); }
+    .icard-icon { font-size: 1.6rem; display: block; margin-bottom: 1rem; }
+    .icard-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: -.02em; color: var(--white); margin-bottom: .55rem; }
+    .icard-body { font-size: .88rem; color: var(--slate-light); line-height: 1.7; }
+
+    /* ─── SHARED GRID ─── */
+    .shared-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+    @media(max-width:660px){ .shared-grid { grid-template-columns: 1fr 1fr; } }
+    .swd { padding: 1.5rem 1.6rem; border: 1px solid var(--shared-dim); border-radius: 14px; background: var(--shared-faint); transition: border-color .2s, background .2s; }
+    .swd:hover { border-color: var(--shared); background: rgba(52,211,153,0.08); }
+    .swd-icon { font-size: 1.4rem; margin-bottom: .75rem; display: block; }
+    .swd-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .95rem; color: var(--white); margin-bottom: .4rem; }
+    .swd-tag { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--shared); margin-bottom: .5rem; }
+    .swd-desc { font-size: .8rem; color: var(--slate-light); line-height: 1.6; }
+
+    /* ─── CONNECTORS ─── */
+    .conn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    @media(max-width:640px){ .conn-grid { grid-template-columns: 1fr 1fr; } }
+    .conn-card { padding: 1.3rem 1.4rem; border: 1px solid var(--dark-4); border-radius: 12px; background: rgba(255,255,255,0.015); transition: border-color .2s; }
+    .conn-card:hover { border-color: rgba(99,102,241,0.25); }
+    .conn-card.hi { border-color: rgba(99,102,241,0.3); background: var(--brand-faint); }
+    .conn-logo { font-size: 1.2rem; margin-bottom: .6rem; display: block; }
+    .conn-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: .9rem; color: var(--white); margin-bottom: .3rem; }
+    .conn-type { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .1em; color: var(--brand); margin-bottom: .45rem; }
+    .conn-card.google .conn-type { color: #4285F4; }
+    .conn-card.meta   .conn-type { color: #0082FB; }
+    .conn-card.llm    .conn-type { color: var(--accent); }
+    .conn-desc { font-size: .78rem; color: var(--slate-light); line-height: 1.55; }
+    .conn-endpoints { margin-top: .6rem; }
+    .conn-endpoint { font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--slate); display: block; line-height: 1.7; }
+
+    /* ─── TIMELINE ─── */
+    .tl { position: relative; padding-left: 2.5rem; }
+    .tl::before { content: ''; position: absolute; left: .55rem; top: 0; bottom: 0; width: 1px; background: var(--dark-4); }
+    .tlitem { position: relative; margin-bottom: 3rem; }
+    .tlitem::before { content: ''; position: absolute; left: -2.1rem; top: .3rem; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 10px rgba(99,102,241,0.5); }
+    .tlitem.new::before { background: var(--hr); box-shadow: 0 0 10px rgba(244,114,182,0.5); }
+    .tlb { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--brand); margin-bottom: .35rem; }
+    .tlitem.new .tlb { color: var(--hr); }
+    .tlt { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--white); margin-bottom: .5rem; }
+    .tld { font-size: .88rem; color: var(--slate-light); line-height: 1.7; }
+    .tld2 { margin-top: .4rem; font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--violet); }
+
+    /* ─── MD TABLE ─── */
+    .md-table { width: 100%; border-collapse: collapse; margin-bottom: 3rem; }
+    .md-table th { font-family: 'JetBrains Mono', monospace; font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; color: var(--slate); padding: .6rem 1rem; border-bottom: 1px solid var(--dark-4); text-align: left; }
+    .md-table td { padding: .85rem 1rem; border-bottom: 1px solid rgba(99,102,241,0.07); font-size: .86rem; color: var(--slate-light); vertical-align: top; }
+    .md-table tr:hover td { background: rgba(99,102,241,0.03); }
+    .md-file { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--accent); font-weight: 500; }
+    .md-file.ext { color: var(--mem); }
+    .md-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: .55rem; letter-spacing: .1em; padding: .12rem .45rem; border-radius: 4px; margin-left: .4rem; }
+    .badge-base { background: var(--brand-faint); color: var(--brand); border: 1px solid var(--brand-dim); }
+
+    .divider-label { display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 2rem; font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--slate); }
+    .divider-label::before, .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--dark-4); }
+
+    footer { padding: 3rem 0; border-top: 1px solid var(--grid-line); }
+    .ft-inner { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+    .ft-brand { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.25rem; letter-spacing: -.04em; }
+    .ft-brand span { color: var(--brand); }
+    .ft-meta { font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: var(--slate); text-align: right; line-height: 1.8; }
+  </style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-a"></div>
+<div class="glow-b"></div>
+<div class="glow-c"></div>
+
+<nav>
+  <div>
+    <span class="nav-logo">FBR<span>·</span>Agents</span>
+    <span class="nav-badge">v3.0 · CONCEITO</span>
+  </div>
+  <ul class="nav-links">
+    <a href="#visao">// visão</a>
+    <a href="#hierarquia">// hierarquia</a>
+    <a href="#delegacao">// delegação</a>
+    <a href="#hr">// hr manager</a>
+    <a href="#workspace">// workspaces</a>
+    <a href="#memoria">// memória</a>
+    <a href="#connectors">// conectores</a>
+    <a href="#plano">// plano</a>
+  </ul>
+</nav>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section id="visao" class="hero">
+    <div class="hero-eyebrow">
+      <div class="pulse-dot"></div>
+      FBR Sistema · Gestão de Agentes Virtuais v3.0
+    </div>
+    <h1 class="hero-title">
+      FBR<span class="accent">·</span>Agents<br>
+      <span class="muted">Hierarquia, Delegação</span><br>
+      <span class="muted">& Auditoria</span>
+    </h1>
+    <p class="hero-sub">
+      Agora com <strong>hierarquia de 4 níveis</strong> (Director → Manager → Executor → Auxiliary), <strong>habilidades nativas em todos os agentes</strong> (RAG, Web Search, MCP), delegação inteligente por complexidade e <strong>módulo de Auditoria HR Manager</strong> com 3 modos operacionais e sistema de progressão.
+    </p>
+    <div class="hero-pills">
+      <div class="hpill"><div class="dot d-v"></div>4 Níveis Hierárquicos</div>
+      <div class="hpill"><div class="dot d-dl"></div>Delegação Inteligente</div>
+      <div class="hpill"><div class="dot d-hr"></div>HR Manager (3 Modos)</div>
+      <div class="hpill"><div class="dot d-m"></div>13 MD por Agente</div>
+      <div class="hpill"><div class="dot d-g"></div>Workspace Compartilhada</div>
+      <div class="hpill"><div class="dot d-c"></div>Conectores Nativos</div>
+    </div>
+  </section>
+
+  <!-- HIERARQUIA -->
+  <section id="hierarquia" class="fade-in">
+    <div class="stag">// arquitetura de hierarquia</div>
+    <h2 class="stitle">4 Níveis de Agentes</h2>
+    <p class="slead">
+      Cada nível tem <strong>orçamento de contexto, habilidades e responsabilidades distintas</strong>. O Director orquestra a estratégia. O Auxiliary executa tarefas atômicas com máxima eficiência de tokens. Todos os níveis têm RAG, Web Search e MCP. Apenas Auxiliaries não delegam.
+    </p>
+
+    <div class="hier-tree">
+
+      <div class="hier-level director">
+        <div class="hier-tab"></div>
+        <div class="hier-body">
+          <div>
+            <div class="hier-header">
+              <span class="hier-chip">Director</span>
+            </div>
+            <div class="hier-col-label" style="margin-top:.6rem">Responsabilidade</div>
+            <div class="hier-col-val">Visão estratégica, orquestra managers, agrega resultados do sistema</div>
+          </div>
+          <div>
+            <div class="hier-col-label">Habilidades Nativas</div>
+            <div class="hier-caps">
+              <span class="cap-pill active">RAG global</span>
+              <span class="cap-pill active">Web Search</span>
+              <span class="cap-pill active">MCP</span>
+              <span class="cap-pill deleg">Delegação</span>
+            </div>
+          </div>
+          <div>
+            <div class="hier-col-label">Delega para</div>
+            <div class="hier-col-val"><strong>Manager</strong> quando complexidade &lt; 0.85</div>
+          </div>
+          <div class="hier-ctx">128 K ctx</div>
+        </div>
+      </div>
+
+      <div class="hier-level manager">
+        <div class="hier-tab"></div>
+        <div class="hier-body">
+          <div>
+            <div class="hier-header">
+              <span class="hier-chip">Manager</span>
+            </div>
+            <div class="hier-col-label" style="margin-top:.6rem">Responsabilidade</div>
+            <div class="hier-col-val">Coordena domínio específico (finance, hr, legal), aloca executores</div>
+          </div>
+          <div>
+            <div class="hier-col-label">Habilidades Nativas</div>
+            <div class="hier-caps">
+              <span class="cap-pill active">RAG domínio</span>
+              <span class="cap-pill active">Web Search</span>
+              <span class="cap-pill active">MCP</span>
+              <span class="cap-pill deleg">Delegação</span>
+            </div>
+          </div>
+          <div>
+            <div class="hier-col-label">Delega para</div>
+            <div class="hier-col-val"><strong>Executor</strong> quando complexidade &lt; 0.60</div>
+          </div>
+          <div class="hier-ctx">64 K ctx</div>
+        </div>
+      </div>
+
+      <div class="hier-level executor">
+        <div class="hier-tab"></div>
+        <div class="hier-body">
+          <div>
+            <div class="hier-header">
+              <span class="hier-chip">Executor</span>
+            </div>
+            <div class="hier-col-label" style="margin-top:.6rem">Responsabilidade</div>
+            <div class="hier-col-val">Executa tarefas complexas, usa ferramentas, pode subdelegar sub-tasks</div>
+          </div>
+          <div>
+            <div class="hier-col-label">Habilidades Nativas</div>
+            <div class="hier-caps">
+              <span class="cap-pill active">RAG agente</span>
+              <span class="cap-pill active">Web Search</span>
+              <span class="cap-pill active">MCP</span>
+              <span class="cap-pill deleg">Delegação</span>
+            </div>
+          </div>
+          <div>
+            <div class="hier-col-label">Delega para</div>
+            <div class="hier-col-val"><strong>Auxiliary</strong> quando complexidade &lt; 0.30</div>
+          </div>
+          <div class="hier-ctx">32 K ctx</div>
+        </div>
+      </div>
+
+      <div class="hier-level auxiliary">
+        <div class="hier-tab"></div>
+        <div class="hier-body">
+          <div>
+            <div class="hier-header">
+              <span class="hier-chip">Auxiliary</span>
+            </div>
+            <div class="hier-col-label" style="margin-top:.6rem">Responsabilidade</div>
+            <div class="hier-col-val">Tarefas atômicas, máxima eficiência de tokens, sub-agent especializado</div>
+          </div>
+          <div>
+            <div class="hier-col-label">Habilidades Nativas</div>
+            <div class="hier-caps">
+              <span class="cap-pill active">RAG restrito</span>
+              <span class="cap-pill active">Web (high pri)</span>
+              <span class="cap-pill active">MCP</span>
+              <span class="cap-pill" style="opacity:.4">Sem Delegação</span>
+            </div>
+          </div>
+          <div>
+            <div class="hier-col-label">Delega para</div>
+            <div class="hier-col-val" style="color:var(--slate)">Não delega — executa localmente sempre</div>
+          </div>
+          <div class="hier-ctx">8 K ctx</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- REGRA DE IDENTIDADE -->
+    <div class="config-block">
+      <div class="config-header"><span>IDENTITY.md — campos obrigatórios na v3.0</span></div>
+      <div class="config-body">
+        <pre class="config-code"><span class="cmt">// Todo agente deve declarar seu nível no IDENTITY.md</span>
+<span class="key">Nível</span>:          <span class="val">executor</span>
+<span class="key">Especialização</span>: <span class="val">finance</span>
+<span class="key">Supervisor</span>:     <span class="val">manager_001</span>   <span class="cmt">// obrigatório para Manager, Executor, Auxiliary</span>
+<span class="key">Criado em</span>:      <span class="val">2026-03-15</span>
+
+<span class="cmt">// O Registry valida: declaração deve ser consistente com o nível cadastrado na API</span>
+<span class="cmt">// Inconsistência → criação bloqueada com erro explícito</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELEGAÇÃO -->
+  <section id="delegacao" class="fade-in">
+    <div class="stag stag-deleg">// motor de delegação</div>
+    <h2 class="stitle">Delegação Inteligente</h2>
+    <p class="slead">
+      Antes de executar qualquer task, o agente avalia sua complexidade via LLM e decide se <strong>executa localmente ou delega para um nível inferior</strong>. 100% das decisões são registradas com complexity_score e rationale para auditoria.
+    </p>
+
+    <div class="deleg-flow">
+      <div class="deleg-header">
+        <div class="deleg-header-label">DelegationEngine.assess_and_delegate()</div>
+      </div>
+      <div class="deleg-steps">
+        <div class="dstep active">
+          <div class="dstep-num">01 / AVALIAR</div>
+          <div class="dstep-title">Complexity Scoring</div>
+          <div class="dstep-desc">LLM (Claude L2) analisa a task e retorna um complexity_score 0.0–1.0 com rationale estruturado</div>
+        </div>
+        <div class="deleg-arrow">→</div>
+        <div class="dstep">
+          <div class="dstep-num">02 / DECIDIR</div>
+          <div class="dstep-title">Selecionar Nível Alvo</div>
+          <div class="dstep-desc">Threshold por nível: Director→Manager se &lt;0.85, Manager→Executor se &lt;0.60, Executor→Auxiliary se &lt;0.30</div>
+        </div>
+        <div class="deleg-arrow">→</div>
+        <div class="dstep">
+          <div class="dstep-num">03 / ROTEAR</div>
+          <div class="dstep-title">Encontrar Sub-agent</div>
+          <div class="dstep-desc">Registry localiza sub-agent disponível com mesma especialização. Se não existe, cria um novo automaticamente</div>
+        </div>
+        <div class="deleg-arrow">→</div>
+        <div class="dstep">
+          <div class="dstep-num">04 / REGISTRAR</div>
+          <div class="dstep-title">Audit Log</div>
+          <div class="dstep-desc">Toda decisão registrada: de qual agente, para qual, complexity_score, rationale e resultado final</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-block" style="border-color:var(--deleg-dim);background:var(--deleg-faint);">
+      <div class="warn-icon">⚡</div>
+      <div>
+        <div class="warn-title" style="color:var(--deleg)">Regra Inviolável — Auxiliaries não delegam</div>
+        <div class="warn-body">Qualquer tentativa de um Auxiliary usar a ferramenta de delegação é <strong>bloqueada com erro explícito</strong>. A ferramenta de delegação não é injetada na sessão de agentes do nível Auxiliary. TOOLS.md não pode conter a palavra 'delegation' — validado no Registry.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HR MANAGER -->
+  <section id="hr" class="fade-in">
+    <div class="stag stag-hr">// módulo de auditoria</div>
+    <h2 class="stitle">HR Manager</h2>
+    <p class="slead">
+      Um módulo independente que consome logs de todos os agentes e calcula <strong>scores em 4 dimensões</strong>. Agentes com alta performance ascendem na hierarquia. Agentes com baixa performance recebem <strong>treinamento dirigido</strong>. Opera em 3 modos configuráveis.
+    </p>
+
+    <!-- 3 MODOS -->
+    <div class="hr-modes">
+      <div class="hr-mode primary">
+        <div class="hr-mode-label">Modo 1</div>
+        <div class="hr-mode-title">Automatizado</div>
+        <div class="hr-mode-desc">AI avalia e aplica todas as decisões sem intervenção humana. Promoções, treinamentos e rebaixamentos executados imediatamente após cada ciclo. Indicado para Executors e Auxiliaries em volume.</div>
+      </div>
+      <div class="hr-mode">
+        <div class="hr-mode-label">Modo 2</div>
+        <div class="hr-mode-title">Semi-Automático</div>
+        <div class="hr-mode-desc">AI calcula scores e recomenda. Decisões críticas (promote / demote / suspend) são bloqueadas até aprovação humana via console. Treinamento e manutenção aplicados automaticamente. Indicado para Directors e Managers.</div>
+      </div>
+      <div class="hr-mode">
+        <div class="hr-mode-label">Modo 3</div>
+        <div class="hr-mode-title">Dashboard</div>
+        <div class="hr-mode-desc">Sem ações automáticas. Todos os scores e recomendações expostos via console para análise humana. Decisões tomadas manualmente. Indicado para fases iniciais ou ambientes regulados.</div>
+      </div>
+    </div>
+
+    <!-- 4 DIMENSÕES -->
+    <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;color:var(--white);margin-bottom:1.4rem;">4 Dimensões de Avaliação</h3>
+    <div class="hr-dims">
+      <div class="hr-dim assertiv">
+        <div class="hr-dim-pct">40%</div>
+        <div class="hr-dim-name">Assertividade</div>
+        <div class="hr-dim-desc">Taxa de sucesso das tasks + precisão das tool calls. Penaliza retries desnecessários e erros de conector. Peso máximo — é a base de qualquer agente confiável.</div>
+      </div>
+      <div class="hr-dim learn">
+        <div class="hr-dim-pct">25%</div>
+        <div class="hr-dim-name">Aprendizado</div>
+        <div class="hr-dim-desc">Evolução do score de assertividade comparado ao ciclo anterior. Considera também novos padrões aprendidos via RAG. Agente que regride consistentemente é sinal de alerta.</div>
+      </div>
+      <div class="hr-dim creat">
+        <div class="hr-dim-pct">20%</div>
+        <div class="hr-dim-name">Criatividade</div>
+        <div class="hr-dim-desc">Avaliação LLM em amostra de execuções + variedade de ferramentas usadas + eficácia da delegação. Mede capacidade de resolver problemas fora do padrão.</div>
+      </div>
+      <div class="hr-dim punct">
+        <div class="hr-dim-pct">15%</div>
+        <div class="hr-dim-name">Pontualidade</div>
+        <div class="hr-dim-desc">Cumprimento de SLA por task. Tasks sem SLA explícito usam p95 do histórico como referência. Inclui latência de delegação na cadeia.</div>
+      </div>
+    </div>
+
+    <!-- THRESHOLDS -->
+    <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.1rem;color:var(--white);margin-bottom:1.4rem;">Thresholds de Progressão</h3>
+    <div class="hr-thresholds">
+      <div class="hr-thr promote">
+        <div class="hr-thr-label">Promoção</div>
+        <div class="hr-thr-num">≥ 85</div>
+        <div class="hr-thr-cond">por 3 ciclos consecutivos → sobe 1 nível na hierarquia</div>
+      </div>
+      <div class="hr-thr train">
+        <div class="hr-thr-label">Treinamento</div>
+        <div class="hr-thr-num">&lt; 60</div>
+        <div class="hr-thr-cond">treinamento dirigido na dimensão mais fraca + reavaliação</div>
+      </div>
+      <div class="hr-thr demote">
+        <div class="hr-thr-label">Rebaixamento</div>
+        <div class="hr-thr-num">&lt; 45</div>
+        <div class="hr-thr-cond">por 2 ciclos consecutivos → desce 1 nível ou suspensão</div>
+      </div>
+    </div>
+
+    <!-- PROGRAMAS DE TREINAMENTO -->
+    <div class="config-block">
+      <div class="config-header"><span>training_programs — programas por dimensão fraca</span></div>
+      <div class="config-body">
+        <pre class="config-code"><span class="key">assertiveness</span>: <span class="val">"Precision Training"</span>    <span class="cmt">// 7 dias — replay_failed_tasks, tool_call_drills</span>
+<span class="key">creativity</span>:    <span class="val">"Innovation Sprint"</span>     <span class="cmt">// 5 dias — multi_tool_challenges, cross_domain_tasks</span>
+<span class="key">learning</span>:      <span class="val">"Memory Reinforcement"</span>  <span class="cmt">// 7 dias — rag_accuracy_tests, lesson_application</span>
+<span class="key">punctuality</span>:   <span class="val">"SLA Discipline"</span>        <span class="cmt">// 5 dias — time_budget, delegation_timing</span>
+
+<span class="cmt">// Agente em training → status 'training' → novas tasks bloqueadas até conclusão</span>
+<span class="cmt">// Reavaliação automática após conclusão de cada programa</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKSPACE OVERVIEW -->
+  <section id="workspace" class="fade-in">
+    <div class="stag">// estrutura de workspaces</div>
+    <h2 class="stitle">Dois Tipos de Workspace</h2>
+    <p class="slead">
+      Cada agente tem sua <strong>workspace individual</strong> com 13 Markdowns — incluindo nível e supervisor no IDENTITY.md. Todos os agentes acessam uma <strong>workspace compartilhada</strong> com recursos centralizados do ecossistema.
+    </p>
+
+    <div class="ws-split">
+      <!-- INDIVIDUAL -->
+      <div class="ws-panel individual">
+        <div class="ws-header">
+          <div class="ws-icon">🧠</div>
+          <div>
+            <div class="ws-title">Workspace Individual</div>
+            <div class="ws-subtitle">POR AGENTE · 13 MARKDOWNS</div>
+          </div>
+        </div>
+        <div class="ws-files">
+          <div class="divider-label" style="padding: 0 1.6rem; margin: .8rem 0 .4rem; font-size:.58rem">7 base obrigatórios</div>
+          <div class="ws-file"><div class="ws-file-icon">🔒</div><div><div class="ws-file-name">SOUL.md</div><div class="ws-file-desc">Identidade e restrições éticas absolutas. Carregado PRIMEIRO. Imutável por sessão.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🪪</div><div><div class="ws-file-name">IDENTITY.md</div><div class="ws-file-desc">Nome, role, LLM, <strong style="color:var(--deleg)">nível hierárquico e supervisor</strong>. Validado contra o cadastro na API.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">📋</div><div><div class="ws-file-name">TASKS.md</div><div class="ws-file-desc">Tarefas recorrentes, triggers de evento e critérios de delegação automática.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🛡️</div><div><div class="ws-file-name">AGENTS.md</div><div class="ws-file-desc">Limites de autonomia e aprovações obrigatórias. Define ações irreversíveis.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">💾</div><div><div class="ws-file-name">MEMORY.md</div><div class="ws-file-desc">Índice executivo da memória. Aponta para topic files sem duplicar.</div><div><span class="ws-file-tag tag-index">ÍNDICE</span></div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🔧</div><div><div class="ws-file-name">TOOLS.md</div><div class="ws-file-desc">Conectores autorizados. Auxiliaries não podem incluir 'delegation'. Validado no Registry.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">👤</div><div><div class="ws-file-name">USER.md</div><div class="ws-file-desc">Preferências do time e contexto da empresa.</div></div></div>
+
+          <div class="divider-label" style="padding: 0 1.6rem; margin: .8rem 0 .4rem; font-size:.58rem">6 de performance</div>
+          <div class="ws-file"><div class="ws-file-icon">📌</div><div><div class="ws-file-name">decisions.md</div><div class="ws-file-desc">Decisões permanentes. Inclui decisão inicial de nível LLM e thresholds de delegação.</div><div><span class="ws-file-tag tag-perm">PERMANENTE</span></div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">📚</div><div><div class="ws-file-name">lessons.md</div><div class="ws-file-desc">Lições aprendidas. Estratégicas: permanentes. Táticas: expiram em 30 dias.</div><div><span class="ws-file-tag tag-perm">ESTRATÉGICA</span> <span class="ws-file-tag tag-tactic">TÁTICA 30d</span></div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🚧</div><div><div class="ws-file-name">projects.md</div><div class="ws-file-desc">Estado atual de projetos. Consultado pelo agente antes de sugerir novo trabalho.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">👥</div><div><div class="ws-file-name">people.md</div><div class="ws-file-desc">Equipe, parceiros, sub-agents. Como se comunicar. Essencial para orquestração multi-agentes.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">⏳</div><div><div class="ws-file-name">pending.md</div><div class="ws-file-desc">Tudo que depende do humano. Gera alertas após 24h. Cobranças automáticas via FBR-Click.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🔁</div><div><div class="ws-file-name">feedback.md</div><div class="ws-file-desc">Histórico de rejeições. Consultado antes de sugestões similares. Aprendizado contínuo.</div></div></div>
+        </div>
+      </div>
+
+      <!-- SHARED -->
+      <div class="ws-panel shared">
+        <div class="ws-header">
+          <div class="ws-icon">🌐</div>
+          <div>
+            <div class="ws-title">Workspace Compartilhada</div>
+            <div class="ws-subtitle">TODOS OS AGENTES · CENTRALIZADA</div>
+          </div>
+        </div>
+        <div class="ws-files">
+          <div class="ws-file"><div class="ws-file-icon">⌘</div><div><div class="ws-file-name" style="color:var(--shared)">commands/</div><div class="ws-file-desc">Comandos pré-formatados com prefixo /. Inclui metadado applicable_levels por nível.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">⚡</div><div><div class="ws-file-name" style="color:var(--shared)">skills/</div><div class="ws-file-desc">Habilidades específicas com cabeçalho padronizado e applicable_levels.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🔗</div><div><div class="ws-file-name" style="color:var(--shared)">hooks/</div><div class="ws-file-desc">Encadeamento reativo. "Quando X → faça Y." Inclui hooks de auditoria e delegação.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">📜</div><div><div class="ws-file-name" style="color:var(--shared)">scripts/</div><div class="ws-file-desc">Repositório central de scripts referenciados pelos agentes de todos os níveis.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🔌</div><div><div class="ws-file-name" style="color:var(--shared)">connectors/</div><div class="ws-file-desc">Conectores a APIs externas. Credenciais via FBR-SafeBox. Nunca expostas ao agente.</div></div></div>
+          <div class="ws-file"><div class="ws-file-icon">🧩</div><div><div class="ws-file-name" style="color:var(--shared)">mcp/</div><div class="ws-file-desc">Servidores MCP disponíveis. Model Context Protocol padronizado para todos os níveis.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMORIA -->
+  <section id="memoria" class="fade-in">
+    <div class="stag stag-mem">// arquitetura de memória</div>
+    <h2 class="stitle">MEMORY.md como Índice + RAG por Escopo</h2>
+    <p class="slead">
+      O MEMORY.md é o sumário executivo — carregado a cada sessão. Os topic files são carregados sob demanda. Na v3.0, o <strong>escopo do RAG varia por nível</strong>: Directors buscam no namespace global do sistema; Auxiliaries apenas no seu namespace restrito.
+    </p>
+
+    <div class="token-bar">
+      <div class="tok-item before">
+        <div class="tok-label">Auxiliary (8K ctx)</div>
+        <div class="tok-num">8KB</div>
+        <div class="tok-desc">namespace restrito do agente</div>
+      </div>
+      <div class="tok-arrow">↑</div>
+      <div class="tok-item after">
+        <div class="tok-label">Director (128K ctx)</div>
+        <div class="tok-num">128K</div>
+        <div class="tok-desc">namespace global do sistema</div>
+      </div>
+      <div class="tok-arrow">=</div>
+      <div class="tok-item after">
+        <div class="tok-label">Economia média</div>
+        <div class="tok-num">80%</div>
+        <div class="tok-desc">tokens por sessão vs. carregar tudo</div>
+      </div>
+    </div>
+
+    <div class="config-block">
+      <div class="config-header"><span>session_initialization_rule — v3.0</span></div>
+      <div class="config-body">
+        <pre class="config-code"><span class="cmt">// Carregado na inicialização (todos os níveis):</span>
+<span class="key">required_on_init</span>: [
+  <span class="val">"SOUL.md"</span>,        <span class="cmt">// sempre primeiro — imutável</span>
+  <span class="val">"USER.md"</span>,
+  <span class="val">"IDENTITY.md"</span>,    <span class="cmt">// inclui nível e supervisor (v3.0)</span>
+  <span class="val">"MEMORY.md"</span>,      <span class="cmt">// índice executivo</span>
+  <span class="val">"memory/YYYY-MM-DD.md"</span>
+]
+
+<span class="cmt">// Habilidades injetadas automaticamente conforme nível (v3.0):</span>
+<span class="key">native_capabilities</span>: {
+  <span class="key">rag_scope</span>:  <span class="val">"global"</span>    <span class="cmt">// director | domain | agent | restricted</span>
+  <span class="key">web_search</span>: <span class="val">"low"</span>       <span class="cmt">// min_priority: low (dir/mgr/exec) | high (aux)</span>
+  <span class="key">mcp</span>:        <span class="val">true</span>        <span class="cmt">// conectores autorizados em TOOLS.md</span>
+  <span class="key">delegation</span>: <span class="val">true</span>        <span class="cmt">// apenas director, manager, executor</span>
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONNECTORS -->
+  <section id="connectors" class="fade-in">
+    <div class="stag">// conectores nativos</div>
+    <h2 class="stitle">Google, Meta & LLM Providers</h2>
+    <p class="slead">
+      Conectores pré-configurados na workspace compartilhada. <strong>Credenciais via FBR-SafeBox</strong> — nenhum agente acessa chave diretamente. Agentes referenciam o conector pelo nome via TOOLS.md, verificado pelo Execution Engine antes de cada chamada.
+    </p>
+
+    <div class="conn-grid">
+      <div class="conn-card google">
+        <span class="conn-logo">🔵</span>
+        <div class="conn-name">Google Workspace</div>
+        <div class="conn-type">GOOGLE · SERVICE ACCOUNT</div>
+        <div class="conn-desc">Gmail, Drive, Sheets, Docs, Calendar. Service Account JSON via FBR-SafeBox.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">gmail.googleapis.com</span>
+          <span class="conn-endpoint">drive.googleapis.com</span>
+          <span class="conn-endpoint">sheets.googleapis.com</span>
+        </div>
+      </div>
+      <div class="conn-card google">
+        <span class="conn-logo">📊</span>
+        <div class="conn-name">Google Analytics 4</div>
+        <div class="conn-type">GOOGLE · DATA API v1</div>
+        <div class="conn-desc">Métricas, audiência e conversão. Cache Redis de 1h para não impactar cota.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">analyticsdata.googleapis.com</span>
+        </div>
+      </div>
+      <div class="conn-card google">
+        <span class="conn-logo">📱</span>
+        <div class="conn-name">YouTube Data API</div>
+        <div class="conn-type">GOOGLE · DATA API v3</div>
+        <div class="conn-desc">Canal, vídeos, métricas e comentários. Essencial para sistemas de conteúdo FBR.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">youtube.googleapis.com</span>
+        </div>
+      </div>
+      <div class="conn-card meta">
+        <span class="conn-logo">🔷</span>
+        <div class="conn-name">Meta Graph API</div>
+        <div class="conn-type">META · GRAPH API v21</div>
+        <div class="conn-desc">Facebook Pages, Instagram, publicações e métricas de engajamento.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">graph.facebook.com/v21.0</span>
+        </div>
+      </div>
+      <div class="conn-card meta">
+        <span class="conn-logo">📣</span>
+        <div class="conn-name">Meta Ads API</div>
+        <div class="conn-type">META · MARKETING API</div>
+        <div class="conn-desc">Campanhas, criativos, métricas. Retry automático em 429. Integrado ao FBR-Sales.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">graph.facebook.com/ads</span>
+        </div>
+      </div>
+      <div class="conn-card meta">
+        <span class="conn-logo">💬</span>
+        <div class="conn-name">WhatsApp Business API</div>
+        <div class="conn-type">META · CLOUD API</div>
+        <div class="conn-desc">Mensagens, templates aprovados. FBR-Suporte e FBR-Leads.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">graph.facebook.com/whatsapp</span>
+        </div>
+      </div>
+      <div class="conn-card llm hi">
+        <span class="conn-logo">🟣</span>
+        <div class="conn-name">Anthropic API</div>
+        <div class="conn-type">LLM · CAMADA 2 + DELEGATION ENGINE</div>
+        <div class="conn-desc">claude-sonnet-4-6 como camada 2. Também usado pelo DelegationEngine e creativity scoring do HR Manager.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">api.anthropic.com/v1</span>
+          <span class="conn-endpoint">claude-sonnet-4-6</span>
+        </div>
+      </div>
+      <div class="conn-card llm">
+        <span class="conn-logo">🟢</span>
+        <div class="conn-name">OpenAI API</div>
+        <div class="conn-type">LLM · CAMADA 3 RESERVA</div>
+        <div class="conn-desc">gpt-4o como camada 3 de contingência. Nunca primária. Alerta ao owner quando ativada.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">api.openai.com/v1 · gpt-4o</span>
+        </div>
+      </div>
+      <div class="conn-card llm">
+        <span class="conn-logo">🖥️</span>
+        <div class="conn-name">Ollama Local</div>
+        <div class="conn-type">LLM · CAMADA 1 PRIMÁRIA</div>
+        <div class="conn-desc">Mac Mini M4 32GB via Tailscale. Alto volume, classificação, scoring. Zero custo por token. Timeout 15s.</div>
+        <div class="conn-endpoints">
+          <span class="conn-endpoint">tailscale:11434 · timeout: 15s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-block" style="border-color:rgba(99,102,241,0.35);background:var(--brand-faint);margin-top:2rem;">
+      <div class="warn-icon">🔑</div>
+      <div>
+        <div class="warn-title" style="color:var(--brand)">Regra de Credenciais — FBR-SafeBox como Fonte Única</div>
+        <div class="warn-body">Nenhum agente (de nenhum nível) acessa credencial diretamente. <strong>Todas as chaves são resolvidas em runtime pelo Connector Proxy</strong> via FBR-SafeBox. O Execution Engine verifica TOOLS.md antes de qualquer chamada — agentes só acessam conectores explicitamente autorizados.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANO -->
+  <section id="plano" class="fade-in">
+    <div class="stag">// cronograma atualizado</div>
+    <h2 class="stitle">Plano de Execução v3.0</h2>
+    <p class="slead">
+      16 semanas · 8 fases. As 4 novas semanas cobrem hierarquia, delegação inteligente e o módulo de auditoria HR Manager com os 3 modos operacionais.
+    </p>
+
+    <div class="tl">
+      <div class="tlitem">
+        <div class="tlb">Fase 1 · Semanas 1–2</div>
+        <div class="tlt">Fundação & Registry (13 MDs + Hierarquia)</div>
+        <div class="tld">Infra base + migrations com campo level, parent_id, audit_scores, training_sessions, promotions. Agent Registry com validação dos 13 MDs e consistência de nível. Seed com 1 Director + 2 Managers.</div>
+        <div class="tld2">Entregável: API de registro com 4 níveis validados e 13 MDs consistentes</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 2 · Semanas 3–4</div>
+        <div class="tlt">Execution Engine, Habilidades Nativas & Delegação Heurística</div>
+        <div class="tld">Session init por nível com NativeCapabilityInjector. DelegationEngine v1 com heurística de complexidade. RAG por escopo. Auxiliaries bloqueados de delegar. Fluxo completo Director→Manager→Executor.</div>
+        <div class="tld2">Entregável: Agentes de todos os níveis executando com habilidades nativas injetadas</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 3 · Semanas 5–6</div>
+        <div class="tlt">Memory Manager Expandido & RAG por Escopo</div>
+        <div class="tld">RAG com namespace por nível (restrito/agente/domínio/global). Compactação com pre_compact_hooks obrigatórios. Consolidação periódica de 15 dias. Token budget por nível.</div>
+        <div class="tld2">Entregável: Memória persistente com RAG hierárquico e compactação configurada</div>
+      </div>
+      <div class="tlitem new">
+        <div class="tlb">Fase 4 · Semanas 7–8 · NOVO</div>
+        <div class="tlt">Delegação Inteligente com LLM + Sub-agent Pool</div>
+        <div class="tld">DelegationEngine v2 com complexity scoring via Claude. Thresholds configuráveis por agente. Auto-spawn de sub-agents. Lifecycle de agents ociosos. Métricas de delegation depth e chain latency.</div>
+        <div class="tld2">Entregável: Delegação com LLM scoring, rationale registrado, 100% auditada</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 5 · Semanas 9–10</div>
+        <div class="tlt">Workspace Compartilhada & Connector Manager</div>
+        <div class="tld">Workspace com commands, skills, hooks, scripts, connectors (applicable_levels). Conectores Google, Meta, LLM com FBR-SafeBox. Connector Proxy com cache Redis e retry automático.</div>
+        <div class="tld2">Entregável: Agentes consumindo Google e Meta via conectores padronizados</div>
+      </div>
+      <div class="tlitem new">
+        <div class="tlb">Fase 6 · Semanas 11–12 · NOVO</div>
+        <div class="tlt">HR Manager — Scoring, 3 Modos & Treinamento</div>
+        <div class="tld">HRScoringEngine com 4 dimensões (assertividade, aprendizado, criatividade, pontualidade). Modos Automatizado, Semi-Auto e Dashboard. Fila de revisão humana com expiração 48h. Sistema de treinamento por dimensão fraca. Worker de ciclo semanal.</div>
+        <div class="tld2">Entregável: HR Manager completo — scoring, progressão e treinamento funcionais</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 7 · Semanas 13–14</div>
+        <div class="tlt">n8n, FBR-Click Bridge & Approval Gateway</div>
+        <div class="tld">Integração completa com ecossistema FBR. Novos eventos FBR-Click: agent_promoted, audit_review_needed, training_started, delegation_chain_timeout. pending.md gerando cobranças automáticas.</div>
+        <div class="tld2">Entregável: Ecossistema FBR completamente conectado com auditoria integrada</div>
+      </div>
+      <div class="tlitem new">
+        <div class="tlb">Fase 8 · Semanas 15–16 · NOVO</div>
+        <div class="tlt">Console Web Completo & Go Live</div>
+        <div class="tld">Frontend com hierarquia visual (árvore + filtros por nível), HR Manager Dashboard (tabela com 4 dimensões, fila de revisões, treinamentos ativos, histórico de promoções), aba Hierarquia e aba Capacidades no detalhe do agente. Deploy em produção.</div>
+        <div class="tld2">Entregável: Sistema completo com hierarquia, delegação e HR Manager em produção</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="ft-inner">
+      <div>
+        <div class="ft-brand">FBR<span>·</span>Agents</div>
+        <div style="font-size:.78rem;color:var(--slate);margin-top:.35rem;font-family:'Inter',sans-serif;font-weight:300;">Sistema de Gestão de Agentes Virtuais</div>
+      </div>
+      <div class="ft-meta">
+        <div>Conceito v3.0</div>
+        <div>Grupo Facebrasil · Março 2026</div>
+        <div style="opacity:.4;margin-top:.3rem">Confidencial · Bíblia FBR v1.0</div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
