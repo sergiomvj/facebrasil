@@ -1,8 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth-server';
-
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/gamification/xp/balance
 // Retorna o XP total, nível atual e progresso do usuário
@@ -10,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 export async function GET() {
     try {
         const { userId } = await auth();
+        const supabase = await createClient();
 
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

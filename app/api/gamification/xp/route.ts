@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server';
 import { auth, currentUser } from '@/lib/auth-server';
-
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
     try {
         const { userId } = await auth();
         const user = await currentUser();
+        const supabase = await createClient();
 
         if (!userId || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
