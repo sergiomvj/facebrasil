@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VideoFlow — Conceito Geral do Projeto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0c0b09;
+  --ink2: #38352f;
+  --ink3: #78746c;
+  --ink4: #b0ab9f;
+  --paper: #f4f0e8;
+  --paper2: #eae6dc;
+  --paper3: #dedad0;
+  --paper4: #d0ccc0;
+  --white: #fdfcf8;
+  --accent: #1840e8;
+  --accent-light: #e8eeff;
+  --teal: #0b7a5c;
+  --teal-light: #e0f5ee;
+  --coral: #d04010;
+  --coral-light: #fceee8;
+  --amber: #a85c08;
+  --amber-light: #fdf0dc;
+  --red: #c01818;
+  --red-light: #fceaea;
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "Instrument Sans", system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--paper2); }
+::-webkit-scrollbar-thumb { background: var(--paper4); border-radius: 3px; }
+
+/* ─── STICKY NAV ─── */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(244,240,232,0.93);
+  backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom: 1px solid var(--paper3);
+  height: 58px;
+  display: flex; align-items: center;
+  padding: 0 56px;
+  gap: 0;
+}
+.nav-logo {
+  font-family: var(--serif);
+  font-size: 22px; color: var(--ink);
+  text-decoration: none; letter-spacing: -0.02em;
+  margin-right: 48px; flex-shrink: 0;
+}
+.nav-logo em { font-style: italic; color: var(--accent); }
+.nav-links {
+  display: flex; gap: 2px; flex: 1; overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-link {
+  font-size: 12px; font-weight: 400; letter-spacing: 0.01em;
+  padding: 6px 14px; border-radius: 20px;
+  color: var(--ink3); text-decoration: none;
+  transition: all 0.15s; white-space: nowrap;
+  border: 1px solid transparent;
+  background: none; cursor: pointer;
+}
+.nav-link:hover { background: var(--paper2); color: var(--ink2); }
+.nav-link.active { background: var(--ink); color: var(--white); }
+.nav-right { margin-left: auto; flex-shrink: 0; padding-left: 20px; }
+.nav-version {
+  font-size: 11px; color: var(--ink4); letter-spacing: 0.08em;
+  text-transform: uppercase; font-weight: 400;
+}
+
+/* ─── PAGE SECTIONS ─── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: calc(100vh - 58px);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 56px 64px;
+  border-bottom: 1px solid var(--paper3);
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--paper3) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper3) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.35;
+}
+.hero-circle {
+  position: absolute;
+  top: -200px; right: -120px;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  border: 1px solid var(--paper3);
+  opacity: 0.6;
+}
+.hero-circle2 {
+  position: absolute;
+  top: -100px; right: -20px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  border: 1px solid var(--paper4);
+  opacity: 0.4;
+}
+.hero-content { position: relative; z-index: 1; max-width: 860px; }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 400; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink3);
+  margin-bottom: 40px;
+  animation: fadein 0.6s ease both;
+}
+.hero-tag-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(56px, 8.5vw, 108px);
+  line-height: 0.93; letter-spacing: -0.035em;
+  color: var(--ink);
+  margin-bottom: 40px;
+  animation: fadein 0.7s 0.1s ease both;
+}
+h1 em { font-style: italic; color: var(--accent); }
+h1 .light { font-style: italic; color: var(--ink3); font-weight: 300; }
+.hero-desc {
+  font-size: 18px; line-height: 1.75;
+  color: var(--ink2); max-width: 600px; font-weight: 300;
+  margin-bottom: 56px;
+  animation: fadein 0.7s 0.2s ease both;
+}
+.hero-stats {
+  display: flex; gap: 0;
+  border-top: 1px solid var(--paper3);
+  padding-top: 40px;
+  animation: fadein 0.7s 0.3s ease both;
+}
+.hstat {
+  padding-right: 40px; margin-right: 40px;
+  border-right: 1px solid var(--paper3);
+}
+.hstat:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+.hstat-num {
+  font-family: var(--serif); font-size: 42px;
+  color: var(--ink); letter-spacing: -0.04em; line-height: 1;
+}
+.hstat-num em { font-style: italic; color: var(--accent); }
+.hstat-lbl { font-size: 12px; color: var(--ink3); margin-top: 6px; letter-spacing: 0.02em; }
+
+@keyframes fadein { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+
+/* ─── CONTENT SECTIONS ─── */
+.content-section {
+  padding: 80px 56px;
+  border-bottom: 1px solid var(--paper3);
+}
+.content-section.tight { padding-top: 56px; padding-bottom: 56px; }
+.content-section.dark {
+  background: var(--ink);
+  color: var(--white);
+}
+.section-eyebrow {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 40px;
+}
+.eyebrow-num {
+  font-size: 12px; font-weight: 300; color: var(--ink4);
+  font-family: var(--serif); font-style: italic;
+}
+.eyebrow-line { flex: 1; max-width: 32px; height: 1px; background: var(--paper3); }
+.eyebrow-text {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3); font-weight: 400;
+}
+.content-section.dark .eyebrow-line { background: rgba(255,255,255,0.15); }
+.content-section.dark .eyebrow-num { color: rgba(255,255,255,0.3); }
+.content-section.dark .eyebrow-text { color: rgba(255,255,255,0.45); }
+
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1.02; letter-spacing: -0.025em;
+  color: var(--ink); margin-bottom: 20px;
+}
+.content-section.dark h2 { color: var(--white); }
+h2 em { font-style: italic; color: var(--accent); }
+.content-section.dark h2 em { color: rgba(180,196,255,0.9); }
+.lead {
+  font-size: 16px; line-height: 1.8; color: var(--ink2);
+  max-width: 680px; font-weight: 300; margin-bottom: 48px;
+}
+.content-section.dark .lead { color: rgba(255,255,255,0.6); }
+
+/* ─── TWO COL ─── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+@media(max-width:860px) {
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── CONCEPT CARD ─── */
+.concept-card {
+  background: var(--white);
+  border: 1px solid var(--paper3);
+  border-radius: 12px;
+  padding: 28px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.concept-card:hover { border-color: var(--ink3); transform: translateY(-2px); }
+.cc-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; font-size: 16px;
+}
+.cc-title { font-weight: 500; font-size: 15px; margin-bottom: 8px; color: var(--ink); }
+.cc-body { font-size: 13px; line-height: 1.7; color: var(--ink3); }
+
+/* ─── AGENT STACK ─── */
+.agent-stack { display: flex; flex-direction: column; gap: 2px; }
+.agent-block {
+  display: grid;
+  grid-template-columns: 260px 1fr auto;
+  gap: 0;
+  border: 1px solid var(--paper3);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--white);
+  transition: border-color 0.18s;
+}
+.agent-block:hover { border-color: var(--ink3); }
+.agent-id {
+  padding: 18px 22px;
+  border-right: 1px solid var(--paper2);
+}
+.agent-tag-pill {
+  display: inline-block; font-size: 10px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 20px; margin-bottom: 6px;
+}
+.agent-name-block { font-weight: 500; font-size: 14px; color: var(--ink); margin-bottom: 3px; }
+.agent-sub { font-size: 11px; color: var(--ink3); line-height: 1.4; }
+.agent-detail {
+  padding: 18px 22px;
+  font-size: 12px; color: var(--ink3); line-height: 1.6;
+}
+.agent-detail strong { color: var(--ink2); font-weight: 500; }
+.agent-model-badge {
+  padding: 18px 22px;
+  display: flex; flex-direction: column; justify-content: center;
+  align-items: flex-end; border-left: 1px solid var(--paper2);
+  min-width: 180px;
+}
+.amb-model { font-size: 12px; font-weight: 500; color: var(--ink2); text-align: right; }
+.amb-cost { font-size: 11px; color: var(--ink3); margin-top: 3px; text-align: right; }
+
+/* supervisor special */
+.agent-block.supervisor {
+  background: var(--paper2);
+  border-style: dashed;
+  border-color: var(--paper4);
+}
+
+/* ─── FLOW DIAGRAM ─── */
+.flow-diagram {
+  background: var(--white);
+  border: 1px solid var(--paper3);
+  border-radius: 16px;
+  padding: 40px;
+  overflow-x: auto;
+}
+.flow-row {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 12px;
+}
+.flow-row:last-child { margin-bottom: 0; }
+.flow-node {
+  flex: 1; min-width: 0;
+  background: var(--paper);
+  border: 1px solid var(--paper3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+}
+.flow-node-title { font-weight: 500; font-size: 13px; margin-bottom: 2px; }
+.flow-node-sub { font-size: 11px; color: var(--ink3); }
+.flow-arrow {
+  flex-shrink: 0; width: 32px; text-align: center;
+  color: var(--ink4); font-size: 16px; line-height: 1;
+}
+.flow-cond {
+  font-size: 10px; color: var(--ink3); text-align: center;
+  padding: 0 8px; flex-shrink: 0;
+}
+
+/* ─── PARAMETER TABLE ─── */
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--paper3);
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--paper3);
+}
+.param-cell {
+  background: var(--white);
+  padding: 20px 22px;
+}
+.param-group {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink4); margin-bottom: 12px; font-weight: 500;
+}
+.param-item {
+  font-size: 13px; color: var(--ink2); padding: 4px 0;
+  border-bottom: 1px solid var(--paper2);
+  display: flex; align-items: center; gap: 8px;
+}
+.param-item:last-child { border-bottom: none; }
+.param-item::before {
+  content: ""; display: block; width: 4px; height: 4px;
+  border-radius: 50%; background: var(--ink4); flex-shrink: 0;
+}
+
+/* ─── INGEST LAYERS ─── */
+.ingest-layers { display: flex; flex-direction: column; gap: 2px; }
+.ingest-layer {
+  display: flex; align-items: stretch;
+  border: 1px solid var(--paper3);
+  border-radius: 10px; overflow: hidden;
+  background: var(--white);
+}
+.il-num {
+  width: 48px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-style: italic;
+  font-size: 20px; color: var(--ink4);
+  border-right: 1px solid var(--paper2);
+  background: var(--paper);
+}
+.il-content { padding: 18px 24px; flex: 1; }
+.il-title { font-weight: 500; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.il-desc { font-size: 12px; color: var(--ink3); line-height: 1.6; }
+.il-example {
+  font-size: 12px; color: var(--accent); margin-top: 6px;
+  font-style: italic; opacity: 0.8;
+}
+
+/* ─── HANDOFF SCHEMA ─── */
+.handoff-list { display: flex; flex-direction: column; gap: 12px; }
+.handoff-item {
+  background: var(--white);
+  border: 1px solid var(--paper3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.handoff-header {
+  padding: 14px 20px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--paper2);
+  display: flex; align-items: center; gap: 12px;
+}
+.handoff-from {
+  font-size: 12px; font-weight: 500; color: var(--ink);
+}
+.handoff-arrow { color: var(--ink4); font-size: 14px; }
+.handoff-to { font-size: 12px; font-weight: 500; color: var(--accent); }
+.handoff-body {
+  padding: 14px 20px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.handoff-field { font-size: 12px; }
+.hf-label {
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink4); margin-bottom: 4px; font-weight: 500;
+}
+.hf-value { color: var(--ink2); line-height: 1.5; }
+.handoff-check {
+  grid-column: 1 / -1;
+  font-size: 11px; color: var(--red);
+  background: var(--red-light);
+  padding: 7px 12px; border-radius: 6px;
+  border-left: 3px solid var(--red);
+}
+
+/* ─── BANCO DE CONCEITOS ─── */
+.pipeline-step {
+  display: flex; gap: 20px; align-items: flex-start;
+  padding: 20px 0; border-bottom: 1px solid var(--paper2);
+}
+.pipeline-step:last-child { border-bottom: none; }
+.ps-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-style: italic; font-size: 16px;
+  flex-shrink: 0; margin-top: 2px;
+}
+.ps-body { flex: 1; }
+.ps-title { font-weight: 500; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+.ps-desc { font-size: 13px; color: var(--ink3); line-height: 1.65; }
+.ps-tools {
+  margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;
+}
+.ps-tool {
+  font-size: 11px; padding: 2px 10px; border-radius: 20px;
+  background: var(--paper2); color: var(--ink3);
+  border: 1px solid var(--paper3);
+}
+
+/* ─── SKILLS GRID ─── */
+.skills-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2px; background: var(--paper3);
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--paper3);
+}
+.skill-cell {
+  background: var(--white);
+  padding: 22px 26px;
+}
+.skill-num {
+  font-family: var(--serif); font-style: italic;
+  font-size: 13px; color: var(--ink4); margin-bottom: 8px;
+}
+.skill-title { font-weight: 500; font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+.skill-desc { font-size: 12px; color: var(--ink3); line-height: 1.6; }
+
+/* ─── QUALITY RUBRIC ─── */
+.rubric-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+@media(max-width:800px){ .rubric-grid { grid-template-columns: 1fr 1fr; } }
+.rubric-card {
+  background: var(--white); border: 1px solid var(--paper3);
+  border-radius: 10px; padding: 18px;
+  text-align: center;
+}
+.rubric-score {
+  font-family: var(--serif); font-size: 32px;
+  color: var(--ink); letter-spacing: -0.03em; line-height: 1;
+  margin-bottom: 6px;
+}
+.rubric-label { font-size: 11px; color: var(--ink3); line-height: 1.4; }
+
+/* ─── SKELETON EXAMPLE ─── */
+.skeleton-box {
+  background: var(--white);
+  border: 1px solid var(--paper3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.skeleton-header {
+  background: var(--paper);
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--paper2);
+  font-size: 12px; font-weight: 500; color: var(--ink3);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.skeleton-code {
+  padding: 24px 22px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 12px; line-height: 1.8;
+  color: var(--ink2);
+  white-space: pre;
+  overflow-x: auto;
+}
+.sk-key { color: var(--accent); }
+.sk-val { color: var(--teal); }
+.sk-str { color: var(--coral); }
+.sk-cmt { color: var(--ink4); font-style: italic; }
+
+/* ─── DOCUMENT SECTION (LLM MODULE) ─── */
+#llm-section { background: var(--paper); }
+.llm-embed-wrap {
+  background: var(--white);
+  border: 1px solid var(--paper3);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.llm-embed-header {
+  background: var(--paper);
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--paper3);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.llm-embed-title { font-size: 13px; font-weight: 500; color: var(--ink2); }
+.llm-embed-badge {
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--accent-light); color: var(--accent);
+  padding: 3px 10px; border-radius: 20px; font-weight: 500;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  padding: 40px 56px;
+  border-top: 1px solid var(--paper3);
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 24px; align-items: end;
+}
+.footer-left { }
+.footer-logo {
+  font-family: var(--serif); font-size: 24px;
+  color: var(--ink); letter-spacing: -0.02em; margin-bottom: 10px;
+}
+.footer-logo em { font-style: italic; color: var(--accent); }
+.footer-desc { font-size: 13px; color: var(--ink3); max-width: 420px; line-height: 1.6; }
+.footer-right { text-align: right; }
+.footer-meta { font-size: 12px; color: var(--ink4); line-height: 1.8; }
+
+/* ─── NEXT DOCS ─── */
+.docs-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width:800px){ .docs-grid { grid-template-columns: 1fr; } }
+.doc-card {
+  background: var(--white);
+  border: 1px solid var(--paper3);
+  border-radius: 12px; padding: 24px;
+  transition: all 0.2s; cursor: default;
+}
+.doc-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.dc-status {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 20px;
+  display: inline-block; margin-bottom: 14px;
+}
+.dc-pending { background: var(--amber-light); color: var(--amber); }
+.dc-next { background: var(--accent-light); color: var(--accent); }
+.dc-future { background: var(--paper2); color: var(--ink3); }
+.dc-title { font-weight: 500; font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+.dc-desc { font-size: 12px; color: var(--ink3); line-height: 1.65; }
+</style>
+</head>
+<body>
+
+<!-- ── NAVIGATION ── -->
+<nav>
+  <a class="nav-logo" href="#" onclick="showPage('home')">Video<em>Flow</em></a>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showPage('home')">Visão Geral</button>
+    <button class="nav-link" onclick="showPage('conceito')">Conceito</button>
+    <button class="nav-link" onclick="showPage('agentes')">Agentes</button>
+    <button class="nav-link" onclick="showPage('parametros')">Parâmetros de DA</button>
+    <button class="nav-link" onclick="showPage('banco')">Banco de Conceitos</button>
+    <button class="nav-link" onclick="showPage('handoff')">Schema de Handoff</button>
+    <button class="nav-link" onclick="showPage('llm')">Modelos LLM</button>
+    <button class="nav-link" onclick="showPage('proximos')">Próximos Docs</button>
+  </div>
+  <div class="nav-right">
+    <span class="nav-version">v0.1 · Brainstorm</span>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <div class="hero">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+      <div class="hero-circle"></div>
+      <div class="hero-circle2"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <div class="hero-tag-dot"></div>
+        Documento de Conceito · Rascunho para Discussão
+      </div>
+      <h1>Video<em>Flow</em><br><span class="light">módulo autônomo<br>de produção autoral</span></h1>
+      <p class="hero-desc">Um sistema de agentes de inteligência artificial com direção de arte real, capaz de produzir vídeos de ponta a ponta — do briefing ao pacote de publicação — sem intervenção humana.</p>
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="hstat-num"><em>6</em></div>
+          <div class="hstat-lbl">agentes especializados</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num"><em>10</em></div>
+          <div class="hstat-lbl">habilidades autorais</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num"><em>4</em></div>
+          <div class="hstat-lbl">cenários de custo LLM</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num">~<em>$0.04</em></div>
+          <div class="hstat-lbl">por minuto de vídeo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">01</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">O que é o VideoFlow</span>
+    </div>
+    <div class="two-col">
+      <div>
+        <h2>Um <em>diretor de arte</em> que nunca dorme</h2>
+        <p class="lead">VideoFlow não é um pipeline de geração de vídeo. É um módulo de inteligência autoral que encapsula o raciocínio criativo de um diretor humano em uma cadeia de agentes especializados que se comunicam através de um envelope de contexto imutável.</p>
+        <p style="font-size:14px;color:var(--ink3);line-height:1.75">O ponto central não é o fluxo técnico — é a <strong style="color:var(--ink2);font-weight:500">direção de arte</strong>. Cada decisão visual, sonora e narrativa é derivada de um vetor de parâmetros que o Orquestrador define no início e que todos os agentes carregam até o pacote final de publicação.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="concept-card">
+          <div class="cc-icon" style="background:var(--accent-light)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#1840e8" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="#1840e8" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="cc-title">Autônomo e acoplável</div>
+          <div class="cc-body">Projetado para se integrar a qualquer sistema empresarial que demande produção de vídeo, via API de briefing e entrega de pacote final.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon" style="background:var(--teal-light)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="#0b7a5c" stroke-width="1.5"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="#0b7a5c" stroke-width="1.5"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="#0b7a5c" stroke-width="1.5"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="#0b7a5c" stroke-width="1.5"/></svg>
+          </div>
+          <div class="cc-title">Banco de conceitos vivo</div>
+          <div class="cc-body">Aprende com cada produção. Vídeos de referência são ingeridos e transformados em esqueletos conceituais reutilizáveis por similaridade semântica.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon" style="background:var(--coral-light)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12L8 4l6 8H2z" stroke="#d04010" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="cc-title">Custo otimizável</div>
+          <div class="cc-body">Cada agente usa o modelo LLM mais adequado ao seu papel cognitivo. Prompt caching reduz até 90% do custo de contexto repetido.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-section dark">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">02</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Princípio central</span>
+    </div>
+    <h2>A diferença entre <em>automatizar</em><br>e <em>criar</em></h2>
+    <div class="three-col" style="margin-top:40px">
+      <div style="padding:28px;background:rgba(255,255,255,0.05);border-radius:12px;border:1px solid rgba(255,255,255,0.1)">
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:14px">Ferramentas convencionais</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.8);line-height:1.7;font-weight:300">Geram conteúdo. Executam templates. Produzem outputs tecnicamente corretos sem nenhuma intenção declarável.</div>
+      </div>
+      <div style="padding:28px;background:rgba(24,64,232,0.18);border-radius:12px;border:1px solid rgba(100,140,255,0.3)">
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(140,170,255,.7);margin-bottom:14px">VideoFlow</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.9);line-height:1.7;font-weight:300">Toma decisões criativas com justificativa. Cada corte, cada cor, cada trilha existe por uma razão que o sistema consegue articular.</div>
+      </div>
+      <div style="padding:28px;background:rgba(255,255,255,0.05);border-radius:12px;border:1px solid rgba(255,255,255,0.1)">
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:14px">O resultado</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.8);line-height:1.7;font-weight:300">Vídeos com identidade, não apenas com qualidade técnica. Coerência de marca preservada mesmo sem supervisão humana por produção.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-home -->
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: CONCEITO
+════════════════════════════════════════════════ -->
+<div class="page" id="page-conceito">
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">01</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Definição conceitual</span>
+    </div>
+    <h2>VideoFlow é uma <em>gramática</em>,<br>não um gerador</h2>
+    <p class="lead">O módulo opera em três camadas sobrepostas: uma identidade de agente estável (system prompt estrutural), uma memória de marca recuperada por similaridade, e um contexto de produção ativo. A interseção das três é onde a direção de arte acontece.</p>
+
+    <div class="ingest-layers" style="margin-bottom:48px">
+      <div class="ingest-layer">
+        <div class="il-num">1</div>
+        <div class="il-content">
+          <div class="il-title">System prompt estrutural — identidade imutável do agente</div>
+          <div class="il-desc">Injetado uma vez na criação do agente. Define sua postura criativa, valores estéticos e regras invioláveis. Nunca é sobrescrito pelo contexto de produção.</div>
+          <div class="il-example">"Você é um diretor de arte. Toda decisão visual deve ter uma intenção declarável."</div>
+        </div>
+      </div>
+      <div class="ingest-layer">
+        <div class="il-num">2</div>
+        <div class="il-content">
+          <div class="il-title">Memória de marca — RAG / knowledge base por cliente</div>
+          <div class="il-desc">Guia visual, tom de voz, paleta, exemplos aprovados e restrições. Recuperada por similaridade semântica ao briefing atual. Muda por cliente, não por produção.</div>
+          <div class="il-example">"Para esta empresa: cores frias, ritmo lento, voz em off feminina. Nunca usar música eletrônica."</div>
+        </div>
+      </div>
+      <div class="ingest-layer">
+        <div class="il-num">3</div>
+        <div class="il-content">
+          <div class="il-title">Contexto de produção — runtime específico</div>
+          <div class="il-desc">Briefing do vídeo atual: objetivo, canal, duração, público-alvo. Esqueleto recuperado do banco de conceitos. Ativo apenas durante a produção em curso.</div>
+          <div class="il-example">"Vídeo 60s para Instagram Reels. Produto de skincare. Público 25–35. Tom: aspiracional discreto."</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-bottom:20px">10 habilidades <em>autorais</em> do agente</h2>
+    <p class="lead">Não são capacidades técnicas — são disposições cognitivas. A diferença entre um agente que executa e um agente que cria.</p>
+
+    <div class="skills-grid">
+      <div class="skill-cell">
+        <div class="skill-num">01</div>
+        <div class="skill-title">Leitura de contexto</div>
+        <div class="skill-desc">Entender objetivo, público e canal antes de qualquer decisão criativa. Para quem? Onde vai aparecer? Em que estado emocional o espectador vai consumir?</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">02</div>
+        <div class="skill-title">Intenção narrativa</div>
+        <div class="skill-desc">Saber o que o vídeo precisa fazer — emocional e racionalmente. Todo vídeo tem uma função: informar, converter, emocionar, provocar. O agente declara isso antes de produzir.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">03</div>
+        <div class="skill-title">Pensamento visual</div>
+        <div class="skill-desc">Composição, hierarquia visual e relação figura-fundo. Não é escolher imagem bonita — é entender onde o olho vai primeiro e o que o fundo comunica antes do texto ser lido.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">04</div>
+        <div class="skill-title">Senso de ritmo</div>
+        <div class="skill-desc">O tempo de um corte é uma decisão tão importante quanto o conteúdo do shot. Tensão, respiração e momentum. O agente trata o tempo de tela como matéria-prima criativa.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">05</div>
+        <div class="skill-title">Gestão de identidade visual</div>
+        <div class="skill-desc">Guardar a coerência de marca em todas as decisões estéticas. Toda liberdade criativa opera dentro de fronteiras que definem quem é aquela organização.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">06</div>
+        <div class="skill-title">Linguagem sonora</div>
+        <div class="skill-desc">Som não é decoração. Um silêncio no momento certo vale mais que trilha o tempo todo. O agente trata o áudio como elemento de construção de significado.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">07</div>
+        <div class="skill-title">Adaptação de formato</div>
+        <div class="skill-desc">Reformatar para diferentes plataformas sem perder a essência. Adaptar não é cortar bordas — é repensar a composição para cada canvas e comportamento de consumo.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">08</div>
+        <div class="skill-title">Autocrítica e revisão</div>
+        <div class="skill-desc">Avaliar o próprio output contra critérios de qualidade definidos antes de entregar. O agente tem um rubric interno que não depende de feedback externo para funcionar.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">09</div>
+        <div class="skill-title">Referenciamento cultural</div>
+        <div class="skill-desc">Uso consciente de referências visuais e cinematográficas. Não para copiar, mas para dialogar. O agente conhece a gramática visual contemporânea e a usa com propósito.</div>
+      </div>
+      <div class="skill-cell">
+        <div class="skill-num">10</div>
+        <div class="skill-title">Escrita audiovisual</div>
+        <div class="skill-desc">Roteirizar com consciência de tempo de tela e impacto. Roteiro audiovisual não é texto — é tempo, imagem e som escritos simultaneamente em segundos de tela.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:24px 28px;background:var(--ink);border-radius:12px;color:var(--white)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px">Meta-habilidade</div>
+      <div style="font-family:var(--serif);font-size:22px;color:var(--white);letter-spacing:-.02em;margin-bottom:8px">Julgamento criativo</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.65);line-height:1.7;max-width:640px">A soma das dez habilidades não produz um agente autoral. O que produz é a capacidade de saber quando seguir a regra e quando quebrá-la intencionalmente — e conseguir justificar cada escolha. É o que distingue um agente técnico de um agente autoral.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: AGENTES
+════════════════════════════════════════════════ -->
+<div class="page" id="page-agentes">
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">03</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Sistema de agentes</span>
+    </div>
+    <h2>6 agentes, <em>uma</em> direção de arte</h2>
+    <p class="lead">Cada agente é especialista em seu domínio. O Orquestrador define o vetor de DA no início e esse vetor viaja em todos os handoffs — nenhum agente perde a intenção original.</p>
+
+    <div class="agent-stack">
+
+      <div class="agent-block">
+        <div class="agent-id">
+          <span class="agent-tag-pill" style="background:#eeeeff;color:#534AB7">Orquestrador</span>
+          <div class="agent-name-block">Diretor de Arte</div>
+          <div class="agent-sub">Camada 1 · alta complexidade criativa</div>
+        </div>
+        <div class="agent-detail">
+          <strong>IN:</strong> briefing · memória de marca · banco de conceitos<br>
+          <strong>OUT:</strong> esqueleto de produção · vetor de DA · fila de tarefas<br>
+          <strong>TOOLS:</strong> similarity search · parser de briefing · gerador de vetor de DA<br>
+          <strong>PAPEL:</strong> Único agente com visão completa do projeto. Define a intenção criativa que todos os outros seguem.
+        </div>
+        <div class="agent-model-badge">
+          <div class="amb-model">Claude Sonnet 4.6</div>
+          <div class="amb-cost">$3.00 / $15.00 /1M</div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="agent-id">
+          <span class="agent-tag-pill" style="background:#e0f5ee;color:#0F6E56">Referências</span>
+          <div class="agent-name-block">Gerente de Referências Visuais</div>
+          <div class="agent-sub">Camada 2 · avaliação multimodal</div>
+        </div>
+        <div class="agent-detail">
+          <strong>IN:</strong> esqueleto · vetor de DA · contexto de cada cena<br>
+          <strong>OUT:</strong> mapa visual por cena — elementos prontos + lista de lacunas<br>
+          <strong>TOOLS:</strong> web search · YouTube/Vimeo API · VLM para avaliação de adequação visual<br>
+          <strong>PAPEL:</strong> Fragmenta o esqueleto em cenas e busca ativos existentes. Decide o que falta para o próximo agente.
+        </div>
+        <div class="agent-model-badge">
+          <div class="amb-model">Gemini 2.5 Flash</div>
+          <div class="amb-cost">$0.30 / $2.50 /1M</div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="agent-id">
+          <span class="agent-tag-pill" style="background:#fceee8;color:#993C1D">Elementos</span>
+          <div class="agent-name-block">Gerente de Elementos Visuais</div>
+          <div class="agent-sub">Camada 3 · condicional (só se há lacunas)</div>
+        </div>
+        <div class="agent-detail">
+          <strong>IN:</strong> lista de lacunas · especificação estética · parâmetros de DA<br>
+          <strong>OUT:</strong> kits de assets criados / adaptados prontos para edição<br>
+          <strong>TOOLS:</strong> Getty · Envato · Pexels · Storyblocks · DALL-E/Flux · motion templates<br>
+          <strong>PAPEL:</strong> Cria ou adapta o que o Gerente de Referências não encontrou. Só é invocado quando há lacunas reais.
+        </div>
+        <div class="agent-model-badge">
+          <div class="amb-model">Claude Haiku 4.5</div>
+          <div class="amb-cost">$0.25 / $1.25 /1M</div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="agent-id">
+          <span class="agent-tag-pill" style="background:#e6f1fb;color:#185FA5">Editor</span>
+          <div class="agent-name-block">Editor de Vídeo</div>
+          <div class="agent-sub">Camada 4 · geração de código / JSON de edição</div>
+        </div>
+        <div class="agent-detail">
+          <strong>IN:</strong> asset_map completo · esqueleto com timing · instruções de DA · trilha<br>
+          <strong>OUT:</strong> vídeo montado em todas as proporções (16:9 · 9:16 · 1:1)<br>
+          <strong>TOOLS:</strong> Remotion · FFmpeg · RunwayML · ElevenLabs · Creatomate · gerador de legenda SRT<br>
+          <strong>PAPEL:</strong> Transforma o asset_map em produto final seguindo o esqueleto. Output é código de edição estruturado.
+        </div>
+        <div class="agent-model-badge">
+          <div class="amb-model">Claude Haiku 4.5</div>
+          <div class="amb-cost">$0.25 / $1.25 /1M</div>
+        </div>
+      </div>
+
+      <div class="agent-block">
+        <div class="agent-id">
+          <span class="agent-tag-pill" style="background:#faeeda;color:#854F0B">Publicação</span>
+          <div class="agent-name-block">Assistente de Publicação de Mídia</div>
+          <div class="agent-sub">Camada 5 · geração de copy e metadata</div>
+        </div>
+        <div class="agent-detail">
+          <strong>IN:</strong> vídeo final · briefing original · parâmetros de canal e marca<br>
+          <strong>OUT:</strong> pacote completo — título · descrição · hashtags · thumbnail · legenda · agendamento<br>
+          <strong>TOOLS:</strong> gerador de copy por plataforma · APIs: YouTube · Instagram · LinkedIn · TikTok<br>
+          <strong>PAPEL:</strong> Fecha o ciclo com metadata que reforça a intenção do vídeo na linguagem de cada canal.
+        </div>
+        <div class="agent-model-badge">
+          <div class="amb-model">Claude Haiku 4.5</div>
+          <div class="amb-cost">$0.25 / $1.25 /1M</div>
+        </div>
+      </div>
+
+      <div class="agent-block supervisor">
+        <div class="agent-id">
+          <span class="agent-tag-pill" style="background:#fceaea;color:#A32D2D">Supervisor</span>
+          <div class="agent-name-block">Supervisor de Qualidade</div>
+          <div class="agent-sub">Transversal · 4–5 checkpoints por produção</div>
+        </div>
+        <div class="agent-detail">
+          <strong>PAPEL:</strong> Agente transversal. Inspeciona o output de cada etapa antes de liberar para o próximo agente.<br>
+          <strong>CRITÉRIOS:</strong> rubric derivado do vetor de DA — não usa critério próprio<br>
+          <strong>AÇÕES:</strong> aprova · solicita revisão com feedback estruturado · escala para humano<br>
+          <strong>OUTPUT:</strong> scorecard auditável + log de decisões que retroalimenta o banco de conceitos
+        </div>
+        <div class="agent-model-badge">
+          <div class="amb-model">Claude Sonnet 4.6</div>
+          <div class="amb-cost">+ prompt caching (−90%)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: PARÂMETROS
+════════════════════════════════════════════════ -->
+<div class="page" id="page-parametros">
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">04</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Parâmetros de direção de arte</span>
+    </div>
+    <h2>O <em>vetor de DA</em> que guia<br>todas as decisões</h2>
+    <p class="lead">O Orquestrador monta um vetor de parâmetros antes de cada produção. Esse vetor é o que transforma um agente genérico em um diretor com ponto de vista. Cada parâmetro é uma escala — não um checkbox.</p>
+
+    <div class="param-grid" style="margin-bottom:40px">
+      <div class="param-cell">
+        <div class="param-group">Narrativos</div>
+        <div class="param-item">tom emocional</div>
+        <div class="param-item">arco dramático</div>
+        <div class="param-item">ponto de vista (narrador)</div>
+        <div class="param-item">densidade de informação</div>
+        <div class="param-item">tensão / resolução</div>
+        <div class="param-item">abertura emocional</div>
+        <div class="param-item">call to action</div>
+      </div>
+      <div class="param-cell">
+        <div class="param-group">Visuais</div>
+        <div class="param-item">paleta cromática</div>
+        <div class="param-item">temperatura de cor</div>
+        <div class="param-item">estilo de imagem</div>
+        <div class="param-item">hierarquia visual</div>
+        <div class="param-item">tipografia em cena</div>
+        <div class="param-item">densidade de frame</div>
+        <div class="param-item">movimento de câmera</div>
+      </div>
+      <div class="param-cell">
+        <div class="param-group">Sonoros</div>
+        <div class="param-item">gênero musical</div>
+        <div class="param-item">energia da trilha</div>
+        <div class="param-item">presença de voz</div>
+        <div class="param-item">uso do silêncio</div>
+        <div class="param-item">sound design</div>
+        <div class="param-item">sincronismo trilha / corte</div>
+        <div class="param-item">idioma / sotaque</div>
+      </div>
+      <div class="param-cell">
+        <div class="param-group">Formato</div>
+        <div class="param-item">duração total</div>
+        <div class="param-item">aspect ratio</div>
+        <div class="param-item">ritmo de corte</div>
+        <div class="param-item">plataforma alvo</div>
+        <div class="param-item">com / sem legenda</div>
+      </div>
+      <div class="param-cell">
+        <div class="param-group">Marca</div>
+        <div class="param-item">personalidade</div>
+        <div class="param-item">restrições visuais</div>
+        <div class="param-item">tom de voz</div>
+        <div class="param-item">elementos obrigatórios</div>
+        <div class="param-item">nível de risco aceito</div>
+      </div>
+      <div class="param-cell">
+        <div class="param-group">Meta-parâmetros</div>
+        <div class="param-item">originalidade</div>
+        <div class="param-item">referência cultural</div>
+        <div class="param-item">grau de convenção</div>
+        <div class="param-item">consistência de série</div>
+        <div class="param-item">nível de ousadia criativa</div>
+      </div>
+    </div>
+
+    <div style="background:var(--paper2);border-radius:12px;padding:28px;border:1px solid var(--paper3)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:14px">Exemplo de vetor de DA gerado pelo Orquestrador</div>
+      <div class="skeleton-code" style="padding:0;background:none;border-radius:0">
+<span class="sk-key">tom_emocional</span>: <span class="sk-str">"esperança contida → confiança"</span>
+<span class="sk-key">energia_musical</span>: <span class="sk-val">0.35</span>  <span class="sk-cmt">// 0=silêncio, 1=alta energia</span>
+<span class="sk-key">ritmo_de_corte</span>: <span class="sk-str">"lento-médio, 4–6s por cena"</span>
+<span class="sk-key">temperatura_visual</span>: <span class="sk-str">"fria, predominância de azuis e cinzas"</span>
+<span class="sk-key">presenca_de_voz</span>: <span class="sk-str">"voz em off feminina, entrada no 3s"</span>
+<span class="sk-key">originalidade</span>: <span class="sk-val">0.55</span>  <span class="sk-cmt">// 0=convencional, 1=experimental</span>
+<span class="sk-key">nivel_de_risco_DA</span>: <span class="sk-str">"conservador"</span>
+<span class="sk-key">esqueleto_ref</span>: <span class="sk-str">"banco://conceitos/mini-doc-institucional-v2"</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: BANCO DE CONCEITOS
+════════════════════════════════════════════════ -->
+<div class="page" id="page-banco">
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">05</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Banco de Conceitos</span>
+    </div>
+    <h2>O repertório que cresce<br>com cada <em>produção</em></h2>
+    <p class="lead">O banco não armazena vídeos — armazena a gramática dos vídeos. Cada esqueleto é um padrão narrativo reutilizável que o Orquestrador recupera por similaridade semântica com o briefing atual.</p>
+
+    <div class="two-col" style="gap:48px;margin-bottom:48px">
+      <div>
+        <h2 style="font-size:22px;margin-bottom:24px">Pipeline de ingestão automática</h2>
+        <div class="pipeline-step">
+          <div class="ps-num">1</div>
+          <div class="ps-body">
+            <div class="ps-title">Entrada: link de vídeo</div>
+            <div class="ps-desc">YouTube, Vimeo, arquivo local, Google Drive. O sistema aceita qualquer fonte acessível via URL.</div>
+            <div class="ps-tools"></div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="ps-num">2</div>
+          <div class="ps-body">
+            <div class="ps-title">Extração multimodal automática</div>
+            <div class="ps-desc">Transcrição, frames-chave, detecção de cenas, análise visual e de áudio, timing de cortes.</div>
+            <div class="ps-tools">
+              <span class="ps-tool">Whisper</span>
+              <span class="ps-tool">Computer Vision</span>
+              <span class="ps-tool">VLM</span>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="ps-num">3</div>
+          <div class="ps-body">
+            <div class="ps-title">Abstração conceitual via LLM</div>
+            <div class="ps-desc">Converte dados brutos em esqueleto conceitual: estrutura narrativa, padrão de ritmo, arquitetura visual, intenção emocional, estratégia de abertura e resolução.</div>
+            <div class="ps-tools">
+              <span class="ps-tool">LLM de análise</span>
+              <span class="ps-tool">Extrator de esqueleto</span>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="ps-num">4</div>
+          <div class="ps-body">
+            <div class="ps-title">Registro vetorial no banco</div>
+            <div class="ps-desc">Cada vídeo vira um conceito com embedding + metadados: tipo, setor, plataforma, esqueleto estrutural, parâmetros de DA inferidos, tags semânticas.</div>
+            <div class="ps-tools">
+              <span class="ps-tool">Vector DB</span>
+              <span class="ps-tool">Embedding model</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 style="font-size:22px;margin-bottom:24px">O que é um esqueleto</h2>
+        <div class="skeleton-box">
+          <div class="skeleton-header">Exemplo · Mini-doc institucional 60s</div>
+          <div class="skeleton-code"><span class="sk-key">tipo</span>: <span class="sk-str">"mini-doc institucional"</span>
+<span class="sk-key">duracao</span>: <span class="sk-str">"60s"</span>
+<span class="sk-key">plataforma</span>: <span class="sk-str">"YouTube, LinkedIn"</span>
+
+<span class="sk-key">abertura</span>: {
+  <span class="sk-key">tipo</span>: <span class="sk-str">"problema + dado de impacto"</span>,
+  <span class="sk-key">duracao</span>: <span class="sk-val">8</span>, <span class="sk-cmt">// segundos</span>
+  <span class="sk-key">visual</span>: <span class="sk-str">"close humano + texto overlay"</span>
+}
+<span class="sk-key">desenvolvimento</span>: {
+  <span class="sk-key">estrutura</span>: <span class="sk-str">"3 pilares com corte seco"</span>,
+  <span class="sk-key">duracao</span>: <span class="sk-val">37</span>,
+  <span class="sk-key">transicao</span>: <span class="sk-str">"corte direto, sem fade"</span>
+}
+<span class="sk-key">resolucao</span>: {
+  <span class="sk-key">tipo</span>: <span class="sk-str">"retorno à imagem de abertura"</span>,
+  <span class="sk-key">duracao</span>: <span class="sk-val">10</span>,
+  <span class="sk-key">transformacao</span>: <span class="sk-str">"visual mais aberto/luminoso"</span>
+}
+<span class="sk-key">cta</span>: {
+  <span class="sk-key">tipo</span>: <span class="sk-str">"overlay de texto, sem voz"</span>,
+  <span class="sk-key">duracao</span>: <span class="sk-val">5</span>
+}
+<span class="sk-key">ritmo</span>: <span class="sk-str">"lento-médio, cortes 4–6s"</span>
+<span class="sk-key">trilha</span>: <span class="sk-str">"instrumental, entrada no 3s"</span>
+<span class="sk-key">tom</span>: <span class="sk-str">"esperança contida → confiança"</span></div>
+        </div>
+        <p style="font-size:12px;color:var(--ink3);margin-top:12px;line-height:1.6">O esqueleto não é o conteúdo do vídeo — é sua gramática. Agnóstico de tema: um padrão narrativo excelente de fintech pode ser a estrutura perfeita para um vídeo de agronegócio.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: HANDOFF
+════════════════════════════════════════════════ -->
+<div class="page" id="page-handoff">
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">06</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Schema de handoff</span>
+    </div>
+    <h2>O envelope que <em>nunca perde</em><br>a intenção original</h2>
+    <p class="lead">Cada agente recebe o envelope completo e adiciona sua camada. O núcleo imutável — briefing, vetor de DA e esqueleto — viaja em todos os handoffs. Nenhum agente pode sobrescrevê-lo.</p>
+
+    <div style="background:var(--ink);border-radius:12px;padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;gap:16px">
+      <div style="flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:2px"></div>
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px">Núcleo imutável — presente em todos os handoffs</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.8);font-family:monospace">production_id · briefing_original · vetor_DA · esqueleto · memoria_de_marca</div>
+      </div>
+    </div>
+
+    <div class="handoff-list">
+      <div class="handoff-item">
+        <div class="handoff-header">
+          <span class="handoff-from">Orquestrador</span>
+          <span class="handoff-arrow">→</span>
+          <span class="handoff-to">Gerente de Referências Visuais</span>
+        </div>
+        <div class="handoff-body">
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">mapa_de_cenas [ { id, descrição, intenção_emocional, tipo_de_visual_necessário } ]</div>
+          </div>
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">critérios_de_busca { estilo, paleta, energia, restrições_de_marca }</div>
+          </div>
+          <div class="handoff-check">Supervisor verifica: o mapa_de_cenas cobre o esqueleto completo sem gaps?</div>
+        </div>
+      </div>
+
+      <div class="handoff-item">
+        <div class="handoff-header">
+          <span class="handoff-from">Gerente de Referências</span>
+          <span class="handoff-arrow">→</span>
+          <span class="handoff-to">Gerente de Elementos (somente lacunas)</span>
+        </div>
+        <div class="handoff-body">
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">elementos_encontrados [ { cena_id, tipo, url, score_adequação } ]</div>
+          </div>
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">lacunas [ { cena_id, tipo_de_visual, descrição_detalhada, urgência } ]</div>
+          </div>
+          <div class="handoff-check">Supervisor verifica: score_adequação de cada elemento ≥ limiar definido no vetor de DA?</div>
+        </div>
+      </div>
+
+      <div class="handoff-item">
+        <div class="handoff-header">
+          <span class="handoff-from">Gerente de Elementos</span>
+          <span class="handoff-arrow">→</span>
+          <span class="handoff-to">Editor de Vídeo</span>
+        </div>
+        <div class="handoff-body">
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">kits_criados [ { cena_id, tipo, arquivo, fonte, adaptações_realizadas } ]</div>
+          </div>
+          <div class="handoff-field">
+            <div class="hf-label">Merge</div>
+            <div class="hf-value">elementos_encontrados + kits_criados → asset_map completo por cena</div>
+          </div>
+          <div class="handoff-check">Supervisor verifica: consistência visual e estética do asset_map completo contra vetor de DA</div>
+        </div>
+      </div>
+
+      <div class="handoff-item">
+        <div class="handoff-header">
+          <span class="handoff-from">Editor de Vídeo</span>
+          <span class="handoff-arrow">→</span>
+          <span class="handoff-to">Assistente de Publicação</span>
+        </div>
+        <div class="handoff-body">
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">arquivos_exportados [ { proporção, resolução, duração, path } ]</div>
+          </div>
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">timeline_log { cortes, trilha, transições, legendas } · thumbnail_candidatos</div>
+          </div>
+          <div class="handoff-check">Supervisor verifica: ritmo, hierarquia visual e coerência emocional com o esqueleto original</div>
+        </div>
+      </div>
+
+      <div class="handoff-item">
+        <div class="handoff-header">
+          <span class="handoff-from">Assistente de Publicação</span>
+          <span class="handoff-arrow">→</span>
+          <span class="handoff-to">Entrega final</span>
+        </div>
+        <div class="handoff-body">
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">metadata_publicação { título, descrição, hashtags, thumbnail_escolhida }</div>
+          </div>
+          <div class="handoff-field">
+            <div class="hf-label">Adiciona</div>
+            <div class="hf-value">variações_por_plataforma + scorecard_supervisor + log de decisões auditável</div>
+          </div>
+          <div class="handoff-check">Supervisor assina o envelope final antes da entrega — sem assinatura, não publica</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: LLM
+════════════════════════════════════════════════ -->
+<div class="page" id="page-llm">
+  <div class="content-section" id="llm-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">07</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Seleção de modelos LLM</span>
+    </div>
+    <h2>O modelo <em>certo</em> para<br>cada papel cognitivo</h2>
+    <p class="lead">O princípio central é não usar modelo de $15/M onde um de $0.25/M resolve. A divisão foi feita por exigência cognitiva real de cada agente — não por status do modelo. Com prompt caching ativo, o custo médio por produção cai até 94% em relação a um stack all-premium.</p>
+
+    <div class="llm-embed-wrap">
+      <div class="llm-embed-header">
+        <span class="llm-embed-title">Matriz interativa de modelos · Cenários · Estimador de custo por minuto</span>
+        <span class="llm-embed-badge">Módulo interativo</span>
+      </div>
+      <div id="llm-app-mount"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════
+     PAGE: PRÓXIMOS DOCUMENTOS
+════════════════════════════════════════════════ -->
+<div class="page" id="page-proximos">
+  <div class="content-section">
+    <div class="section-eyebrow">
+      <span class="eyebrow-num">08</span>
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Documentos a produzir</span>
+    </div>
+    <h2>Do conceito à <em>especificação</em><br>técnica</h2>
+    <p class="lead">Este documento é o ponto de partida. A partir das discussões geradas por ele, os documentos abaixo serão produzidos em ordem de dependência.</p>
+
+    <div class="docs-grid">
+      <div class="doc-card">
+        <span class="dc-status dc-next">Próximo</span>
+        <div class="dc-title">Especificação de Agentes</div>
+        <div class="dc-desc">System prompts completos de cada agente. Estrutura de memória. Critérios de julgamento do Supervisor. Rubric de qualidade por tipo de vídeo.</div>
+      </div>
+      <div class="doc-card">
+        <span class="dc-status dc-next">Próximo</span>
+        <div class="dc-title">Schema do Envelope de Handoff</div>
+        <div class="dc-desc">Definição formal do objeto JSON que circula entre agentes. Tipos, validações, campos obrigatórios vs opcionais. Protocolo de erro e escalada humana.</div>
+      </div>
+      <div class="doc-card">
+        <span class="dc-status dc-next">Próximo</span>
+        <div class="dc-title">Arquitetura do Banco de Conceitos</div>
+        <div class="dc-desc">Schema do esqueleto. Pipeline de ingestão de vídeo. Modelo de embedding. Estratégia de retrieval e versionamento de conceitos.</div>
+      </div>
+      <div class="doc-card">
+        <span class="dc-status dc-pending">Em discussão</span>
+        <div class="dc-title">Guia de Integração com Sistemas</div>
+        <div class="dc-desc">API de briefing. Webhooks de entrega. Autenticação. Rate limits. Documentação para times que vão acoplar o VideoFlow a seus sistemas existentes.</div>
+      </div>
+      <div class="doc-card">
+        <span class="dc-status dc-pending">Em discussão</span>
+        <div class="dc-title">Configuração de Memória de Marca</div>
+        <div class="dc-desc">Como onboardar uma nova marca no sistema. Estrutura do knowledge base. Processo de aprovação de exemplos. Atualização incremental.</div>
+      </div>
+      <div class="doc-card">
+        <span class="dc-status dc-future">Futuro</span>
+        <div class="dc-title">Plano de Avaliação e Benchmarks</div>
+        <div class="dc-desc">Como medir qualidade de vídeo produzido autonomamente. Métricas de aderência à DA. A/B testing de configurações de agentes. Feedback loop humano.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <div class="footer-logo">Video<em>Flow</em></div>
+    <div class="footer-desc">Módulo autônomo de produção autoral de vídeo. Documento de conceito para discussão interna. Versão 0.1 — sujeito a revisão após alinhamentos.</div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-meta">
+      Versão 0.1 · Brainstorm<br>
+      Março 2026<br>
+      Gerado com Claude Sonnet 4.6
+    </div>
+  </div>
+</footer>
+
+
+<script>
+// ─── NAV ────────────────────────────────────────────────────────────────────
+const PAGES = ['home','conceito','agentes','parametros','banco','handoff','llm','proximos'];
+
+function showPage(id) {
+  PAGES.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if(el) el.classList.toggle('active', p === id);
+  });
+  document.querySelectorAll('.nav-link').forEach((el, i) => {
+    el.classList.toggle('active', PAGES[i] === id);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if(id === 'llm' && !window._llmMounted) mountLLM();
+}
+
+// ─── MOUNT LLM MODULE ───────────────────────────────────────────────────────
+function mountLLM() {
+  window._llmMounted = true;
+  const mount = document.getElementById('llm-app-mount');
+
+  // Inline the full LLM app styles and HTML
+  const llmStyle = document.createElement('style');
+  llmStyle.textContent = `
+  #llm-app { font-family: "Instrument Sans", system-ui, sans-serif; padding: 0; }
+  #llm-app *, #llm-app *::before, #llm-app *::after { box-sizing: border-box; }
+  #llm-app .ln { padding: 28px 28px 16px; }
+  #llm-app .la-nav { display: flex; gap: 4px; margin-bottom: 24px; flex-wrap: wrap; }
+  #llm-app .la-tab {
+    padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 13px;
+    border: 1px solid #dedad0; background: none; color: #78746c;
+    transition: all .15s; font-family: inherit;
+  }
+  #llm-app .la-tab:hover { background: #eae6dc; }
+  #llm-app .la-tab.on { background: #0c0b09; color: #fdfcf8; border-color: #0c0b09; }
+  #llm-app .la-section { display: none; padding: 0 28px 28px; }
+  #llm-app .la-section.on { display: block; }
+
+  #llm-app table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  #llm-app th { font-size: 10px; letter-spacing:.06em; text-transform:uppercase; color:#b0ab9f;
+    border-bottom:1px solid #dedad0; padding:8px 12px; text-align:left; white-space:nowrap; font-weight:500; }
+  #llm-app td { padding:12px 12px; border-bottom:1px solid #eae6dc; vertical-align:middle; }
+  #llm-app tr:last-child td { border-bottom:none; }
+  #llm-app tr:hover td { background:#f4f0e8; }
+  #llm-app .tier { font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-block; }
+  #llm-app .tp { background:#ece9ff;color:#534AB7; }
+  #llm-app .tm { background:#e3f2f8;color:#185FA5; }
+  #llm-app .tb { background:#e0f5ee;color:#0b7a5c; }
+  #llm-app .tf { background:#fdf0dc;color:#a85c08; }
+
+  #llm-app .sc-bar { display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap; }
+  #llm-app .sc-b { padding:7px 16px;border-radius:6px;cursor:pointer;font-size:12px;
+    border:1px solid #dedad0;background:#fff;color:#38352f;transition:all .15s;font-family:inherit; }
+  #llm-app .sc-b:hover { border-color:#78746c; }
+  #llm-app .sc-b.on { background:#0c0b09;color:#fff;border-color:#0c0b09; }
+
+  #llm-app .ag-row { display:grid;grid-template-columns:220px 1fr 160px 100px;border:1px solid #dedad0;
+    border-radius:8px;margin-bottom:6px;overflow:hidden;background:#fff;font-size:12px; }
+  #llm-app .ag-row:hover { border-color:#78746c; }
+  #llm-app .ag-a { padding:14px 16px;border-right:1px solid #eae6dc; }
+  #llm-app .ag-n { font-weight:500;font-size:13px;margin-bottom:3px; }
+  #llm-app .ag-s { font-size:11px;color:#78746c; }
+  #llm-app .ag-d { padding:14px 16px;border-right:1px solid #eae6dc;color:#78746c;line-height:1.6; }
+  #llm-app .ag-m { padding:14px 16px;border-right:1px solid #eae6dc; }
+  #llm-app .ag-m .mn { font-weight:500;font-size:12px; }
+  #llm-app .ag-m .ms { font-size:11px;color:#b0ab9f; }
+  #llm-app .ag-c { padding:14px 16px;text-align:right; }
+  #llm-app .ag-c .cv { font-size:14px;font-weight:500; }
+  #llm-app .ag-c .cs { font-size:10px;color:#b0ab9f; }
+  #llm-app .tot-row { background:#eae6dc!important;border-top:2px solid #dedad0; }
+  #llm-app .tot-row td,.ag-row.tot { font-weight:500; }
+
+  #llm-app .cmp-grid { display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:20px; }
+  #llm-app .cmp-card { background:#fff;border:1px solid #dedad0;border-radius:10px;padding:16px; }
+  #llm-app .cmp-card.best { border:2px solid #0b7a5c; }
+  #llm-app .cmp-t { font-weight:500;font-size:13px;margin-bottom:3px; }
+  #llm-app .cmp-s { font-size:11px;color:#78746c;margin-bottom:12px;line-height:1.4; }
+  #llm-app .cmp-p { font-size:22px;font-weight:500;letter-spacing:-.02em; }
+  #llm-app .cmp-u { font-size:10px;color:#b0ab9f;margin-top:2px; }
+  #llm-app .cmp-sv { font-size:11px;margin-top:8px;padding:2px 8px;border-radius:20px;display:inline-block; }
+  #llm-app .sv-green { background:#e0f5ee;color:#0b7a5c; }
+  #llm-app .sv-base { background:#eae6dc;color:#78746c; }
+  #llm-app .best-badge { font-size:9px;font-weight:500;letter-spacing:.06em;padding:2px 7px;border-radius:20px;background:#e0f5ee;color:#0b7a5c;display:inline-block;margin-bottom:8px; }
+
+  #llm-app .est-grid { display:grid;grid-template-columns:1fr 1fr;gap:28px; }
+  #llm-app .est-lbl { font-size:11px;color:#78746c;margin-bottom:8px;display:flex;justify-content:space-between; }
+  #llm-app .est-lbl span { font-weight:500;color:#1840e8; }
+  #llm-app .est-row { margin-bottom:18px; }
+  #llm-app input[type=range] { width:100%;height:4px;-webkit-appearance:none;appearance:none;
+    background:#dedad0;border-radius:2px;outline:none;cursor:pointer; }
+  #llm-app input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:15px;height:15px;
+    border-radius:50%;background:#0c0b09;cursor:pointer; }
+  #llm-app select { width:100%;padding:8px 11px;border:1px solid #dedad0;border-radius:6px;
+    font-size:12px;background:#fff;color:#38352f;font-family:inherit;cursor:pointer;outline:none; }
+  #llm-app .res-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px; }
+  #llm-app .rc { background:#fff;border:1px solid #dedad0;border-radius:10px;padding:14px 16px; }
+  #llm-app .rc .rl { font-size:11px;color:#78746c;margin-bottom:5px; }
+  #llm-app .rc .rv { font-size:22px;font-weight:500;letter-spacing:-.02em;color:#0c0b09; }
+  #llm-app .rc .rs { font-size:10px;color:#b0ab9f;margin-top:3px; }
+  #llm-app .rc.dk { background:#0c0b09;border-color:#0c0b09; }
+  #llm-app .rc.dk .rl { color:rgba(255,255,255,.5); }
+  #llm-app .rc.dk .rv { color:#fff; }
+  #llm-app .rc.dk .rs { color:rgba(255,255,255,.35); }
+  #llm-app .rc.gr { background:#e0f5ee;border-color:#9fe1cb; }
+  #llm-app .rc.gr .rv { color:#0b7a5c; }
+  #llm-app .bkd { border:1px solid #dedad0;border-radius:6px;overflow:hidden; }
+  #llm-app .bkd-row { display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #eae6dc;font-size:11px; }
+  #llm-app .bkd-row:last-child { border-bottom:none; }
+  #llm-app .bkd-row:nth-child(even) { background:#f4f0e8; }
+  #llm-app .ba { color:#38352f;display:flex;align-items:center;gap:7px; }
+  #llm-app .bm { color:#b0ab9f;font-size:10px; }
+  #llm-app .bc { font-weight:500; }
+  #llm-app .ntb { margin-top:16px;background:#fdf0dc;border:1px solid #f0d88a;border-radius:6px;
+    padding:12px 16px;font-size:12px;color:#a85c08;line-height:1.6; }
+  `;
+  document.head.appendChild(llmStyle);
+
+  mount.innerHTML = `<div id="llm-app">
+  <div class="ln">
+    <div class="la-nav">
+      <button class="la-tab on" onclick="laTab('models',this)">Catálogo de Modelos</button>
+      <button class="la-tab" onclick="laTab('scenarios',this)">Cenários de Configuração</button>
+      <button class="la-tab" onclick="laTab('estimator',this)">Estimador de Custo</button>
+    </div>
+  </div>
+
+  <div class="la-section on" id="la-models">
+    <table>
+      <thead><tr>
+        <th>Modelo</th><th>Fornecedor</th><th>Tier</th>
+        <th>Input /1M</th><th>Output /1M</th><th>Contexto</th><th>Multimodal</th><th>Papel no VideoFlow</th>
+      </tr></thead>
+      <tbody id="la-model-rows"></tbody>
+    </table>
+    <div class="ntb" style="margin-top:14px"><strong>* GLM-4.7 Flash</strong> disponível gratuitamente como loss leader da ZhipuAI. Adequado para prototyping e agentes de execução de baixa complexidade.</div>
+  </div>
+
+  <div class="la-section" id="la-scenarios">
+    <div class="sc-bar">
+      <button class="sc-b on" onclick="laSc(0,this)">A — Anthropic Stack</button>
+      <button class="sc-b" onclick="laSc(1,this)">B — Google + MiniMax</button>
+      <button class="sc-b" onclick="laSc(2,this)">C — MiMo + GLM</button>
+      <button class="sc-b" onclick="laSc(3,this)">D — Ultra Budget</button>
+    </div>
+    <div id="la-sc-body"></div>
+    <div class="cmp-grid" id="la-cmp"></div>
+  </div>
+
+  <div class="la-section" id="la-estimator">
+    <div class="est-grid">
+      <div>
+        <div class="est-row"><div class="est-lbl">Duração do vídeo (min) <span id="e-dur-l">2</span></div>
+          <input type="range" min="1" max="15" value="2" id="e-dur" oninput="laEst()"></div>
+        <div class="est-row"><div class="est-lbl">Vídeos por mês <span id="e-vol-l">50</span></div>
+          <input type="range" min="5" max="500" step="5" value="50" id="e-vol" oninput="laEst()"></div>
+        <div class="est-row"><div class="est-lbl">Complexidade <span id="e-cmp-l">Média</span></div>
+          <input type="range" min="1" max="3" value="2" id="e-cmp" oninput="laEst()"></div>
+        <div class="est-row"><div class="est-lbl">Prompt caching <span id="e-cch-l">Ativo</span></div>
+          <input type="range" min="0" max="1" value="1" id="e-cch" oninput="laEst()"></div>
+        <div class="est-row">
+          <div class="est-lbl">Cenário de modelos</div>
+          <select id="e-sc" onchange="laEst()">
+            <option value="0">A — Anthropic Stack</option>
+            <option value="1">B — Google + MiniMax</option>
+            <option value="2">C — MiMo + GLM</option>
+            <option value="3">D — Ultra Budget</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="res-grid">
+          <div class="rc dk"><div class="rl">Custo por vídeo</div><div class="rv" id="e-r-vid">$0.00</div><div class="rs" id="e-r-vid-s"></div></div>
+          <div class="rc"><div class="rl">Custo por minuto</div><div class="rv" id="e-r-min">$0.00</div><div class="rs">de vídeo produzido</div></div>
+          <div class="rc gr"><div class="rl">Custo mensal</div><div class="rv" id="e-r-mon">$0.00</div><div class="rs" id="e-r-mon-s"></div></div>
+          <div class="rc"><div class="rl">Economia vs A</div><div class="rv" id="e-r-sav">—</div><div class="rs" id="e-r-sav-s"></div></div>
+        </div>
+        <div class="bkd" id="e-bkd"></div>
+      </div>
+    </div>
+    <div class="ntb" id="e-note"></div>
+  </div>
+</div>`;
+
+  // ── DATA ──
+  const AGENTS=[
+    {id:'orch',  name:'Orquestrador',             tag:'Criativo',  color:'#534AB7', desc:'síntese de briefing + esqueleto + vetor DA',          inv:1,   ti:4000, to:1200},
+    {id:'ref',   name:'Ger. Referências Visuais', tag:'Criativo',  color:'#0F6E56', desc:'fragmentação em cenas + busca + avaliação VLM',       inv:1,   ti:3000, to:800 },
+    {id:'elem',  name:'Ger. Elementos Visuais',   tag:'Execução',  color:'#993C1D', desc:'resolve lacunas · bancos de asset · geração',         inv:0.7, ti:2000, to:600 },
+    {id:'edit',  name:'Editor de Vídeo',          tag:'Execução',  color:'#185FA5', desc:'monta timeline · gera código/JSON de edição',         inv:1,   ti:3500, to:1000},
+    {id:'pub',   name:'Assistente de Publicação', tag:'Execução',  color:'#854F0B', desc:'título · descrição · hashtags · variações por canal', inv:1,   ti:1500, to:700 },
+    {id:'sup',   name:'Supervisor de Qualidade',  tag:'Controle',  color:'#A32D2D', desc:'4–5 checkpoints contra rubric de DA',                  inv:4.5, ti:5000, to:400 },
+  ];
+  const MODELS={
+    sonnet:    {name:'Claude Sonnet 4.6',   vendor:'Anthropic', iP:3.00,  oP:15.00},
+    haiku:     {name:'Claude Haiku 4.5',    vendor:'Anthropic', iP:0.25,  oP:1.25 },
+    gflash:    {name:'Gemini 2.5 Flash',    vendor:'Google',    iP:0.30,  oP:2.50 },
+    gflite:    {name:'Gem. 2.0 Flash-Lite', vendor:'Google',    iP:0.075, oP:0.30 },
+    minimax:   {name:'MiniMax M2.5',        vendor:'MiniMax',   iP:0.20,  oP:0.95 },
+    glm47:     {name:'GLM-4.7',             vendor:'ZhipuAI',   iP:0.60,  oP:2.20 },
+    glm47f:    {name:'GLM-4.7 Flash',       vendor:'ZhipuAI',   iP:0.06,  oP:0.40 },
+    mimopro:   {name:'MiMo V2 Pro',         vendor:'Xiaomi',    iP:1.00,  oP:3.00 },
+    mimoomni:  {name:'MiMo V2 Omni',        vendor:'Xiaomi',    iP:0.40,  oP:2.00 },
+    mimoflash: {name:'MiMo V2 Flash',       vendor:'Xiaomi',    iP:0.09,  oP:0.29 },
+  };
+  const MCAT={
+    sonnet:'tp',haiku:'tm',gflash:'tm',gflite:'tb',
+    minimax:'tb',glm47:'tb',glm47f:'tf',mimopro:'tm',mimoomni:'tm',mimoflash:'tb'
+  };
+  const MTIERLBL={tp:'Premium',tm:'Mid',tb:'Budget',tf:'Gratuito*'};
+  const MMULTI={gflash:'Sim',mimoomni:'Sim (áudio+vídeo)',gflite:'Parcial',glm47:'Parcial',others:''};
+  const MROLE={
+    sonnet:'Orquestrador, Supervisor',haiku:'Editor, Publicação, Elementos',
+    gflash:'Gerente de Referências',gflite:'Publicação, Elementos (fallback)',
+    minimax:'Orquestrador alt., Supervisor alt.',glm47:'Orquestrador alt.',
+    glm47f:'Publicação, Elementos, prototyping',mimopro:'Orquestrador alt.',
+    mimoomni:'Gerente de Referências alt.',mimoflash:'Editor, Elementos, Publicação'
+  };
+  const MCTX={sonnet:'200K',haiku:'200K',gflash:'1M',gflite:'1M',minimax:'1M',glm47:'128K',glm47f:'200K',mimopro:'256K–1M',mimoomni:'262K',mimoflash:'256K'};
+  const SCENARIOS=[
+    {name:'A — Anthropic Stack',  desc:'Máxima confiabilidade e integração com ecossistema Anthropic.',      models:{orch:'sonnet',ref:'gflash',elem:'haiku',edit:'haiku',pub:'haiku',sup:'sonnet'}},
+    {name:'B — Google + MiniMax', desc:'Mix estratégico: MiniMax para raciocínio criativo, Google para visão e execução.', models:{orch:'minimax',ref:'gflash',elem:'gflite',edit:'gflite',pub:'gflite',sup:'minimax'}},
+    {name:'C — MiMo + GLM',       desc:'Stack asiático: MiMo Pro para orquestração, Omni para visão, GLM Flash para execução.', models:{orch:'mimopro',ref:'mimoomni',elem:'glm47f',edit:'mimoflash',pub:'glm47f',sup:'mimopro'}},
+    {name:'D — Ultra Budget',     desc:'Custo mínimo absoluto. GLM Flash gratuito onde possível, MiMo Flash para execução.', models:{orch:'glm47',ref:'mimoomni',elem:'glm47f',edit:'mimoflash',pub:'glm47f',sup:'minimax'}},
+  ];
+  const CXLBL=['Simples','Média','Complexa'];
+
+  function agCost(agIdx,scIdx,cache=false,mult=1){
+    const ag=AGENTS[agIdx],mk=SCENARIOS[scIdx].models[ag.id],m=MODELS[mk];
+    const cr=cache?(ag.id==='sup'||ag.id==='orch'?0.15:0.7):1.0;
+    const ti=ag.ti*ag.inv*mult,to=ag.to*ag.inv*mult;
+    return (ti*cr/1e6*m.iP)+(to/1e6*m.oP);
+  }
+
+  // Render models table
+  const rows=Object.entries(MODELS).map(([k,m])=>`<tr>
+    <td><strong>${m.name}</strong></td>
+    <td style="color:#78746c">${m.vendor}</td>
+    <td><span class="tier ${MCAT[k]}">${MTIERLBL[MCAT[k]]}</span></td>
+    <td><strong>$${m.iP.toFixed(3)}</strong></td>
+    <td>$${m.oP.toFixed(2)}</td>
+    <td style="color:#78746c">${MCTX[k]}</td>
+    <td>${MMULTI[k]||''}</td>
+    <td style="color:#78746c;font-size:11px">${MROLE[k]||''}</td>
+  </tr>`).join('');
+  document.getElementById('la-model-rows').innerHTML=rows;
+
+  // Tab switcher
+  window.laTab=function(id,btn){
+    document.querySelectorAll('#llm-app .la-section').forEach(s=>s.classList.remove('on'));
+    document.querySelectorAll('#llm-app .la-tab').forEach(b=>b.classList.remove('on'));
+    document.getElementById('la-'+id).classList.add('on');
+    btn.classList.add('on');
+    if(id==='scenarios') laScRender(0);
+    if(id==='estimator') laEst();
+  };
+
+  let curSc=0;
+  window.laSc=function(idx,btn){
+    curSc=idx;
+    document.querySelectorAll('#llm-app .sc-b').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    laScRender(idx);
+  };
+
+  function laScRender(idx){
+    const sc=SCENARIOS[idx];
+    let html='';
+    AGENTS.forEach((ag,i)=>{
+      const mk=sc.models[ag.id],m=MODELS[mk];
+      const c=agCost(i,idx);
+      html+=`<div class="ag-row">
+        <div class="ag-a"><div style="font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:20px;display:inline-block;margin-bottom:5px;background:${ag.color}18;color:${ag.color}">${ag.tag}</div>
+          <div class="ag-n">${ag.name}</div><div class="ag-s">${ag.inv}× invocação</div></div>
+        <div class="ag-d">${ag.desc}</div>
+        <div class="ag-m"><div class="mn">${m.name}</div><div class="ms">${m.vendor}</div></div>
+        <div class="ag-c"><div class="cv">$${c.toFixed(4)}</div><div class="cs">por prod.</div></div>
+      </div>`;
+    });
+    const total=AGENTS.reduce((s,_,i)=>s+agCost(i,idx),0);
+    const cached=AGENTS.reduce((s,_,i)=>s+agCost(i,idx,true),0);
+    html+=`<div class="ag-row tot" style="background:#f4f0e8;border:1px solid #dedad0">
+      <div class="ag-a" style="grid-column:1/4"><div class="ag-s">Total por produção · sem caching</div></div>
+      <div class="ag-d"></div><div class="ag-m"></div>
+      <div class="ag-c"><div class="cv">$${total.toFixed(4)}</div></div>
+    </div>
+    <div class="ag-row tot" style="background:#e0f5ee;border:1px solid #9fe1cb">
+      <div class="ag-a" style="grid-column:1/4"><div class="ag-s">Total com prompt caching ativo</div></div>
+      <div class="ag-d"></div><div class="ag-m"></div>
+      <div class="ag-c"><div class="cv" style="color:#0b7a5c">$${cached.toFixed(4)}</div></div>
+    </div>`;
+    document.getElementById('la-sc-body').innerHTML=html;
+
+    // Compare all
+    const baseC=AGENTS.reduce((s,_,i)=>s+agCost(i,0,true),0);
+    const costs=SCENARIOS.map((_,si)=>AGENTS.reduce((s,_,i)=>s+agCost(i,si,true),0));
+    const minC=Math.min(...costs);
+    document.getElementById('la-cmp').innerHTML=SCENARIOS.map((s,si)=>{
+      const c=costs[si],isBest=Math.abs(c-minC)<0.00001;
+      const sv=si===0?null:Math.round((1-c/baseC)*100);
+      return `<div class="cmp-card${isBest?' best':''}">
+        ${isBest?'<div class="best-badge">MENOR CUSTO</div><br>':''}
+        <div class="cmp-t">${s.name}</div>
+        <div class="cmp-s">${s.desc}</div>
+        <div class="cmp-p">$${c.toFixed(4)}</div>
+        <div class="cmp-u">por produção · com caching</div>
+        ${sv!==null?`<div class="cmp-sv sv-green">−${sv}% vs A</div>`:'<div class="cmp-sv sv-base">Referência</div>'}
+      </div>`;
+    }).join('');
+  }
+
+  window.laEst=function(){
+    const dur=+document.getElementById('e-dur').value;
+    const vol=+document.getElementById('e-vol').value;
+    const cx=+document.getElementById('e-cmp').value-1;
+    const cc=+document.getElementById('e-cch').value===1;
+    const si=+document.getElementById('e-sc').value;
+    document.getElementById('e-dur-l').textContent=dur+' min';
+    document.getElementById('e-vol-l').textContent=vol;
+    document.getElementById('e-cmp-l').textContent=CXLBL[cx];
+    document.getElementById('e-cch-l').textContent=cc?'Ativo':'Inativo';
+    const mult=[0.6,1.0,1.6][cx]*(0.7+dur*0.15);
+    let total=0,bkd='';
+    AGENTS.forEach((ag,i)=>{
+      const mk=SCENARIOS[si].models[ag.id],m=MODELS[mk];
+      const c=agCost(i,si,cc,mult);
+      total+=c;
+      bkd+=`<div class="bkd-row"><div class="ba"><div style="width:6px;height:6px;border-radius:50%;background:${ag.color};flex-shrink:0"></div>${ag.name}<span class="bm">${m.name}</span></div><div class="bc">$${c.toFixed(4)}</div></div>`;
+    });
+    const perMin=total/dur,monthly=total*vol;
+    const baseC=AGENTS.reduce((s,_,i)=>s+agCost(i,0,cc,mult),0);
+    const sv=si===0?null:Math.round((1-total/baseC)*100);
+    document.getElementById('e-r-vid').textContent='$'+total.toFixed(4);
+    document.getElementById('e-r-vid-s').textContent=dur+' min · '+CXLBL[cx];
+    document.getElementById('e-r-min').textContent='$'+perMin.toFixed(4);
+    document.getElementById('e-r-mon').textContent='$'+monthly.toFixed(2);
+    document.getElementById('e-r-mon-s').textContent=vol+' vídeos/mês';
+    document.getElementById('e-r-sav').textContent=sv!==null?('−'+sv+'%'):'base';
+    document.getElementById('e-r-sav-s').textContent=sv!==null?'vs Cenário A':'Cenário A é a referência';
+    document.getElementById('e-bkd').innerHTML=bkd;
+    const sc=SCENARIOS[si];
+    document.getElementById('e-note').innerHTML=`<strong>${sc.name}:</strong> ${sc.desc} Com ${vol} vídeos/mês de ${dur} min, o custo anual estimado é <strong>$${(monthly*12).toFixed(2)}</strong>.`;
+  };
+
+  // init renders
+  laScRender(0);
+  laEst();
+}
+
+// init
+document.querySelector('.nav-link.active') && null;
+</script>
+</body>
+</html>
