@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, BrainCircuit, X, Type, FileImage, FileText, CheckCircle2, Key } from 'lucide-react';
+import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, BrainCircuit, X, Type, FileImage, FileText, CheckCircle2, Key, Waves } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -546,6 +546,14 @@ export default function ArticlesListPage() {
                                         </td>
                                         <td className="p-4 text-right pr-6">
                                             <div className="flex items-center justify-end gap-1">
+                                                {/* Waterfall Button */}
+                                                <Link
+                                                    href={`/admin/waterfall/${post.id}`}
+                                                    className="p-2 text-slate-400 hover:text-purple-400 rounded-lg hover:bg-purple-400/10 transition-colors"
+                                                    title="Content Waterfall — Gerar posts para redes sociais"
+                                                >
+                                                    <Waves className="w-4 h-4" />
+                                                </Link>
                                                 <button
                                                     onClick={() => setSelectedStatsArticle({ id: post.id, title: post.title })}
                                                     className="p-2 text-slate-400 hover:text-accent-yellow rounded-lg hover:bg-accent-yellow/10 transition-colors"
