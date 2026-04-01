@@ -83,8 +83,9 @@ export async function POST(req: Request) {
             style: 'natural',
         });
 
-        const imageUrl = imageResponse.data[0]?.url;
-        if (!imageUrl) throw new Error('DALL-E não retornou URL de imagem');
+        const imageItem = imageResponse.data?.[0];
+        if (!imageItem?.url) throw new Error('DALL-E não retornou URL de imagem');
+        const imageUrl = imageItem.url;
 
         // Download the image from OpenAI (temporary URL, expires in ~1h)
         const imgBuffer = await fetch(imageUrl).then(r => r.arrayBuffer());
@@ -106,22 +107,13 @@ export async function POST(req: Request) {
 
         // If sessionId provided, update the session's images JSONB
         if (sessionId) {
-            await supabaseAdmin.rpc('jsonb_set_deep', {
-                row_id: sessionId,
-                key: platform,
-                value: publicUrl,
-            }).catch(() => {
-                // fallback: load + merge + update
-            });
-
-            // Simple fallback: fetch current images, merge, update
             const { data: session } = await supabaseAdmin
                 .from('waterfall_sessions')
                 .select('images')
                 .eq('id', sessionId)
                 .single();
 
-            const currentImages = (session?.images as Record<string, string>) || {};
+            const currentImages = ((session as { images?: Record<string, string> })?.images) || {};
             await supabaseAdmin
                 .from('waterfall_sessions')
                 .update({ images: { ...currentImages, [platform]: publicUrl } })
