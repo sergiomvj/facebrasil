@@ -75,12 +75,7 @@ Gere o seguinte JSON (sem markdown, somente JSON puro):
         { "number": 2, "text": "..." },
         { "number": 3, "text": "..." },
         { "number": 4, "text": "..." },
-        { "number": 5, "text": "..." },
-        { "number": 6, "text": "..." },
-        { "number": 7, "text": "..." },
-        { "number": 8, "text": "..." },
-        { "number": 9, "text": "..." },
-        { "number": 10, "text": "SIGA @facebrasil para mais notícias da diáspora 🇧🇷" }
+        { "number": 5, "text": "SIGA @facebrasil para mais notícias da diáspora brasileira nos EUA 🇧🇷" }
       ]
     },
     "caption": "..."
@@ -104,7 +99,7 @@ Gere o seguinte JSON (sem markdown, somente JSON puro):
 }
 
 Regras por formato:
-- Instagram carousel: Slide 1 é o hook visual (pergunta ou dado chocante). slides 2-8 são 1 ponto cada. Slide 9 é o resumo. Use bullet simplificado.
+- Instagram carousel: Slide 1 é o hook visual (pergunta ou dado chocante). Slides 2-4 são 1 ponto cada (conciso, máx 2 linhas). Slide 5 é o CTA de seguir. Use linguagem bullet simplificada.
 - Instagram caption: máx 150 palavras, 3-5 hashtags no final, CTA claro
 - Twitter thread: tweet 1 é o hook (máx 270 chars), tweets seguintes desenvolvem. CADA tweet máx 270 chars
 - Twitter single_tweet: máx 270 chars. Hot take provocador que convida ao clique

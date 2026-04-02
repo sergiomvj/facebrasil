@@ -34,7 +34,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { id, article_id, tone, angle, audience, data, images } = body;
+        const { id, article_id, tone, angle, audience, data, images, slide_images } = body;
 
         if (!article_id || !data) {
             return NextResponse.json({ error: 'article_id e data são obrigatórios' }, { status: 400 });
@@ -42,18 +42,16 @@ export async function POST(req: Request) {
 
         let result;
         if (id) {
-            // Update existing
             result = await supabaseAdmin
                 .from('waterfall_sessions')
-                .update({ tone, angle, audience, data, images: images || {} })
+                .update({ tone, angle, audience, data, images: images || {}, slide_images: slide_images || {} })
                 .eq('id', id)
                 .select()
                 .single();
         } else {
-            // Create new
             result = await supabaseAdmin
                 .from('waterfall_sessions')
-                .insert({ article_id, tone, angle, audience, data, images: images || {} })
+                .insert({ article_id, tone, angle, audience, data, images: images || {}, slide_images: slide_images || {} })
                 .select()
                 .single();
         }
