@@ -10,7 +10,9 @@ const supabaseAdmin = createClient(
 
 const VERIFY_TOKEN = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN || 'facebrasil_ig_webhook_2026';
 
-// ─── GET — Meta Webhook Verification Handshake ─────────────────────────────
+// ─── GET — Meta Webhook Verification Handshake ────────────────────────────────
+// Meta sends: GET ?hub.mode=subscribe&hub.verify_token=TOKEN&hub.challenge=NUMBER
+// We must respond with the hub.challenge value (plain text, 200 OK)
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
@@ -18,16 +20,31 @@ export async function GET(req: Request) {
     const token     = searchParams.get('hub.verify_token');
     const challenge = searchParams.get('hub.challenge');
 
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-        console.log('[Instagram Webhook] Verificação bem-sucedida');
-        return new Response(challenge, { status: 200 });
+    // ── Meta verification handshake ──────────────────────────────────────────
+    if (mode === 'subscribe') {
+        if (token === VERIFY_TOKEN) {
+            console.log('[Instagram Webhook] ✅ Verificação Meta bem-sucedida');
+            return new Response(challenge ?? '', {
+                status: 200,
+                headers: { 'Content-Type': 'text/plain' },
+            });
+        }
+        // Token present but wrong — reject
+        console.warn('[Instagram Webhook] ❌ Token inválido recebido:', token);
+        return new Response('Forbidden: invalid verify_token', { status: 403 });
     }
 
-    console.warn('[Instagram Webhook] Falha na verificação', { mode, token });
-    return new Response('Forbidden', { status: 403 });
+    // ── Plain GET (browser, health check, etc.) — return 200 + status info ──
+    return NextResponse.json({
+        status: 'ok',
+        webhook: 'Instagram / Meta Webhook — Facebrasil',
+        endpoint: 'https://fbr.news/api/instagram',
+        events: ['comments', 'mentions', 'messages', 'story_insights', 'feed'],
+        ready: true,
+    });
 }
 
-// ─── POST — Receive Events ─────────────────────────────────────────────────
+// ─── POST — Receive Events from Meta ─────────────────────────────────────────
 export async function POST(req: Request) {
     try {
         const payload = await req.json();
@@ -36,10 +53,10 @@ export async function POST(req: Request) {
         const entries = payload?.entry || [];
 
         for (const entry of entries) {
-            const changes = entry?.changes || [];
+            const changes   = entry?.changes   || [];
             const messaging = entry?.messaging || [];
 
-            // ── Handle "changes" (comments, mentions, likes) ──
+            // ── changes: comments, mentions, story, feed ─────────────────────
             for (const change of changes) {
                 const field = change.field as string;
                 const value = change.value || {};
@@ -49,53 +66,56 @@ export async function POST(req: Request) {
                 let senderId: string | undefined;
                 let message: string | undefined;
 
-                if (field === 'comments') {
-                    eventType = 'comment';
-                    mediaId = value.media?.id;
-                    senderId = value.from?.id;
-                    message = value.text;
-                } else if (field === 'mentions') {
-                    eventType = 'mention';
-                    mediaId = value.media_id;
-                    senderId = value.commenter_id;
-                    message = value.text;
-                } else if (field === 'story_insights') {
-                    eventType = 'story_insight';
-                } else if (field === 'feed') {
-                    eventType = 'feed_update';
-                    mediaId = value.media_id;
+                switch (field) {
+                    case 'comments':
+                        eventType = 'comment';
+                        mediaId   = value.media?.id;
+                        senderId  = value.from?.id;
+                        message   = value.text;
+                        break;
+                    case 'mentions':
+                        eventType = 'mention';
+                        mediaId   = value.media_id;
+                        senderId  = value.commenter_id;
+                        message   = value.text;
+                        break;
+                    case 'story_insights':
+                        eventType = 'story_insight';
+                        break;
+                    case 'feed':
+                        eventType = 'feed_update';
+                        mediaId   = value.media_id;
+                        break;
                 }
 
                 await supabaseAdmin.from('instagram_events').insert({
-                    event_type: eventType,
-                    object: payload.object,
-                    sender_id: senderId || null,
-                    media_id: mediaId || null,
-                    message: message || null,
+                    event_type:  eventType,
+                    object:      payload.object ?? null,
+                    sender_id:   senderId  ?? null,
+                    media_id:    mediaId   ?? null,
+                    message:     message   ?? null,
                     raw_payload: { entry_id: entry.id, field, value },
                 });
             }
 
-            // ── Handle "messaging" (DMs via Instagram Messenger) ──
+            // ── messaging: DMs ────────────────────────────────────────────────
             for (const msg of messaging) {
-                const senderId = msg.sender?.id;
-                const text = msg.message?.text;
-                const attachments = msg.message?.attachments;
-
                 await supabaseAdmin.from('instagram_events').insert({
-                    event_type: 'direct_message',
-                    object: 'instagram',
-                    sender_id: senderId || null,
-                    message: text || (attachments ? '[Mídia]' : null),
+                    event_type:  'direct_message',
+                    object:      'instagram',
+                    sender_id:   msg.sender?.id   ?? null,
+                    message:     msg.message?.text ?? (msg.message?.attachments ? '[Mídia]' : null),
                     raw_payload: msg,
                 });
             }
         }
 
-        return NextResponse.json({ status: 'ok' }, { status: 200 });
+        // Meta expects 200 — always
+        return NextResponse.json({ status: 'ok' });
+
     } catch (err: any) {
-        console.error('[Instagram Webhook] Erro:', err);
-        // Always return 200 to Meta so it doesn't retry aggressively
-        return NextResponse.json({ status: 'error', message: err.message }, { status: 200 });
+        console.error('[Instagram Webhook] Erro no processamento:', err);
+        // Still return 200 so Meta doesn't retry aggressively
+        return NextResponse.json({ status: 'error', message: err.message });
     }
 }
