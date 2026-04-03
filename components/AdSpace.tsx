@@ -71,6 +71,21 @@ const AdSpace: React.FC<AdSpaceProps> = ({
     const activeAd = adsPool[currentIndex];
     const adImageUrl = isMobile && activeAd?.mobile_image_url ? activeAd.mobile_image_url : activeAd?.image_url;
 
+    // 🕵️‍♂️ Lógica de Proxy Anti-Bloqueio: 
+    // Interceptamos URLs diretas do Supabase para passá-las pelo nosso roteamento interno.
+    const getProxyUrl = (url?: string) => {
+        if (!url) return '';
+        // Detectamos se é uma URL de storage do Supabase no bucket 'ads'
+        if (url.includes('/storage/v1/object/public/ads/')) {
+            const parts = url.split('/ads/');
+            const filePath = parts[parts.length - 1].split('?')[0]; // Pegamos apenas o nome do arquivo sem query params
+            return `/api/v1/assets/${filePath}`;
+        }
+        return url;
+    };
+
+    const finalImageUrl = getProxyUrl(adImageUrl);
+
     // Reset tracking when ad changes
     useEffect(() => {
         setStatsLogged({ view: false, curiosity: false });
@@ -172,9 +187,9 @@ const AdSpace: React.FC<AdSpaceProps> = ({
                     <p className="text-xs text-accent-yellow font-bold uppercase tracking-widest">Saiba Mais</p>
                 </div>
 
-                {adImageUrl ? (
+                {finalImageUrl ? (
                     <img
-                        src={adImageUrl}
+                        src={finalImageUrl}
                         alt={activeAd.title}
                         className="w-full h-full object-cover relative z-10"
                         onError={(e) => {
@@ -190,7 +205,7 @@ const AdSpace: React.FC<AdSpaceProps> = ({
 
             {/* Labels */}
             <div className="absolute top-0 right-0 p-1 bg-black/80">
-                <span className="text-[10px] font-black uppercase text-white/50 tracking-tighter italic px-2">Anúncio</span>
+                <span className="text-[10px] font-black uppercase text-white/50 tracking-tighter italic px-2">Parceiro</span>
             </div>
 
             {/* Carousel Controls (if multiple) */}
