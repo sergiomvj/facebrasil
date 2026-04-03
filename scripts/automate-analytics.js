@@ -5,12 +5,17 @@ const path = require('path');
 
 /**
  * Script de Automação de Analytics - Facebrasil
- * Regras:
+ * Regras Atualizadas:
  * - Artigos (< 7 dias): 
- *    - < 24h: +1 view a cada 3 minutos
- *    - > 24h: +1 view a cada 15 minutos
+ *    - < 24h: Toda execução (+1 view a cada 3-5 min)
+ *    - Dia 2: +1 view a cada 15 min
+ *    - Dia 3: +1 view a cada 20 min
+ *    - Dia 4: +1 view a cada 25 min
+ *    - Dia 5: +1 view a cada 30 min
+ *    - Dia 6: +1 view a cada 35 min
+ *    - Dia 7: +1 view a cada 40 min
  * - Anúncios (Ativos): 
- *    - +1 view a cada 15 minutos
+ *    - +1 view a cada 15 min
  */
 
 async function runAutomation() {
@@ -38,9 +43,11 @@ async function runAutomation() {
 
     const now = new Date();
     const currentMinute = now.getMinutes();
+    const totalDailyMinutes = now.getHours() * 60 + now.getMinutes();
     let updatedCount = 0;
 
     // 1. Processar Artigos
+    // Filtramos artigos publicados nos últimos 7 dias que estejam 'PUBLISHED'
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: articles, error: artError } = await supabase
         .from('articles')
@@ -51,20 +58,36 @@ async function runAutomation() {
     if (artError) {
         console.error('Erro ao buscar artigos:', artError);
     } else if (articles) {
-        console.log(`Analisando ${articles.length} artigos recentes...`);
+        console.log(`Analisando ${articles.length} artigos recentes para incremento linear...`);
         for (const article of articles) {
             const pubDate = new Date(article.published_at);
             const ageInHours = (now - pubDate) / (1000 * 60 * 60);
+            const ageInDays = Math.floor(ageInHours / 24);
+            
             let shouldIncrement = false;
+            let intervalMinutes = 0;
 
-            if (ageInHours < 24) {
-                // < 24h -> Incrementa sempre (assume-se que o script roda a cada 3-5 min)
+            if (ageInDays === 0) {
+                // Dia 1 (< 24h) -> Incrementa a cada execução (assumindo script rodando frequente)
                 shouldIncrement = true;
-            } else {
-                // > 24h -> Incrementa com probabilidade de 1/5 para simular +1 a cada 15 min 
-                // se o script rodar a cada 3 min. Ou simplesmente usar o modulo mas de forma mais flexível.
-                // Vou manter o modulo mas sugerir execução frequente.
-                if (currentMinute % 15 === 0 || currentMinute % 15 === 1 || currentMinute % 15 === 2) {
+            } else if (ageInDays === 1) {
+                intervalMinutes = 15; // Dia 2
+            } else if (ageInDays === 2) {
+                intervalMinutes = 20; // Dia 3
+            } else if (ageInDays === 3) {
+                intervalMinutes = 25; // Dia 4
+            } else if (ageInDays === 4) {
+                intervalMinutes = 30; // Dia 5
+            } else if (ageInDays === 5) {
+                intervalMinutes = 35; // Dia 6
+            } else if (ageInDays === 6) {
+                intervalMinutes = 40; // Dia 7
+            }
+
+            // Para idades > 24h, checamos o gatilho de tempo
+            if (intervalMinutes > 0) {
+                // Usamos um range de 3 min para garantir o gatilho se o script rodar por ex. a cada 3 ou 5 min
+                if (totalDailyMinutes % intervalMinutes < 3) {
                     shouldIncrement = true;
                 }
             }
@@ -72,7 +95,7 @@ async function runAutomation() {
             if (shouldIncrement) {
                 const { error: updErr } = await supabase.rpc('increment_article_views', { p_article_id: article.id });
                 if (updErr) {
-                    console.error(`Erro ao incrementar via RPC para ${article.id}:`, updErr.message);
+                    // Fallback se o RPC falhar
                     await supabase.from('articles').update({ views: (article.views || 0) + 1 }).eq('id', article.id);
                 }
                 updatedCount++;
@@ -80,7 +103,7 @@ async function runAutomation() {
         }
     }
 
-    // 2. Processar Anúncios
+    // 2. Processar Anúncios (Mantendo a regra de 1 view a cada 15 min para ativos)
     const { data: ads, error: adsError } = await supabase
         .from('ads')
         .select('id, views')
