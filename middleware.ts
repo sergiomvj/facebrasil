@@ -9,16 +9,30 @@ export async function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname
 
     // Skip auth for static assets and API routes that don't need session refresh
+    const staticApps = ['arva', 'facebrasilshop', 'facebrasiltv', 'fbrnews', 'novafacebrasil']
+    const pathParts = path.split('/').filter(Boolean)
+    const firstPart = pathParts[0]
+    const isLocale = ['pt', 'en', 'es'].includes(firstPart)
+    const rootPath = isLocale ? pathParts[1] : firstPart
+
+    // Check if it's one of our static apps or an old business route
+    if (staticApps.includes(rootPath) || path.startsWith('/business/')) {
+        const targetRoute = rootPath || pathParts[1] // fallback for /business/arva
+        
+        // If it's already the clean static path (e.g. /arva), just serve it
+        if (path === `/${targetRoute}` || path.startsWith(`/${targetRoute}/`)) {
+            return NextResponse.next()
+        }
+        
+        // Otherwise (it's /pt/arva or /business/arva), redirect to the clean version
+        const remainingPath = path.substring(path.indexOf(targetRoute) + targetRoute.length)
+        return NextResponse.redirect(new URL(`/${targetRoute}${remainingPath}`, request.url))
+    }
+
     if (
         path.startsWith('/_next') ||
         path.startsWith('/api/auth/callback') ||
         path.startsWith('/fbrapps/') ||
-        path.startsWith('/business/') ||
-        path.startsWith('/arva/') ||
-        path.startsWith('/facebrasilshop/') ||
-        path.startsWith('/facebrasiltv/') ||
-        path.startsWith('/fbrnews/') ||
-        path.startsWith('/novafacebrasil/') ||
         /\.(svg|png|jpg|jpeg|gif|webp|ico|html|css|js|woff|woff2|ttf)$/.test(path)
     ) {
         return NextResponse.next()
