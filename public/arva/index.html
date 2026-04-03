@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARVA — Plataforma de Agentes Virtuais Autônomos v2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:         #10B981;
+      --brand-dim:     rgba(16,185,129,0.18);
+      --brand-faint:   rgba(16,185,129,0.06);
+      --accent:        #F59E0B;
+      --accent-dim:    rgba(245,158,11,0.18);
+      --accent-faint:  rgba(245,158,11,0.05);
+      --pro:           #6366F1;
+      --pro-dim:       rgba(99,102,241,0.18);
+      --pro-faint:     rgba(99,102,241,0.06);
+      --life:          #10B981;
+      --life-dim:      rgba(16,185,129,0.18);
+      --life-faint:    rgba(16,185,129,0.06);
+      --health:        #EF4444;
+      --health-dim:    rgba(239,68,68,0.18);
+      --health-faint:  rgba(239,68,68,0.06);
+      --student:       #F59E0B;
+      --student-dim:   rgba(245,158,11,0.18);
+      --student-faint: rgba(245,158,11,0.05);
+      --autism:        #8B5CF6;
+      --autism-dim:    rgba(139,92,246,0.18);
+      --autism-faint:  rgba(139,92,246,0.06);
+      --children:      #EC4899;
+      --children-dim:  rgba(236,72,153,0.18);
+      --children-faint:rgba(236,72,153,0.05);
+      --voice:         #06B6D4;
+      --voice-dim:     rgba(6,182,212,0.18);
+      --voice-faint:   rgba(6,182,212,0.05);
+      --sdr:           #F97316;
+      --sdr-dim:       rgba(249,115,22,0.18);
+      --sdr-faint:     rgba(249,115,22,0.05);
+      --support:       #14B8A6;
+      --support-dim:   rgba(20,184,166,0.18);
+      --support-faint: rgba(20,184,166,0.05);
+      --dark:          #07090F;
+      --dark-2:        #0C0F1C;
+      --dark-3:        #111528;
+      --dark-4:        #191E36;
+      --dark-5:        #222845;
+      --slate:         #7278A0;
+      --slate-light:   #A0A8CC;
+      --white:         #EDF0FF;
+      --green:         #34D399;
+      --red:           #F87171;
+      --amber:         #FBBF24;
+      --violet:        #A78BFA;
+      --pink:          #F472B6;
+      --grid-line:     rgba(16,185,129,0.05);
+      --gutter:        2rem;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--dark); color: var(--white); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.75; overflow-x: hidden; }
+
+    /* ── BG ── */
+    .grid-bg { position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:52px 52px; }
+    .glow-a { position:fixed;top:-25vh;left:-15vw;width:80vw;height:80vh;background:radial-gradient(ellipse,rgba(16,185,129,0.07) 0%,transparent 65%);pointer-events:none;z-index:0; }
+    .glow-b { position:fixed;bottom:-25vh;right:-15vw;width:80vw;height:80vh;background:radial-gradient(ellipse,rgba(245,158,11,0.05) 0%,transparent 65%);pointer-events:none;z-index:0; }
+    .glow-c { position:fixed;top:40vh;left:50%;width:60vw;height:60vh;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(6,182,212,0.04) 0%,transparent 70%);pointer-events:none;z-index:0; }
+    .wrapper { position:relative;z-index:1;max-width:980px;margin:0 auto;padding:0 var(--gutter); }
+
+    /* ── NAV ── */
+    nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;background:rgba(7,9,15,0.9);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--grid-line);display:flex;justify-content:space-between;align-items:center; }
+    .nav-logo { font-family:'Outfit',sans-serif;font-weight:900;font-size:1.05rem;letter-spacing:-.04em;color:var(--white); }
+    .nav-logo span { color:var(--brand); }
+    .nav-badge { font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:500;letter-spacing:.12em;color:var(--brand);background:var(--brand-faint);border:1px solid rgba(16,185,129,0.22);padding:.15rem .55rem;border-radius:99px;margin-left:.6rem;vertical-align:middle; }
+    .nav-links { display:flex;gap:1.2rem;list-style:none;flex-wrap:wrap; }
+    .nav-links a { font-size:.64rem;color:var(--slate);text-decoration:none;transition:color .2s;font-family:'JetBrains Mono',monospace; }
+    .nav-links a:hover { color:var(--white); }
+    @media(max-width:720px){ .nav-links{display:none;} }
+
+    /* ── HERO ── */
+    .hero { min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:9rem 0 7rem;border-bottom:1px solid var(--grid-line); }
+    .hero-eyebrow { display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--brand);border:1px solid rgba(16,185,129,0.22);background:var(--brand-faint);padding:.38rem 1rem;border-radius:99px;margin-bottom:2.8rem;animation:fadeUp .7s ease both; }
+    .pulse-dot { width:6px;height:6px;border-radius:50%;background:var(--brand);box-shadow:0 0 8px var(--brand);animation:pulsate 2.2s infinite; }
+    @keyframes pulsate { 0%,100%{opacity:1}50%{opacity:.2} }
+    .hero-title { font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(3rem,9vw,5.8rem);line-height:.96;letter-spacing:-.04em;color:var(--white);animation:fadeUp .8s .1s ease both; }
+    .hero-title .accent { color:var(--brand); }
+    .hero-title .muted { color:var(--slate); }
+    .hero-sub { margin-top:2.2rem;font-size:1.05rem;color:var(--slate-light);max-width:640px;font-weight:300;line-height:1.9;animation:fadeUp .8s .2s ease both; }
+    .hero-sub strong { color:var(--white);font-weight:500; }
+    .hero-pills { margin-top:3rem;display:flex;flex-wrap:wrap;gap:.9rem;animation:fadeUp .8s .3s ease both; }
+    .hpill { display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--slate);padding:.42rem 1rem;border:1px solid var(--dark-4);border-radius:8px;background:rgba(255,255,255,0.018); }
+    .hpill .dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+    .d-pro      { background:var(--pro);     box-shadow:0 0 6px var(--pro); }
+    .d-life     { background:var(--life);    box-shadow:0 0 6px var(--life); }
+    .d-health   { background:var(--health);  box-shadow:0 0 6px var(--health); }
+    .d-student  { background:var(--student); box-shadow:0 0 6px var(--student); }
+    .d-autism   { background:var(--autism);  box-shadow:0 0 6px var(--autism); }
+    .d-children { background:var(--children);box-shadow:0 0 6px var(--children); }
+    .d-voice    { background:var(--voice);   box-shadow:0 0 6px var(--voice); }
+    .d-sdr      { background:var(--sdr);     box-shadow:0 0 6px var(--sdr); }
+    .d-support  { background:var(--support); box-shadow:0 0 6px var(--support); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)} }
+
+    /* ── SECTIONS ── */
+    section { padding:6.5rem 0;border-bottom:1px solid var(--grid-line); }
+    .stag { font-family:'JetBrains Mono',monospace;font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--brand);margin-bottom:1rem; }
+    .stag-pro     { color:var(--pro); }
+    .stag-health  { color:var(--health); }
+    .stag-student { color:var(--student); }
+    .stag-autism  { color:var(--autism); }
+    .stag-children{ color:var(--children); }
+    .stag-accent  { color:var(--accent); }
+    .stag-voice   { color:var(--voice); }
+    .stag-sdr     { color:var(--sdr); }
+    .stag-support { color:var(--support); }
+    .stitle { font-family:'Outfit',sans-serif;font-weight:800;font-size:clamp(1.9rem,4.5vw,2.8rem);line-height:1.1;letter-spacing:-.03em;color:var(--white);margin-bottom:1.1rem; }
+    .slead { font-size:.97rem;color:var(--slate-light);max-width:640px;font-weight:300;margin-bottom:3.5rem;line-height:1.85; }
+    .slead strong { color:var(--white);font-weight:500; }
+    .fade-in { opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease; }
+    .fade-in.visible { opacity:1;transform:none; }
+
+    /* ── LINE CARDS ── */
+    .lines-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:3rem; }
+    @media(max-width:700px){ .lines-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:460px){ .lines-grid{grid-template-columns:1fr;} }
+    .line-card { padding:1.8rem;border-radius:16px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.015);transition:all .25s;position:relative;overflow:hidden; }
+    .line-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
+    .line-card:hover { transform:translateY(-3px); }
+    .line-card.pro      { border-color:var(--pro-dim); }      .line-card.pro::before      { background:var(--pro); }      .line-card.pro:hover      { background:var(--pro-faint); }
+    .line-card.life     { border-color:var(--life-dim); }     .line-card.life::before     { background:var(--life); }     .line-card.life:hover     { background:var(--life-faint); }
+    .line-card.health   { border-color:var(--health-dim); }   .line-card.health::before   { background:var(--health); }   .line-card.health:hover   { background:var(--health-faint); }
+    .line-card.student  { border-color:var(--student-dim); }  .line-card.student::before  { background:var(--student); }  .line-card.student:hover  { background:var(--student-faint); }
+    .line-card.autism   { border-color:var(--autism-dim); }   .line-card.autism::before   { background:var(--autism); }   .line-card.autism:hover   { background:var(--autism-faint); }
+    .line-card.children { border-color:var(--children-dim); } .line-card.children::before { background:var(--children); } .line-card.children:hover { background:var(--children-faint); }
+    .line-card.voice    { border-color:var(--voice-dim);border-style:dashed; }    .line-card.voice::before    { background:var(--voice); }    .line-card.voice:hover    { background:var(--voice-faint); }
+    .line-card.sdr      { border-color:var(--sdr-dim); }      .line-card.sdr::before      { background:var(--sdr); }      .line-card.sdr:hover      { background:var(--sdr-faint); }
+    .line-card.support  { border-color:var(--support-dim); }  .line-card.support::before  { background:var(--support); }  .line-card.support:hover  { background:var(--support-faint); }
+    .line-emoji { font-size:1.8rem;margin-bottom:.9rem;display:block; }
+    .line-badge { font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;padding:.14rem .55rem;border-radius:99px;display:inline-block;margin-bottom:.8rem; }
+    .line-card.pro      .line-badge { color:var(--pro);     background:var(--pro-faint);     border:1px solid var(--pro-dim); }
+    .line-card.life     .line-badge { color:var(--life);    background:var(--life-faint);    border:1px solid var(--life-dim); }
+    .line-card.health   .line-badge { color:var(--health);  background:var(--health-faint);  border:1px solid var(--health-dim); }
+    .line-card.student  .line-badge { color:var(--student); background:var(--student-faint); border:1px solid var(--student-dim); }
+    .line-card.autism   .line-badge { color:var(--autism);  background:var(--autism-faint);  border:1px solid var(--autism-dim); }
+    .line-card.children .line-badge { color:var(--children);background:var(--children-faint);border:1px solid var(--children-dim); }
+    .line-card.voice    .line-badge { color:var(--voice);   background:var(--voice-faint);   border:1px solid var(--voice-dim); }
+    .line-card.sdr      .line-badge { color:var(--sdr);     background:var(--sdr-faint);     border:1px solid var(--sdr-dim); }
+    .line-card.support  .line-badge { color:var(--support); background:var(--support-faint); border:1px solid var(--support-dim); }
+    .line-title { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.15rem;color:var(--white);margin-bottom:.45rem; }
+    .line-for   { font-size:.78rem;color:var(--slate);margin-bottom:.6rem;font-family:'JetBrains Mono',monospace; }
+    .line-desc  { font-size:.83rem;color:var(--slate-light);line-height:1.65; }
+
+    /* ── AGENT HERO CARD ── */
+    .agent-hero { border-radius:20px;overflow:hidden;margin-bottom:3rem;position:relative; }
+    .agent-hero-band { height:4px;width:100%; }
+    .agent-hero-body { padding:2.5rem;border:1px solid;border-top:0;border-radius:0 0 20px 20px;background:rgba(255,255,255,0.012); }
+    .agent-hero.sdr     .agent-hero-band { background:linear-gradient(90deg,var(--sdr),#FBBF24); }
+    .agent-hero.sdr     .agent-hero-body { border-color:var(--sdr-dim); }
+    .agent-hero.support .agent-hero-band { background:linear-gradient(90deg,var(--support),#6366F1); }
+    .agent-hero.support .agent-hero-body { border-color:var(--support-dim); }
+    .agent-hero.voice   .agent-hero-band { background:linear-gradient(90deg,var(--voice),#8B5CF6); }
+    .agent-hero.voice   .agent-hero-body { border-color:var(--voice-dim); }
+    .agent-label { font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;margin-bottom:.6rem; }
+    .agent-hero.sdr     .agent-label { color:var(--sdr); }
+    .agent-hero.support .agent-label { color:var(--support); }
+    .agent-hero.voice   .agent-label { color:var(--voice); }
+    .agent-name { font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.04em;line-height:1;margin-bottom:1rem; }
+    .agent-tagline { font-size:1rem;color:var(--slate-light);max-width:600px;line-height:1.8;margin-bottom:2rem;font-weight:300; }
+    .agent-tagline strong { color:var(--white);font-weight:500; }
+    .agent-pills { display:flex;flex-wrap:wrap;gap:.7rem; }
+    .agent-pill { font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:.35rem .9rem;border-radius:8px;border:1px solid var(--dark-4);color:var(--slate-light);background:rgba(255,255,255,0.02); }
+
+    /* ── FEATURE GRID ── */
+    .feat-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.2rem;margin-bottom:2.5rem; }
+    .feat-card { padding:1.6rem 1.8rem;border-radius:14px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.018);transition:all .25s;position:relative;overflow:hidden; }
+    .feat-card:hover { transform:translateY(-2px); }
+    .feat-card.sdr:hover     { border-color:var(--sdr-dim);    background:var(--sdr-faint); }
+    .feat-card.support:hover { border-color:var(--support-dim);background:var(--support-faint); }
+    .feat-card.voice:hover   { border-color:var(--voice-dim);  background:var(--voice-faint); }
+    .feat-icon  { font-size:1.4rem;display:block;margin-bottom:.9rem; }
+    .feat-title { font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:.35rem; }
+    .feat-body  { font-size:.81rem;color:var(--slate-light);line-height:1.65; }
+    .feat-items { margin-top:.9rem;display:flex;flex-direction:column;gap:.28rem; }
+    .feat-item  { font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--slate-light);padding:.28rem .65rem;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid var(--dark-4); }
+
+    /* ── ANATOMY ── */
+    .anatomy-wrap { display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:3rem; }
+    @media(max-width:660px){ .anatomy-wrap{grid-template-columns:1fr;} }
+    .anatomy-side { padding:2rem;border-radius:16px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.015); }
+    .anatomy-side.fixed   { border-color:var(--pro-dim);background:var(--pro-faint); }
+    .anatomy-side.dynamic { border-color:var(--brand-dim);background:var(--brand-faint); }
+    .anatomy-label { font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.7rem; }
+    .anatomy-side.fixed   .anatomy-label { color:var(--pro); }
+    .anatomy-side.dynamic .anatomy-label { color:var(--brand); }
+    .anatomy-title { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--white);margin-bottom:.6rem; }
+    .anatomy-desc  { font-size:.84rem;color:var(--slate-light);line-height:1.7;margin-bottom:1.2rem; }
+    .anatomy-items { display:flex;flex-direction:column;gap:.5rem; }
+    .anatomy-item  { font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--slate-light);padding:.35rem .8rem;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid var(--dark-4); }
+    .anatomy-side.fixed   .anatomy-item { border-color:rgba(99,102,241,0.15); }
+    .anatomy-side.dynamic .anatomy-item { border-color:rgba(16,185,129,0.15); }
+
+    /* ── FUNNEL ── */
+    .funnel { display:flex;flex-direction:column;gap:.6rem;margin-bottom:2.5rem; }
+    .funnel-step { display:flex;align-items:center;gap:1.2rem;padding:1.2rem 1.6rem;border-radius:12px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.015);transition:border-color .2s; }
+    .funnel-step:hover { border-color:var(--sdr-dim); }
+    .funnel-num  { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.04em;color:var(--sdr);flex-shrink:0;width:32px; }
+    .funnel-name { font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--white);flex:1; }
+    .funnel-desc { font-size:.8rem;color:var(--slate-light);flex:2;line-height:1.5; }
+    .funnel-tag  { font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.12rem .5rem;border-radius:4px;flex-shrink:0; }
+
+    /* ── SUPPORT TIERS ── */
+    .tier-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2.5rem; }
+    @media(max-width:640px){ .tier-grid{grid-template-columns:1fr;} }
+    .tier-card { padding:1.8rem;border-radius:16px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.015);position:relative;overflow:hidden; }
+    .tier-card::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
+    .tier-card.t1::before { background:var(--green); }
+    .tier-card.t2::before { background:var(--accent); }
+    .tier-card.t3::before { background:var(--support); }
+    .tier-label { font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem; }
+    .tier-card.t1 .tier-label { color:var(--green); }
+    .tier-card.t2 .tier-label { color:var(--accent); }
+    .tier-card.t3 .tier-label { color:var(--support); }
+    .tier-name   { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;color:var(--white);margin-bottom:.5rem; }
+    .tier-desc   { font-size:.82rem;color:var(--slate-light);line-height:1.65; }
+    .tier-feats  { margin-top:1rem;display:flex;flex-direction:column;gap:.35rem; }
+    .tier-feat   { font-size:.78rem;color:var(--slate-light);display:flex;gap:.5rem; }
+    .tier-feat::before { content:'→';font-family:'JetBrains Mono',monospace;flex-shrink:0; }
+    .tier-card.t1 .tier-feat::before { color:var(--green); }
+    .tier-card.t2 .tier-feat::before { color:var(--accent); }
+    .tier-card.t3 .tier-feat::before { color:var(--support); }
+
+    /* ── VOICE MODALITIES ── */
+    .voice-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:2.5rem; }
+    @media(max-width:580px){ .voice-grid{grid-template-columns:1fr;} }
+    .voice-card { padding:1.8rem;border-radius:14px;border:1px solid var(--voice-dim);background:var(--voice-faint);transition:all .25s; }
+    .voice-card:hover { transform:translateY(-2px);border-color:rgba(6,182,212,0.35); }
+    .voice-icon  { font-size:1.6rem;margin-bottom:.9rem;display:block; }
+    .voice-name  { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;color:var(--white);margin-bottom:.4rem; }
+    .voice-desc  { font-size:.83rem;color:var(--slate-light);line-height:1.65;margin-bottom:1rem; }
+    .voice-feats { display:flex;flex-direction:column;gap:.3rem; }
+    .voice-feat  { font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--voice);padding:.22rem .6rem;border-radius:4px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15); }
+
+    /* ── FLOW SECTION ── */
+    .flow-map { display:flex;flex-direction:column;gap:0;position:relative;margin-bottom:3rem; }
+    .flow-map::before { content:'';position:absolute;left:22px;top:30px;bottom:30px;width:1px;background:linear-gradient(180deg,var(--brand),rgba(16,185,129,0.1)); }
+    .flow-step { display:flex;gap:1.4rem;align-items:flex-start;padding:1.1rem 0; }
+    .flow-circle { width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:800;font-size:.85rem;flex-shrink:0;position:relative;z-index:1;border:1px solid; }
+    .fc-g  { background:var(--brand-faint); border-color:rgba(16,185,129,0.3);  color:var(--brand); }
+    .fc-a  { background:var(--accent-faint);border-color:rgba(245,158,11,0.3);  color:var(--accent); }
+    .fc-b  { background:var(--pro-faint);   border-color:rgba(99,102,241,0.3);  color:var(--pro); }
+    .fc-v  { background:var(--autism-faint);border-color:rgba(139,92,246,0.3);  color:var(--violet); }
+    .fc-p  { background:var(--children-faint);border-color:rgba(236,72,153,0.3);color:var(--pink); }
+    .fc-r  { background:var(--health-faint);border-color:rgba(239,68,68,0.3);   color:var(--red); }
+    .fc-gr { background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--green); }
+    .fc-tl { background:var(--support-faint);border-color:rgba(20,184,166,0.3); color:var(--support); }
+    .fc-sl { background:rgba(148,163,184,0.08);border-color:rgba(148,163,184,0.25);color:var(--slate-light); }
+    .flow-info { padding-top:.2rem; }
+    .flow-tag  { font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--slate);margin-bottom:.2rem; }
+    .flow-name { font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.25rem; }
+    .flow-desc { font-size:.82rem;color:var(--slate-light);line-height:1.55; }
+
+    /* ── CHAT MOCKUP ── */
+    .chat-wrap { border-radius:18px;border:1px solid var(--dark-4);overflow:hidden;background:var(--dark-2);margin-bottom:2rem; }
+    .chat-bar  { padding:.9rem 1.4rem;background:var(--dark-3);border-bottom:1px solid var(--dark-4);display:flex;align-items:center;gap:.8rem; }
+    .chat-avatar { width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--brand),#00B8D9);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#000;flex-shrink:0; }
+    .chat-agent-name { font-family:'Outfit',sans-serif;font-weight:700;font-size:.9rem; }
+    .chat-status { font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--brand);display:flex;align-items:center;gap:.3rem; }
+    .chat-status::before { content:'';width:5px;height:5px;border-radius:50%;background:var(--brand);box-shadow:0 0 6px var(--brand); }
+    .chat-messages { padding:1.5rem;display:flex;flex-direction:column;gap:1rem; }
+    .msg { display:flex;gap:.8rem;max-width:88%; }
+    .msg.user { align-self:flex-end;flex-direction:row-reverse; }
+    .msg-bubble { padding:.75rem 1.1rem;border-radius:14px;font-size:.85rem;line-height:1.6; }
+    .msg.agent .msg-bubble { background:var(--dark-3);border:1px solid var(--dark-4);border-radius:4px 14px 14px 14px;color:var(--white); }
+    .msg.user  .msg-bubble { background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.08));border:1px solid rgba(16,185,129,0.2);border-radius:14px 4px 14px 14px; }
+    .msg-av { width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700; }
+    .msg.agent .msg-av { background:linear-gradient(135deg,var(--brand),#00B8D9);color:#000; }
+    .msg.user  .msg-av { background:var(--dark-4);color:var(--slate-light);border:1px solid var(--dark-4); }
+    .msg-time { font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--slate);margin-top:.3rem; }
+
+    /* ── SCHEMA FLOW ── */
+    .schema-flow { background:var(--dark-3);border:1px solid var(--brand-dim);border-radius:14px;overflow:hidden;margin-bottom:2.5rem; }
+    .schema-header { padding:.85rem 1.6rem;background:var(--brand-faint);border-bottom:1px solid var(--brand-dim);display:flex;align-items:center;gap:.7rem; }
+    .schema-header-label { font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--brand);letter-spacing:.1em; }
+    .schema-steps { padding:1.6rem;display:flex;align-items:stretch;gap:1rem; }
+    @media(max-width:660px){ .schema-steps{flex-direction:column;} }
+    .sstep { flex:1;padding:1.1rem 1.3rem;border-radius:10px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.015); }
+    .sstep.active { border-color:var(--brand-dim);background:var(--brand-faint); }
+    .sstep-num   { font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.15em;color:var(--brand);margin-bottom:.35rem; }
+    .sstep-title { font-family:'Outfit',sans-serif;font-weight:700;font-size:.9rem;color:var(--white);margin-bottom:.3rem; }
+    .sstep-desc  { font-size:.78rem;color:var(--slate-light);line-height:1.6; }
+    .schema-arrow { display:flex;align-items:center;color:var(--brand);font-size:.9rem;padding:0 .1rem;opacity:.6; }
+
+    /* ── CONFIG BLOCK ── */
+    .config-block { border:1px solid var(--dark-4);border-radius:14px;overflow:hidden;margin-bottom:2.5rem; }
+    .config-header { padding:.8rem 1.5rem;background:var(--dark-2);border-bottom:1px solid var(--dark-4);font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--slate); }
+    .config-body { padding:1.4rem 1.6rem;background:var(--dark-3);overflow-x:auto; }
+    .config-code { font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;white-space:pre; }
+    .key { color:var(--accent); } .val { color:var(--green); } .cmt { color:var(--slate);opacity:.7; }
+
+    /* ── WARN BLOCK ── */
+    .warn-block { display:flex;gap:1.2rem;align-items:flex-start;padding:1.5rem 1.8rem;border-radius:14px;border:1px solid var(--dark-4);margin-bottom:2rem; }
+    .warn-icon  { font-size:1.4rem;flex-shrink:0;margin-top:.1rem; }
+    .warn-title { font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.4rem; }
+    .warn-body  { font-size:.84rem;color:var(--slate-light);line-height:1.7; }
+    .warn-body strong { color:var(--white);font-weight:500; }
+
+    /* ── TABLE ── */
+    .md-table { width:100%;border-collapse:collapse;margin-bottom:3rem; }
+    .md-table th { font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--slate);padding:.6rem 1rem;border-bottom:1px solid var(--dark-4);text-align:left; }
+    .md-table td { padding:.85rem 1rem;border-bottom:1px solid rgba(16,185,129,0.07);font-size:.86rem;color:var(--slate-light);vertical-align:top; }
+    .md-table tr:hover td { background:rgba(16,185,129,0.03); }
+    .md-file { font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--brand);font-weight:500; }
+
+    /* ── POS GRID ── */
+    .pos-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:2.5rem; }
+    @media(max-width:600px){ .pos-grid{grid-template-columns:1fr;} }
+    .pos-card { padding:1.6rem;border-radius:14px;border:1px solid var(--dark-4);text-align:center; }
+    .pos-card.chatbot { border-color:rgba(248,113,113,0.2);background:rgba(248,113,113,0.04); }
+    .pos-card.rpa     { border-color:rgba(251,191,36,0.2); background:rgba(251,191,36,0.04); }
+    .pos-card.arva    { border-color:var(--brand-dim);     background:var(--brand-faint); }
+    .pos-emoji { font-size:2rem;margin-bottom:.8rem;display:block; }
+    .pos-name  { font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--white);margin-bottom:.5rem; }
+    .pos-verb  { font-family:'JetBrains Mono',monospace;font-size:.75rem;margin-bottom:.7rem; }
+    .pos-card.chatbot .pos-verb { color:var(--red); }
+    .pos-card.rpa     .pos-verb { color:var(--amber); }
+    .pos-card.arva    .pos-verb { color:var(--brand); }
+    .pos-desc  { font-size:.82rem;color:var(--slate-light);line-height:1.6; }
+
+    /* ── BLOCOS GRID ── */
+    .blocos-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.2rem;margin-bottom:2.5rem; }
+    .bloco-card  { padding:1.6rem 1.8rem;border-radius:14px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.018);transition:all .25s; }
+    .bloco-card:hover { border-color:var(--brand-dim);background:var(--brand-faint);transform:translateY(-2px); }
+    .bloco-icon  { font-size:1.4rem;display:block;margin-bottom:.9rem; }
+    .bloco-title { font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;color:var(--white);margin-bottom:.35rem; }
+    .bloco-line-tag { font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.1em;padding:.14rem .5rem;border-radius:4px;display:inline-block;margin-bottom:.65rem; }
+    .bloco-body  { font-size:.81rem;color:var(--slate-light);line-height:1.65; }
+    .bloco-features { margin-top:.9rem;display:flex;flex-direction:column;gap:.28rem; }
+    .bloco-feat  { font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--slate-light);padding:.28rem .65rem;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid var(--dark-4); }
+
+    /* ── TIMELINE ── */
+    .tl { display:flex;flex-direction:column;gap:.9rem; }
+    .tlitem { padding:1.6rem 1.8rem;border:1px solid var(--dark-4);border-radius:14px;background:rgba(255,255,255,0.015);transition:border-color .2s; }
+    .tlitem:hover { border-color:var(--brand-dim); }
+    .tlitem.highlight { border-color:rgba(16,185,129,0.25);background:var(--brand-faint); }
+    .tlb  { font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.12em;color:var(--brand);margin-bottom:.4rem; }
+    .tlt  { font-family:'Outfit',sans-serif;font-weight:700;font-size:1.15rem;color:var(--white);margin-bottom:.5rem; }
+    .tld  { font-size:.88rem;color:var(--slate-light);line-height:1.7; }
+    .tld2 { margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--brand); }
+
+    /* ── DIVIDER ── */
+    .divider-label { display:flex;align-items:center;gap:1rem;margin:2.5rem 0 2rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--slate); }
+    .divider-label::before,.divider-label::after { content:'';flex:1;height:1px;background:var(--dark-4); }
+
+    /* ── CANAL GRID ── */
+    .canal-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.1rem; }
+    .canal-card { padding:1.5rem;border-radius:14px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.018);transition:all .25s; }
+    .canal-card:hover { transform:translateY(-2px); }
+    .canal-card.native   { border-color:var(--brand-dim); }  .canal-card.native:hover   { background:var(--brand-faint); }
+    .canal-card.optional { border-color:var(--accent-dim); } .canal-card.optional:hover { background:var(--accent-faint); }
+    .canal-card.dashboard{ border-color:var(--pro-dim); }    .canal-card.dashboard:hover{ background:var(--pro-faint); }
+    .canal-logo { font-size:1.5rem;display:block;margin-bottom:.7rem; }
+    .canal-name { font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--white);margin-bottom:.25rem; }
+    .canal-type { font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--slate);letter-spacing:.1em;margin-bottom:.6rem; }
+    .canal-desc { font-size:.8rem;color:var(--slate-light);line-height:1.55;margin-bottom:.7rem; }
+    .canal-tag  { display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.12rem .5rem;border-radius:4px; }
+    .tag-native   { background:var(--brand-faint); color:var(--brand);  border:1px solid var(--brand-dim); }
+    .tag-optional { background:var(--accent-faint);color:var(--accent); border:1px solid var(--accent-dim); }
+    .tag-core     { background:var(--pro-faint);   color:var(--pro);    border:1px solid var(--pro-dim); }
+
+    /* ── LLM STACK ── */
+    .llm-stack { display:flex;flex-direction:column;gap:.7rem;margin-bottom:2.5rem; }
+    .llm-row { display:flex;align-items:center;gap:1rem;padding:1.2rem 1.6rem;border-radius:12px;border:1px solid var(--dark-4);background:rgba(255,255,255,0.015); }
+    .llm-row:hover { border-color:var(--brand-dim); }
+    .llm-num  { font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--slate);letter-spacing:.1em;flex-shrink:0;width:60px; }
+    .llm-name { font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--white);flex:1; }
+    .llm-desc { font-size:.8rem;color:var(--slate-light);flex:2;line-height:1.5; }
+    .llm-tag  { font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.12rem .5rem;border-radius:4px;flex-shrink:0; }
+    .llm-client { background:rgba(16,185,129,0.1);color:var(--brand); border:1px solid var(--brand-dim); }
+    .llm-note   { background:rgba(245,158,11,0.1); color:var(--accent);border:1px solid var(--accent-dim); }
+
+    footer { padding:3rem 0;border-top:1px solid var(--grid-line); }
+    .ft-inner { display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem; }
+    .ft-brand { font-family:'Outfit',sans-serif;font-weight:900;font-size:1.25rem;letter-spacing:-.04em; }
+    .ft-brand span { color:var(--brand); }
+    .ft-meta { font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--slate);text-align:right;line-height:1.8; }
+  </style>
+</head>
+<body>
+<div class="grid-bg"></div><div class="glow-a"></div><div class="glow-b"></div><div class="glow-c"></div>
+
+<nav>
+  <div>
+    <span class="nav-logo">ARV<span>A</span></span>
+    <span class="nav-badge">v2.0 · CONCEITO</span>
+  </div>
+  <ul class="nav-links">
+    <a href="#visao">// visão</a>
+    <a href="#linhas">// linhas</a>
+    <a href="#sdr">// arva sdr</a>
+    <a href="#support">// arva support</a>
+    <a href="#voice">// arva voice</a>
+    <a href="#blocos">// blocos</a>
+    <a href="#onboarding">// onboarding</a>
+    <a href="#fluxo">// fluxo</a>
+    <a href="#canais">// canais</a>
+    <a href="#llm">// llm</a>
+    <a href="#plano">// plano</a>
+  </ul>
+</nav>
+
+<div class="wrapper">
+
+  <!-- ─── HERO ─── -->
+  <section id="visao" class="hero">
+    <div class="hero-eyebrow">
+      <div class="pulse-dot"></div>
+      Grupo Facebrasil · Plataforma de Agentes Virtuais Autônomos
+    </div>
+    <h1 class="hero-title">
+      ARV<span class="accent">A</span><br>
+      <span class="muted">Inteligência para</span><br>
+      <span class="muted">cada fase da vida</span>
+    </h1>
+    <p class="hero-sub">
+      Plataforma de <strong>agentes virtuais autônomos modulares</strong> construída sobre OpenClaw. Seis linhas de vida, dois agentes especializados de negócio, um pacote de voz opcional. <strong>LLM agnóstico.</strong> Não responde perguntas. <strong>Trabalha.</strong>
+    </p>
+    <div class="hero-pills">
+      <div class="hpill"><div class="dot d-pro"></div>Professional</div>
+      <div class="hpill"><div class="dot d-life"></div>Life</div>
+      <div class="hpill"><div class="dot d-health"></div>Health</div>
+      <div class="hpill"><div class="dot d-student"></div>Student</div>
+      <div class="hpill"><div class="dot d-autism"></div>Autism</div>
+      <div class="hpill"><div class="dot d-children"></div>Children</div>
+      <div class="hpill"><div class="dot d-sdr"></div>ARVA SDR</div>
+      <div class="hpill"><div class="dot d-support"></div>ARVA Support</div>
+      <div class="hpill"><div class="dot d-voice"></div>ARVA Voice ✦</div>
+    </div>
+  </section>
+
+  <!-- ─── POSICIONAMENTO ─── -->
+  <section id="filosofia" class="fade-in">
+    <div class="stag">// posicionamento estratégico</div>
+    <h2 class="stitle">Chatbots conversam. RPA repete. ARVA executa.</h2>
+    <p class="slead">O ARVA ocupa um espaço que nenhuma plataforma existente ocupa: <strong>presença inteligente contínua</strong> na vida de pessoas e organizações. Não é chatbot turbinado. Não é RPA com prompt bonito. É um <strong>sistema operacional de trabalho e cuidado digital.</strong></p>
+    <div class="pos-grid">
+      <div class="pos-card chatbot">
+        <span class="pos-emoji">🗨️</span>
+        <div class="pos-name">Chatbots</div>
+        <div class="pos-verb">Conversam</div>
+        <div class="pos-desc">Respondem perguntas. Dependem do humano para cada passo. Não possuem estado operacional real. Não entregam trabalho final.</div>
+      </div>
+      <div class="pos-card rpa">
+        <span class="pos-emoji">🤖</span>
+        <div class="pos-name">RPA Tradicional</div>
+        <div class="pos-verb">Repetem</div>
+        <div class="pos-desc">Excelentes em tarefas fixas. Quebram com exceções. Não entendem contexto. Não lidam com linguagem natural.</div>
+      </div>
+      <div class="pos-card arva">
+        <span class="pos-emoji">⚡</span>
+        <div class="pos-name">ARVA</div>
+        <div class="pos-verb">Executam</div>
+        <div class="pos-desc">Processos completos com estado, histórico e contexto. Resultados verificáveis. Adaptam-se. Trabalham enquanto você dorme.</div>
+      </div>
+    </div>
+    <div class="warn-block" style="border-color:var(--brand-dim);background:var(--brand-faint);">
+      <div class="warn-icon">💡</div>
+      <div>
+        <div class="warn-title" style="color:var(--brand)">Missão Central</div>
+        <div class="warn-body">Criar um ecossistema de Agentes Virtuais Autônomos capazes de executar trabalho real, contínuo e especializado — <strong>ampliando a capacidade humana</strong> por meio da automação inteligente, ética e modular. ARVA existe para que pessoas e empresas operem <strong>acima de seus limites naturais de tempo, atenção e escala.</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── LINHAS ─── -->
+  <section id="linhas" class="fade-in">
+    <div class="stag">// ecossistema completo</div>
+    <h2 class="stitle">Linhas de Vida + Agentes Especializados</h2>
+    <p class="slead">Seis linhas para cada fase da vida humana. Dois agentes especializados para negócios. Um pacote de voz opcional que ativa presença sonora em qualquer produto ARVA. <strong>Uma infraestrutura. Muitos universos.</strong></p>
+
+    <div class="divider-label">seis linhas de vida</div>
+    <div class="lines-grid">
+      <div class="line-card pro">
+        <span class="line-emoji">💼</span><div class="line-badge">Advanced</div>
+        <div class="line-title">ARVA Professional</div>
+        <div class="line-for">// autônomos · PMEs · equipes</div>
+        <div class="line-desc">Escala operacional. Blocos de vendas, marketing, finanças e produtividade. O exoesqueleto cognitivo da empresa moderna.</div>
+      </div>
+      <div class="line-card life">
+        <span class="line-emoji">🌱</span><div class="line-badge">Essential</div>
+        <div class="line-title">ARVA Life</div>
+        <div class="line-for">// qualquer pessoa · qualquer idade</div>
+        <div class="line-desc">Bem-estar e qualidade de vida. Não é sobre doença nem produtividade — é sobre viver melhor com consistência.</div>
+      </div>
+      <div class="line-card health">
+        <span class="line-emoji">❤️‍🩹</span><div class="line-badge">Care</div>
+        <div class="line-title">ARVA Health</div>
+        <div class="line-for">// pacientes crônicos · famílias cuidadoras</div>
+        <div class="line-desc">Monitoramento contínuo de saúde. Medicamentos, vitais, histórico médico, painel familiar, alerta de emergência.</div>
+      </div>
+      <div class="line-card student">
+        <span class="line-emoji">🎓</span><div class="line-badge">Education</div>
+        <div class="line-title">ARVA Student</div>
+        <div class="line-for">// estudantes · vestibular · concursos</div>
+        <div class="line-desc">Direção e foco acadêmico. Organização de provas, tutoria de revisão, metas de estudo, orientação vocacional.</div>
+      </div>
+      <div class="line-card autism">
+        <span class="line-emoji">🧩</span><div class="line-badge">Inclusion</div>
+        <div class="line-title">ARVA Autism</div>
+        <div class="line-for">// famílias de autistas e DEFs</div>
+        <div class="line-desc">Suporte ao cuidado especializado. Terapias, diário comportamental, direitos legais, comunicação escolar.</div>
+      </div>
+      <div class="line-card children">
+        <span class="line-emoji">👶</span><div class="line-badge">Family</div>
+        <div class="line-title">ARVA Children</div>
+        <div class="line-for">// pais de crianças</div>
+        <div class="line-desc">Visão unificada da vida do filho. Saúde, escola, atividades, marcos de desenvolvimento, memória afetiva.</div>
+      </div>
+    </div>
+
+    <div class="divider-label">agentes especializados de negócio</div>
+    <div class="lines-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="line-card sdr">
+        <span class="line-emoji">🎯</span><div class="line-badge">Sales Agent</div>
+        <div class="line-title">ARVA SDR</div>
+        <div class="line-for">// vendas · prospecção · funil</div>
+        <div class="line-desc">Agente completo de vendas. Prospecta, qualifica, nutre, faz follow-up e entrega leads quentes para o humano fechar.</div>
+      </div>
+      <div class="line-card support">
+        <span class="line-emoji">🛟</span><div class="line-badge">Support Agent</div>
+        <div class="line-title">ARVA Support</div>
+        <div class="line-for">// suporte · atendimento · CS</div>
+        <div class="line-desc">Agente completo de suporte. Resolve tickets, responde dúvidas, escala para humanos e fecha o loop com o cliente.</div>
+      </div>
+    </div>
+
+    <div class="divider-label">pacote opcional de voz</div>
+    <div class="lines-grid" style="grid-template-columns:1fr;">
+      <div class="line-card voice">
+        <span class="line-emoji">🎙️</span><div class="line-badge">Optional Add-on</div>
+        <div class="line-title">ARVA Voice</div>
+        <div class="line-for">// voz · ligações · URA inteligente · assistente sonoro</div>
+        <div class="line-desc">Pacote opcional que adiciona presença sonora a qualquer linha ou agente ARVA. Recepção de chamadas, ligações outbound, URA conversacional, síntese e transcrição de voz. Ativa com um clique sobre qualquer produto ARVA existente — não é uma linha separada, é uma camada de canal.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ARVA SDR ─── -->
+  <section id="sdr" class="fade-in">
+    <div class="stag stag-sdr">// agente especializado · vendas</div>
+
+    <div class="agent-hero sdr">
+      <div class="agent-hero-band"></div>
+      <div class="agent-hero-body">
+        <div class="agent-label">ARVA SDR — Sales Development Representative</div>
+        <div class="agent-name">O vendedor que nunca dorme,<br>nunca esquece um follow-up.</div>
+        <p class="agent-tagline">Agente autônomo de vendas construído sobre OpenClaw. Prospecta leads em múltiplos canais, qualifica com base em critérios configuráveis, conduz nutrição personalizada e entrega oportunidades quentes com histórico completo para o humano fechar. <strong>Pipeline preenchido, humano focado em fechar.</strong></p>
+        <div class="agent-pills">
+          <span class="agent-pill">Prospecção Multicanal</span>
+          <span class="agent-pill">Qualificação BANT / SPIN</span>
+          <span class="agent-pill">Nutrição Personalizada</span>
+          <span class="agent-pill">Follow-up Sistemático</span>
+          <span class="agent-pill">CRM Nativo</span>
+          <span class="agent-pill">Pipeline em Tempo Real</span>
+          <span class="agent-pill">Handoff para Humano</span>
+          <span class="agent-pill">ARVA Voice Ready</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-label">funil de atuação do arva sdr</div>
+
+    <div class="funnel">
+      <div class="funnel-step">
+        <div class="funnel-num">01</div>
+        <div class="funnel-name">Prospecção e Captura</div>
+        <div class="funnel-desc">Busca ativa de leads em LinkedIn, bases de dados, formulários de site, eventos e indicações. Enriquecimento automático com dados públicos — cargo, empresa, setor, tamanho.</div>
+        <span class="funnel-tag" style="color:var(--sdr);background:var(--sdr-faint);border:1px solid var(--sdr-dim)">Autônomo</span>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-num">02</div>
+        <div class="funnel-name">Qualificação Inteligente</div>
+        <div class="funnel-desc">Score de qualificação configurável (BANT, SPIN ou critérios personalizados). Leads abaixo do threshold vão para nutrição. Leads acima avançam imediatamente.</div>
+        <span class="funnel-tag" style="color:var(--sdr);background:var(--sdr-faint);border:1px solid var(--sdr-dim)">Autônomo</span>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-num">03</div>
+        <div class="funnel-name">Primeiro Contato Personalizado</div>
+        <div class="funnel-desc">Mensagem inicial via e-mail, WhatsApp ou LinkedIn — gerada com contexto do lead. Tom, oferta e abordagem configurados no onboarding. Nunca genérico.</div>
+        <span class="funnel-tag" style="color:var(--amber);background:var(--accent-faint);border:1px solid var(--accent-dim)">Aprovação Opt.</span>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-num">04</div>
+        <div class="funnel-name">Nutrição e Follow-up Sistemático</div>
+        <div class="funnel-desc">Sequência de follow-ups com intervalos e abordagens configuráveis. Adapta o conteúdo conforme a resposta (ou silêncio) do lead. Sem cemitério de leads.</div>
+        <span class="funnel-tag" style="color:var(--sdr);background:var(--sdr-faint);border:1px solid var(--sdr-dim)">Autônomo</span>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-num">05</div>
+        <div class="funnel-name">Qualificação Conversacional</div>
+        <div class="funnel-desc">Quando o lead responde, o SDR conduz conversa estruturada para aprofundar qualificação: budget, timeline, pain points, decision maker. Registra tudo no CRM.</div>
+        <span class="funnel-tag" style="color:var(--sdr);background:var(--sdr-faint);border:1px solid var(--sdr-dim)">Autônomo</span>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-num">06</div>
+        <div class="funnel-name">Agendamento de Reunião</div>
+        <div class="funnel-desc">Propõe horários disponíveis do vendedor humano, confirma e envia convite. Prepara briefing completo do lead para o humano antes da reunião.</div>
+        <span class="funnel-tag" style="color:var(--amber);background:var(--accent-faint);border:1px solid var(--accent-dim)">Semi-auto</span>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-num">07</div>
+        <div class="funnel-name">Handoff Documentado para Humano</div>
+        <div class="funnel-desc">Entrega ao vendedor humano: ficha completa do lead, histórico de interações, score de qualificação, principais pain points identificados e sugestão de abordagem.</div>
+        <span class="funnel-tag" style="color:var(--green);background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25)">Humano fecha</span>
+      </div>
+    </div>
+
+    <div class="divider-label">features do arva sdr</div>
+    <div class="feat-grid">
+      <div class="feat-card sdr">
+        <span class="feat-icon">🔍</span>
+        <div class="feat-title">Prospecção Multicanal</div>
+        <div class="feat-body">Busca e captura de leads em LinkedIn Sales Navigator, Apollo, bases próprias, formulários e webhooks de eventos.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ enriquecimento automático de perfil</div>
+          <div class="feat-item">→ deduplicação inteligente</div>
+          <div class="feat-item">→ scoring de ICP na entrada</div>
+        </div>
+      </div>
+      <div class="feat-card sdr">
+        <span class="feat-icon">🎯</span>
+        <div class="feat-title">Qualificação Configurável</div>
+        <div class="feat-body">Metodologias padrão (BANT, SPIN, MEDDIC) ou critérios 100% personalizados definidos no onboarding da empresa.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ threshold de avanço ajustável</div>
+          <div class="feat-item">→ perguntas de qualificação customizadas</div>
+          <div class="feat-item">→ re-qualificação automática com o tempo</div>
+        </div>
+      </div>
+      <div class="feat-card sdr">
+        <span class="feat-icon">✉️</span>
+        <div class="feat-title">Cadência Personalizada</div>
+        <div class="feat-body">Sequências de mensagens com variação de canal, tom e conteúdo. Sem templates genéricos — cada mensagem usa contexto do lead.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ e-mail · WhatsApp · LinkedIn</div>
+          <div class="feat-item">→ intervalo e timing configuráveis</div>
+          <div class="feat-item">→ A/B testing de abordagens</div>
+        </div>
+      </div>
+      <div class="feat-card sdr">
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">CRM Nativo</div>
+        <div class="feat-body">Integração bidirecional com HubSpot, Pipedrive, RD Station e outros. Cada interação registrada automaticamente sem intervenção humana.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ atualização automática de status</div>
+          <div class="feat-item">→ registro de toda interação</div>
+          <div class="feat-item">→ alertas de oportunidade quente</div>
+        </div>
+      </div>
+      <div class="feat-card sdr">
+        <span class="feat-icon">📅</span>
+        <div class="feat-title">Agendamento Inteligente</div>
+        <div class="feat-body">Propõe e confirma reuniões com base na agenda real do vendedor. Envia convite, lembrete e briefing pré-reunião automaticamente.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ sync Google Calendar / Outlook</div>
+          <div class="feat-item">→ briefing gerado por IA antes da call</div>
+          <div class="feat-item">→ lembrete automático 24h e 1h antes</div>
+        </div>
+      </div>
+      <div class="feat-card sdr">
+        <span class="feat-icon">📈</span>
+        <div class="feat-title">Painel de Pipeline</div>
+        <div class="feat-body">Visibilidade total do funil em tempo real. Conversão por etapa, tempo médio de resposta, canais mais efetivos, ROI por campanha.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ dashboard em tempo real</div>
+          <div class="feat-item">→ alertas de leads esfriando</div>
+          <div class="feat-item">→ relatório semanal automático</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-block">
+      <div class="config-header">schema.json — onboarding ARVA SDR</div>
+      <div class="config-body"><pre class="config-code"><span class="cmt">// Preenchido no onboarding conversacional — o SDR opera com esse contexto</span>
+{
+  <span class="key">"empresa"</span>:           <span class="val">"Acme Soluções B2B"</span>,
+  <span class="key">"produto"</span>:           <span class="val">"Software de gestão financeira para PMEs"</span>,
+  <span class="key">"icp"</span>: {
+    <span class="key">"setor"</span>:           <span class="val">["varejo", "serviços", "indústria"]</span>,
+    <span class="key">"porte"</span>:           <span class="val">"10-200 funcionários"</span>,
+    <span class="key">"cargo_alvo"</span>:     <span class="val">["CEO", "CFO", "Gerente Financeiro"]</span>,
+    <span class="key">"dores_primarias"</span>: <span class="val">["fluxo de caixa", "conciliação bancária", "DRE manual"]</span>
+  },
+  <span class="key">"metodologia"</span>:      <span class="val">"BANT"</span>,
+  <span class="key">"threshold_avanço"</span>: <span class="val">65</span>,                    <span class="cmt">// score mínimo para handoff</span>
+  <span class="key">"canais"</span>:           <span class="val">["email", "whatsapp", "linkedin"]</span>,
+  <span class="key">"tom"</span>:              <span class="val">"consultivo, direto, sem jargão técnico"</span>,
+  <span class="key">"agendas_humanas"</span>:  <span class="val">["joao@acme.com", "maria@acme.com"]</span>,
+  <span class="key">"crm"</span>:              <span class="val">"hubspot"</span>,
+  <span class="key">"max_followups"</span>:    <span class="val">5</span>                     <span class="cmt">// após isso, lead vai para nurturing longo</span>
+}</pre></div>
+    </div>
+
+    <div class="warn-block" style="border-color:var(--sdr-dim);background:var(--sdr-faint);">
+      <div class="warn-icon">🤝</div>
+      <div>
+        <div class="warn-title" style="color:var(--sdr)">ARVA SDR + ARVA Voice = SDR com voz própria</div>
+        <div class="warn-body">Com o pacote ARVA Voice ativado, o SDR pode fazer e receber <strong>ligações telefônicas</strong> — apresentação inicial, qualificação por voz, confirmação de reunião. A transcrição da chamada é registrada automaticamente no CRM e alimenta o histórico do lead. O humano recebe a reunião agendada <strong>com gravação e resumo da conversa já prontos.</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ARVA SUPPORT ─── -->
+  <section id="support" class="fade-in">
+    <div class="stag stag-support">// agente especializado · suporte</div>
+
+    <div class="agent-hero support">
+      <div class="agent-hero-band"></div>
+      <div class="agent-hero-body">
+        <div class="agent-label">ARVA Support — Customer Support Agent</div>
+        <div class="agent-name">Suporte 24/7 que resolve,<br>não só responde.</div>
+        <p class="agent-tagline">Agente autônomo de suporte ao cliente construído sobre OpenClaw. Triagem inteligente de tickets, resolução autônoma de demandas dentro de seu escopo, escalada precisa para humanos, e fechamento de loop com o cliente. <strong>CSAT alto, fila de suporte vazia.</strong></p>
+        <div class="agent-pills">
+          <span class="agent-pill">Triagem Inteligente</span>
+          <span class="agent-pill">Base de Conhecimento Viva</span>
+          <span class="agent-pill">Resolução Autônoma L1/L2</span>
+          <span class="agent-pill">Escalada Precisa</span>
+          <span class="agent-pill">Multicanal</span>
+          <span class="agent-pill">CSAT Automático</span>
+          <span class="agent-pill">Análise de Tendências</span>
+          <span class="agent-pill">ARVA Voice Ready</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-label">três níveis de resolução</div>
+    <div class="tier-grid">
+      <div class="tier-card t1">
+        <div class="tier-label">Nível 1 · Autônomo</div>
+        <div class="tier-name">Resolução Imediata</div>
+        <div class="tier-desc">O agente resolve sozinho. FAQs, status de pedido, redefinição de senha, informações de produto, dúvidas de uso, tutoriais.</div>
+        <div class="tier-feats">
+          <div class="tier-feat">Resposta em segundos, 24/7</div>
+          <div class="tier-feat">Base de conhecimento consultada em tempo real</div>
+          <div class="tier-feat">Tom e linguagem configuráveis por marca</div>
+          <div class="tier-feat">Registro automático no sistema de tickets</div>
+        </div>
+      </div>
+      <div class="tier-card t2">
+        <div class="tier-label">Nível 2 · Semi-autônomo</div>
+        <div class="tier-name">Resolução Assistida</div>
+        <div class="tier-desc">O agente processa, prepara a solução e notifica humano para aprovação antes de executar. Reembolsos, exceções, casos fora do padrão.</div>
+        <div class="tier-feats">
+          <div class="tier-feat">Diagnóstico completo pelo agente</div>
+          <div class="tier-feat">Solução proposta com justificativa</div>
+          <div class="tier-feat">Humano aprova em 1 clique no dashboard</div>
+          <div class="tier-feat">Agente executa e fecha o loop com cliente</div>
+        </div>
+      </div>
+      <div class="tier-card t3">
+        <div class="tier-label">Nível 3 · Escalada</div>
+        <div class="tier-name">Handoff para Especialista</div>
+        <div class="tier-desc">Casos complexos, reclamações graves, questões jurídicas ou técnicas que requerem especialista humano. Escalada com contexto completo.</div>
+        <div class="tier-feats">
+          <div class="tier-feat">Briefing completo para o especialista</div>
+          <div class="tier-feat">Histórico integral da interação</div>
+          <div class="tier-feat">Sugestão de resolução pelo agente</div>
+          <div class="tier-feat">Cliente informado sobre escalada e prazo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-label">features do arva support</div>
+    <div class="feat-grid">
+      <div class="feat-card support">
+        <span class="feat-icon">🔀</span>
+        <div class="feat-title">Triagem Inteligente</div>
+        <div class="feat-body">Classifica tickets por tipo, urgência, sentimento e complexidade antes de qualquer ação. Priorização automática por SLA.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ análise de sentimento em tempo real</div>
+          <div class="feat-item">→ categorização automática por intent</div>
+          <div class="feat-item">→ detecção de cliente em risco de churn</div>
+        </div>
+      </div>
+      <div class="feat-card support">
+        <span class="feat-icon">📚</span>
+        <div class="feat-title">Base de Conhecimento Viva</div>
+        <div class="feat-body">A base cresce a cada resolução. Casos resolvidos alimentam automaticamente o conhecimento do agente para o próximo ticket similar.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ RAG sobre documentação do produto</div>
+          <div class="feat-item">→ atualização automática com novos casos</div>
+          <div class="feat-item">→ gap analysis — detecta o que falta na base</div>
+        </div>
+      </div>
+      <div class="feat-card support">
+        <span class="feat-icon">🌐</span>
+        <div class="feat-title">Suporte Multicanal</div>
+        <div class="feat-body">Um agente, vários canais. E-mail, WhatsApp, chat do site, Telegram, Instagram DM. Histórico unificado independente do canal.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ contexto preservado entre canais</div>
+          <div class="feat-item">→ cliente não precisa repetir o problema</div>
+          <div class="feat-item">→ resposta no mesmo canal do contato</div>
+        </div>
+      </div>
+      <div class="feat-card support">
+        <span class="feat-icon">⭐</span>
+        <div class="feat-title">CSAT Automático</div>
+        <div class="feat-body">Pesquisa de satisfação enviada após cada resolução. Análise de tendências, identificação de causas raiz, alertas de degradação.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ pesquisa contextualizada por tipo de caso</div>
+          <div class="feat-item">→ NPS e CSAT integrados</div>
+          <div class="feat-item">→ relatório mensal de causas raiz</div>
+        </div>
+      </div>
+      <div class="feat-card support">
+        <span class="feat-icon">🛡️</span>
+        <div class="feat-title">Conformidade e Limites</div>
+        <div class="feat-body">O agente só executa ações explicitamente autorizadas. Ações irreversíveis (reembolso, cancelamento) sempre passam por aprovação humana.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ lista de ações proibidas configurável</div>
+          <div class="feat-item">→ limites de valor para aprovação automática</div>
+          <div class="feat-item">→ audit log de toda decisão tomada</div>
+        </div>
+      </div>
+      <div class="feat-card support">
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">Inteligência de Produto</div>
+        <div class="feat-body">O agente identifica padrões de tickets que revelam bugs, confusões de UX e gaps de documentação — e reporta ao time de produto.</div>
+        <div class="feat-items">
+          <div class="feat-item">→ clustering de tickets por tema</div>
+          <div class="feat-item">→ relatório semanal de tendências</div>
+          <div class="feat-item">→ alerta de pico de demanda por tema</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-block" style="border-color:var(--support-dim);background:var(--support-faint);">
+      <div class="warn-icon">🎙️</div>
+      <div>
+        <div class="warn-title" style="color:var(--support)">ARVA Support + ARVA Voice = Central de Atendimento por Voz</div>
+        <div class="warn-body">Com o pacote ARVA Voice ativado, o Support recebe e faz ligações telefônicas. URA conversacional inteligente — sem menus numéricos, sem "pressione 1". O cliente fala normalmente e o agente entende, resolve ou escala. <strong>Transcrição automática, ticket criado durante a ligação, humano acionado apenas quando necessário.</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ARVA VOICE ─── -->
+  <section id="voice" class="fade-in">
+    <div class="stag stag-voice">// pacote opcional · presença sonora</div>
+
+    <div class="agent-hero voice">
+      <div class="agent-hero-band"></div>
+      <div class="agent-hero-body">
+        <div class="agent-label">ARVA Voice — Pacote Opcional de Voz</div>
+        <div class="agent-name">Uma voz para cada agente.<br>Uma camada, infinitas aplicações.</div>
+        <p class="agent-tagline">ARVA Voice não é um produto separado — é um <strong>pacote de capacidades sonoras</strong> que se adiciona a qualquer linha ou agente ARVA existente. Ativa ligações inbound e outbound, URA conversacional, síntese de voz e transcrição. O agente que já trabalha em texto passa a <strong>também falar</strong>.</p>
+        <div class="agent-pills">
+          <span class="agent-pill">Add-on · Não substitui nenhuma linha</span>
+          <span class="agent-pill">Ativa em qualquer agente ARVA</span>
+          <span class="agent-pill">Voz sintética configurável</span>
+          <span class="agent-pill">Transcrição em tempo real</span>
+          <span class="agent-pill">Integração telefônica (VoIP/SIP)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-label">quatro modalidades de voz</div>
+    <div class="voice-grid">
+      <div class="voice-card">
+        <span class="voice-icon">📞</span>
+        <div class="voice-name">Receptivo Inteligente</div>
+        <div class="voice-desc">O agente atende ligações recebidas. Identifica o cliente, entende a demanda por voz e resolve ou encaminha — sem menus numéricos, sem scripts rígidos.</div>
+        <div class="voice-feats">
+          <div class="voice-feat">→ URA conversacional natural</div>
+          <div class="voice-feat">→ identificação do cliente pelo número</div>
+          <div class="voice-feat">→ contexto do histórico injetado na chamada</div>
+          <div class="voice-feat">→ escalada para humano com briefing</div>
+        </div>
+      </div>
+      <div class="voice-card">
+        <span class="voice-icon">📲</span>
+        <div class="voice-name">Outbound Proativo</div>
+        <div class="voice-desc">O agente faz ligações outbound com propósito definido — confirmação de reunião, follow-up de proposta, cobrança amigável, pesquisa de satisfação.</div>
+        <div class="voice-feats">
+          <div class="voice-feat">→ agendamento de campanha de ligações</div>
+          <div class="voice-feat">→ script adaptativo por perfil do contato</div>
+          <div class="voice-feat">→ detecção de caixa postal vs atendimento</div>
+          <div class="voice-feat">→ registro de resultado no CRM</div>
+        </div>
+      </div>
+      <div class="voice-card">
+        <span class="voice-icon">🗣️</span>
+        <div class="voice-name">Síntese de Voz</div>
+        <div class="voice-desc">Transforma qualquer conteúdo gerado pelo agente em áudio. Resumos do dia por voz no WhatsApp, alertas sonoros, mensagens de voz personalizadas.</div>
+        <div class="voice-feats">
+          <div class="voice-feat">→ voz configurável por agente (tom, velocidade)</div>
+          <div class="voice-feat">→ áudio enviado via WhatsApp / Telegram</div>
+          <div class="voice-feat">→ suporte a português brasileiro nativo</div>
+          <div class="voice-feat">→ emoção adaptada ao contexto da mensagem</div>
+        </div>
+      </div>
+      <div class="voice-card">
+        <span class="voice-icon">📝</span>
+        <div class="voice-name">Transcrição e Memória</div>
+        <div class="voice-desc">Toda interação de voz é transcrita, sumarizada e injetada no contexto do agente. O que foi dito numa ligação é lembrado na próxima mensagem de texto.</div>
+        <div class="voice-feats">
+          <div class="voice-feat">→ transcrição em tempo real durante a call</div>
+          <div class="voice-feat">→ resumo automático pós-chamada</div>
+          <div class="voice-feat">→ ações identificadas e agendadas</div>
+          <div class="voice-feat">→ histórico unificado texto + voz</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-label">voice aplicado por linha e agente</div>
+    <table class="md-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Aplicação do ARVA Voice</th>
+          <th>Impacto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="md-file">ARVA SDR</span></td>
+          <td style="color:var(--slate-light)">Ligações de prospecção outbound, confirmação de reunião por voz, qualificação telefônica</td>
+          <td style="color:var(--slate-light)">Taxa de contato 3-5x maior que e-mail frio</td>
+        </tr>
+        <tr>
+          <td><span class="md-file">ARVA Support</span></td>
+          <td style="color:var(--slate-light)">Central de atendimento por voz, URA inteligente, resolução de tickets por ligação</td>
+          <td style="color:var(--slate-light)">Suporte 24/7 sem fila de espera</td>
+        </tr>
+        <tr>
+          <td><span class="md-file">ARVA Health</span></td>
+          <td style="color:var(--slate-light)">Ligação automática de lembrete de medicamento para idosos, alerta de emergência por voz</td>
+          <td style="color:var(--slate-light)">Adesão ao tratamento para quem não usa app</td>
+        </tr>
+        <tr>
+          <td><span class="md-file">ARVA Life</span></td>
+          <td style="color:var(--slate-light)">Resumo diário por áudio no WhatsApp, check-in de bem-estar por voz</td>
+          <td style="color:var(--slate-light)">Acessibilidade para público 60+</td>
+        </tr>
+        <tr>
+          <td><span class="md-file">ARVA Children</span></td>
+          <td style="color:var(--slate-light)">Alerta de emergência escolar por ligação, lembrete de vacina para pais</td>
+          <td style="color:var(--slate-light)">Canal que o pai realmente atende</td>
+        </tr>
+        <tr>
+          <td><span class="md-file">ARVA Student</span></td>
+          <td style="color:var(--slate-light)">Sessão de revisão por voz, quiz oral, feedback de redação narrado</td>
+          <td style="color:var(--slate-light)">Aprendizagem multimodal, mais retenção</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warn-block" style="border-color:var(--voice-dim);background:var(--voice-faint);">
+      <div class="warn-icon">✦</div>
+      <div>
+        <div class="warn-title" style="color:var(--voice)">Modelo de ativação e custo</div>
+        <div class="warn-body">ARVA Voice é um <strong>add-on com custo por minuto de voz</strong> consumido — separado dos créditos de execução de texto. O cliente ativa pelo dashboard, configura o número de telefone (VoIP/SIP/número local), escolhe a voz sintética e define quais agentes têm acesso ao pacote. <strong>Não há mensalidade fixa adicional</strong> — paga apenas pelo uso real de voz.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BLOCOS ─── -->
+  <section id="blocos" class="fade-in">
+    <div class="stag">// arquitetura de blocos</div>
+    <h2 class="stitle">O Bloco ARVA</h2>
+    <p class="slead">Um Bloco ARVA é uma <strong>unidade autônoma de competência digital</strong>. Construído sobre OpenClaw, cada bloco tem duas metades: o que nasce sabendo e o que aprende com o cliente.</p>
+
+    <div class="anatomy-wrap">
+      <div class="anatomy-side fixed">
+        <div class="anatomy-label">Metade Fixa</div>
+        <div class="anatomy-title">DNA Profissional</div>
+        <div class="anatomy-desc">Construído e certificado pela equipe ARVA. Não muda de cliente para cliente — é a competência core validada do bloco.</div>
+        <div class="anatomy-items">
+          <div class="anatomy-item">🧠 Lógica operacional do domínio</div>
+          <div class="anatomy-item">🔗 Integrações e conectores nativos</div>
+          <div class="anatomy-item">📋 Regras e políticas de execução</div>
+          <div class="anatomy-item">🛡️ Filtros de segurança e conformidade</div>
+          <div class="anatomy-item">📊 Métricas e observabilidade</div>
+        </div>
+      </div>
+      <div class="anatomy-side dynamic">
+        <div class="anatomy-label">Metade Dinâmica</div>
+        <div class="anatomy-title">Contexto do Cliente</div>
+        <div class="anatomy-desc">Gerado pelo questionário conversacional. Injetado como contexto persistente em toda execução do agente.</div>
+        <div class="anatomy-items">
+          <div class="anatomy-item">👤 Perfil do usuário e preferências</div>
+          <div class="anatomy-item">📐 Parâmetros e regras específicas</div>
+          <div class="anatomy-item">🎯 Objetivos e metas declaradas</div>
+          <div class="anatomy-item">🔑 Credenciais e integrações ativas</div>
+          <div class="anatomy-item">🧬 Histórico e aprendizado acumulado</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-label">catálogo de blocos · exemplos por linha</div>
+    <div class="blocos-grid">
+      <div class="bloco-card">
+        <span class="bloco-icon">📅</span>
+        <div class="bloco-title">Agenda Inteligente</div>
+        <div class="bloco-line-tag" style="color:var(--pro);background:var(--pro-faint);border:1px solid var(--pro-dim)">Professional · Life</div>
+        <div class="bloco-body">Gerenciamento ativo de compromissos. Avisa, reorganiza e prepara briefing antes de cada reunião.</div>
+        <div class="bloco-features">
+          <div class="bloco-feat">→ briefing automático pré-reunião</div>
+          <div class="bloco-feat">→ detecção de conflitos</div>
+          <div class="bloco-feat">→ sync Google Calendar / iCal</div>
+        </div>
+      </div>
+      <div class="bloco-card">
+        <span class="bloco-icon">💊</span>
+        <div class="bloco-title">Central de Medicamentos</div>
+        <div class="bloco-line-tag" style="color:var(--health);background:var(--health-faint);border:1px solid var(--health-dim)">Health · Life</div>
+        <div class="bloco-body">Vai além do lembrete. Controla estoque, detecta padrão de esquecimento e alerta familiar.</div>
+        <div class="bloco-features">
+          <div class="bloco-feat">→ alerta de estoque baixo</div>
+          <div class="bloco-feat">→ registro de adesão diária</div>
+          <div class="bloco-feat">→ notificação familiar autorizado</div>
+        </div>
+      </div>
+      <div class="bloco-card">
+        <span class="bloco-icon">📣</span>
+        <div class="bloco-title">Presença Digital</div>
+        <div class="bloco-line-tag" style="color:var(--pro);background:var(--pro-faint);border:1px solid var(--pro-dim)">Professional</div>
+        <div class="bloco-body">Geração e agendamento de conteúdo para redes sociais com consistência e tom de voz configurado.</div>
+        <div class="bloco-features">
+          <div class="bloco-feat">→ calendário editorial automático</div>
+          <div class="bloco-feat">→ publicação multi-canal</div>
+          <div class="bloco-feat">→ relatório de engajamento</div>
+        </div>
+      </div>
+      <div class="bloco-card">
+        <span class="bloco-icon">📚</span>
+        <div class="bloco-title">Tutor de Revisão</div>
+        <div class="bloco-line-tag" style="color:var(--student);background:var(--student-faint);border:1px solid var(--student-dim)">Student</div>
+        <div class="bloco-body">Explica de formas diferentes até fazer sentido. Sem julgamento, sem pressa. Quiz e análise de redação ENEM.</div>
+        <div class="bloco-features">
+          <div class="bloco-feat">→ adaptação ao nível do estudante</div>
+          <div class="bloco-feat">→ gerador de quiz personalizado</div>
+          <div class="bloco-feat">→ análise de redação ENEM</div>
+        </div>
+      </div>
+      <div class="bloco-card">
+        <span class="bloco-icon">🧩</span>
+        <div class="bloco-title">Diário Comportamental</div>
+        <div class="bloco-line-tag" style="color:var(--autism);background:var(--autism-faint);border:1px solid var(--autism-dim)">Autism</div>
+        <div class="bloco-body">Registro de comportamentos e gatilhos. Identifica correlações e sugere protocolos para situações recorrentes.</div>
+        <div class="bloco-features">
+          <div class="bloco-feat">→ detecção de padrões comportamentais</div>
+          <div class="bloco-feat">→ relatório para terapeutas</div>
+          <div class="bloco-feat">→ protocolo para dias críticos</div>
+        </div>
+      </div>
+      <div class="bloco-card">
+        <span class="bloco-icon">❤️</span>
+        <div class="bloco-title">Monitoramento Vital</div>
+        <div class="bloco-line-tag" style="color:var(--health);background:var(--health-faint);border:1px solid var(--health-dim)">Health</div>
+        <div class="bloco-body">Check-in estruturado diário. Pressão, glicemia, peso, humor. Alerta familiar quando algo sai do padrão.</div>
+        <div class="bloco-features">
+          <div class="bloco-feat">→ integração com dispositivos smart</div>
+          <div class="bloco-feat">→ painel familiar em tempo real</div>
+          <div class="bloco-feat">→ alerta de emergência automático</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ONBOARDING ─── -->
+  <section id="onboarding" class="fade-in">
+    <div class="stag">// experiência de ativação</div>
+    <h2 class="stitle">Onboarding Conversacional</h2>
+    <p class="slead">A IA conduz uma <strong>conversa com propósito técnico claro</strong>: ao final, o schema do bloco está completo e o agente começa a operar. O cliente nunca vê campos, nunca vê JSON. Só conversa.</p>
+
+    <div class="schema-flow">
+      <div class="schema-header"><div class="schema-header-label">ArvaOnboarding.activate_block(bloco_id, user_id)</div></div>
+      <div class="schema-steps">
+        <div class="sstep active">
+          <div class="sstep-num">01 / ATIVAR</div>
+          <div class="sstep-title">Cliente contrata o bloco</div>
+          <div class="sstep-desc">Sistema inicia sessão de onboarding via chat (web, Telegram ou WhatsApp)</div>
+        </div>
+        <div class="schema-arrow">→</div>
+        <div class="sstep">
+          <div class="sstep-num">02 / CONVERSAR</div>
+          <div class="sstep-title">IA conduz o questionário</div>
+          <div class="sstep-desc">Perguntas fluidas mapeando internamente os campos do schema do bloco. Tom adaptado à linha</div>
+        </div>
+        <div class="schema-arrow">→</div>
+        <div class="sstep">
+          <div class="sstep-num">03 / PREENCHER</div>
+          <div class="sstep-title">Schema gerado e validado</div>
+          <div class="sstep-desc">IA extrai e estrutura as respostas. Campos obrigatórios verificados. Opcional marcados para depois</div>
+        </div>
+        <div class="schema-arrow">→</div>
+        <div class="sstep">
+          <div class="sstep-num">04 / OPERAR</div>
+          <div class="sstep-title">Bloco ativo imediatamente</div>
+          <div class="sstep-desc">Schema injetado no contexto do agente OpenClaw. Execução inicia na próxima janela de trigger</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-block" style="border-color:var(--brand-dim);background:var(--brand-faint);">
+      <div class="warn-icon">🔄</div>
+      <div>
+        <div class="warn-title" style="color:var(--brand)">Portabilidade de Schema entre Blocos</div>
+        <div class="warn-body">Campos compartilhados — como <strong>perfis_assistidos</strong>, <strong>horario_operacional</strong> e <strong>integracoes_ativas</strong> — são reutilizados automaticamente. Um cliente que já tem a Agenda Inteligente ativa <strong>não precisa fornecer essas informações novamente</strong> ao contratar um segundo bloco compatível.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FLUXO ARVA ─── -->
+  <section id="fluxo" class="fade-in">
+    <div class="stag">// jornada completa do cliente</div>
+    <h2 class="stitle">FluxoARVA — Da descoberta ao agente operando</h2>
+    <p class="slead">O cliente não configura software — ele <strong>contrata um assistente</strong>. Dez etapas desenhadas para eliminar fricção técnica, construir confiança progressiva e gerar expansão natural.</p>
+
+    <div class="flow-map">
+      <div class="flow-step">
+        <div class="flow-circle fc-g">1</div>
+        <div class="flow-info">
+          <div class="flow-tag">Topo do funil</div>
+          <div class="flow-name">Descoberta e Escolha da Linha</div>
+          <div class="flow-desc">Uma pergunta humana — "Para quem você busca ajuda?" — direciona para a linha certa sem expor nomenclatura interna. Linguagem da vida do cliente, não do produto.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-g">2</div>
+        <div class="flow-info">
+          <div class="flow-tag">Catálogo</div>
+          <div class="flow-name">Apresentação dos Blocos como Assistentes</div>
+          <div class="flow-desc">Cards de assistentes em linguagem natural — o que o agente faz na vida do cliente, não features técnicas. Tempo de setup visível em cada card.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-a">3</div>
+        <div class="flow-info">
+          <div class="flow-tag">Billing</div>
+          <div class="flow-name">Escolha de Plano e Canais</div>
+          <div class="flow-desc">Por créditos de execução, não por número de blocos. WhatsApp parametrizado com limite de custo definido pelo cliente. Transparência total.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-b">4</div>
+        <div class="flow-info">
+          <div class="flow-tag">Inteligência</div>
+          <div class="flow-name">Configuração do LLM</div>
+          <div class="flow-desc">O cliente escolhe o provedor em linguagem de resultado — "o mais rápido", "o mais inteligente". Chave testada em tempo real. Configuração por bloco disponível.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-v">5</div>
+        <div class="flow-info">
+          <div class="flow-tag">Coração do produto</div>
+          <div class="flow-name">Onboarding Conversacional</div>
+          <div class="flow-desc">IA conduz conversa natural que preenche o schema do bloco. Tom diferente por linha. Zero formulários, zero campos técnicos, zero fricção.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-p">6</div>
+        <div class="flow-info">
+          <div class="flow-tag">Conectividade</div>
+          <div class="flow-name">Conexão de Integrações</div>
+          <div class="flow-desc">Apenas o necessário para os blocos escolhidos. OAuth simples. Cada integração declara o que o agente pode e não pode fazer.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-r">7</div>
+        <div class="flow-info">
+          <div class="flow-tag">Ativação</div>
+          <div class="flow-name">Revisão e Ativação</div>
+          <div class="flow-desc">Resumo em linguagem humana do que o agente vai fazer. Um botão. Primeira notificação agendada imediatamente. Sem ambiguidade.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-gr">8</div>
+        <div class="flow-info">
+          <div class="flow-tag">Primeiros dias</div>
+          <div class="flow-name">Período de Adaptação — 48 horas</div>
+          <div class="flow-desc">Relatório do primeiro dia. O agente identifica lacunas e propõe melhorias. Momento de confiança mais crítico do produto — o cliente vê que funcionou.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-tl">9</div>
+        <div class="flow-info">
+          <div class="flow-tag">Operação contínua</div>
+          <div class="flow-name">Dashboard Operacional</div>
+          <div class="flow-desc">Visão geral, log auditável de execuções, ajustes via chat. Painel familiar para linhas de cuidado. O cliente intervém quando quer, não quando é obrigado.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-circle fc-sl">10</div>
+        <div class="flow-info">
+          <div class="flow-tag">Crescimento orgânico</div>
+          <div class="flow-name">Expansão Natural</div>
+          <div class="flow-desc">O agente ativo percebe lacunas no contexto real do cliente e propõe novos blocos com justificativa concreta. Upsell que parte do cliente, não do marketing.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-block" style="border-color:var(--brand-dim);background:var(--brand-faint);">
+      <div class="warn-icon">🔁</div>
+      <div>
+        <div class="warn-title" style="color:var(--brand)">O ciclo que cria defensores</div>
+        <div class="warn-body">Cada bloco ativo <strong>aumenta o contexto disponível para o próximo</strong>. O schema do Health alimenta a relevância da sugestão de Agenda Médica. O contexto de Vendas fundamenta a proposta do Financeiro. Com o tempo, o ARVA sabe tanto sobre a vida do cliente que <strong>cada sugestão parece ter sido pensada especificamente para ele</strong> — porque foi.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CANAIS ─── -->
+  <section id="canais" class="fade-in">
+    <div class="stag">// superfícies de interação</div>
+    <h2 class="stitle">Dashboard + Canais de Acompanhamento</h2>
+    <p class="slead">O cliente <strong>opera e configura</strong> pelo dashboard. <strong>Acompanha e aprova</strong> pelo Telegram (nativo) ou WhatsApp (opcional). O ARVA Voice adiciona ligações telefônicas sobre qualquer canal existente.</p>
+    <div class="canal-grid">
+      <div class="canal-card dashboard">
+        <span class="canal-logo">🖥️</span>
+        <div class="canal-name">Dashboard Web</div>
+        <div class="canal-type">INTERFACE PRINCIPAL · SEMPRE INCLUSO</div>
+        <div class="canal-desc">Centro de controle completo. Configuração, métricas, onboarding, parametrização de LLM e billing.</div>
+        <span class="canal-tag tag-core">Core</span>
+      </div>
+      <div class="canal-card native">
+        <span class="canal-logo">✈️</span>
+        <div class="canal-name">Telegram</div>
+        <div class="canal-type">ACOMPANHAMENTO · NATIVO · SEM CUSTO EXTRA</div>
+        <div class="canal-desc">Notificações, alertas e aprovações rápidas. Nativo em todos os planos, sem custo adicional por mensagem.</div>
+        <span class="canal-tag tag-native">Nativo</span>
+      </div>
+      <div class="canal-card optional">
+        <span class="canal-logo">💬</span>
+        <div class="canal-name">WhatsApp</div>
+        <div class="canal-type">ACOMPANHAMENTO · OPCIONAL · CUSTO/MSG</div>
+        <div class="canal-desc">Mesma funcionalidade do Telegram, pelo canal que o cliente já usa. Custo transparente, limite configurável pelo cliente.</div>
+        <span class="canal-tag tag-optional">Opcional</span>
+      </div>
+      <div class="canal-card" style="border-color:var(--voice-dim);">
+        <span class="canal-logo">📞</span>
+        <div class="canal-name">Voz (ARVA Voice)</div>
+        <div class="canal-type">LIGAÇÕES · ADD-ON · CUSTO/MINUTO</div>
+        <div class="canal-desc">Inbound e outbound telefônico. Ativado com o pacote ARVA Voice. Custo por minuto consumido, sem mensalidade fixa.</div>
+        <span class="canal-tag" style="color:var(--voice);background:var(--voice-faint);border:1px solid var(--voice-dim);">Add-on Voice</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── LLM ─── -->
+  <section id="llm" class="fade-in">
+    <div class="stag stag-accent">// provedor de inteligência</div>
+    <h2 class="stitle">LLM Agnóstico — o cliente escolhe</h2>
+    <p class="slead">O ARVA não impõe um provedor de LLM. Cada cliente configura no dashboard <strong>qual API usar em cada bloco</strong>, com sua própria chave. Velocidade e custo para triagem. Qualidade para geração.</p>
+    <div class="llm-stack">
+      <div class="llm-row">
+        <div class="llm-num">OPÇÃO 1</div>
+        <div class="llm-name">OpenAI (GPT-4o / mini)</div>
+        <div class="llm-desc">Excelente para geração de texto e raciocínio geral. GPT-4o mini para triagem com custo reduzido.</div>
+        <div class="llm-tag llm-client">chave do cliente</div>
+      </div>
+      <div class="llm-row">
+        <div class="llm-num">OPÇÃO 2</div>
+        <div class="llm-name">Anthropic (Claude Sonnet / Haiku)</div>
+        <div class="llm-desc">Superior em raciocínio complexo e análise de documentos. Haiku para tarefas rápidas, Sonnet para conteúdo elaborado.</div>
+        <div class="llm-tag llm-client">chave do cliente</div>
+      </div>
+      <div class="llm-row">
+        <div class="llm-num">OPÇÃO 3</div>
+        <div class="llm-name">Google (Gemini Pro / Flash)</div>
+        <div class="llm-desc">Integração nativa com Google Workspace. Flash para volume e velocidade.</div>
+        <div class="llm-tag llm-client">chave do cliente</div>
+      </div>
+      <div class="llm-row">
+        <div class="llm-num">OPÇÃO 4</div>
+        <div class="llm-name">Groq (Llama / Mixtral)</div>
+        <div class="llm-desc">Velocidade extrema e custo mínimo. Ideal para blocos de alta frequência — lembretes, triagem, classificação.</div>
+        <div class="llm-tag llm-client">chave do cliente</div>
+      </div>
+      <div class="llm-row">
+        <div class="llm-num">FUTURO</div>
+        <div class="llm-name">Ollama Local (self-hosted)</div>
+        <div class="llm-desc">Para clientes com infraestrutura própria e requisito de privacidade total. Zero custo por token.</div>
+        <div class="llm-tag llm-note">roadmap</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PLANO ─── -->
+  <section id="plano" class="fade-in">
+    <div class="stag">// cronograma de execução</div>
+    <h2 class="stitle">Plano de Execução v2.0</h2>
+    <p class="slead">Professional e Life primeiro — maior mercado, blocos reutilizáveis, receita que financia linhas de impacto social. SDR e Support em paralelo com Professional. Voice como camada transversal na fase 3.</p>
+
+    <div class="tl">
+      <div class="tlitem highlight">
+        <div class="tlb">Fase 1 · Semanas 1–4</div>
+        <div class="tlt">Fundação — OpenClaw + Dashboard + Schema Engine</div>
+        <div class="tld">Setup do runtime OpenClaw. Schema engine para onboarding conversacional. Dashboard web com auth, billing e configuração de LLM por bloco. Canal Telegram nativo. Primeiros 3 blocos: Agenda Inteligente, Triagem de Comunicações, Resumo Diário.</div>
+        <div class="tld2">Entregável: MVP funcional com 3 blocos e onboarding conversacional</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 2 · Semanas 5–8</div>
+        <div class="tlt">ARVA Professional + ARVA Life</div>
+        <div class="tld">10 blocos Professional: Agenda, Comunicações, Presença Digital, Follow-up de Vendas, Financeiro, CRM, Criador de Conteúdo, Gestor de Tarefas, Triagem E-mail, Assistente Central. 8 blocos Life: Bem-Estar Físico, Nutrição, Sono, Saúde Mental, Relacionamentos, Gratidão, Finanças Pessoais, Lazer. WhatsApp opcional ativado.</div>
+        <div class="tld2">Entregável: Duas linhas em produção — Professional e Life</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 3 · Semanas 9–14</div>
+        <div class="tlt">ARVA SDR + ARVA Support + ARVA Voice (Alpha)</div>
+        <div class="tld">SDR completo: prospecção, qualificação, cadência multicanal, CRM nativo, agendamento, painel de pipeline. Support completo: triagem, 3 níveis de resolução, base de conhecimento viva, CSAT automático, multicanal. ARVA Voice alpha: síntese e transcrição de voz, inbound básico. Integração Voice com SDR e Support.</div>
+        <div class="tld2">Entregável: Agentes de negócio completos + Voice em alpha para SDR e Support</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 4 · Semanas 15–18</div>
+        <div class="tlt">ARVA Health + ARVA Student</div>
+        <div class="tld">10 blocos Health: Monitoramento Vital, Medicamentos, Triagem Sintomas, Histórico Médico, Intérprete de Exames, Agenda Médica, Painel Familiar, Alerta Emergência, Nutrição Terapêutica, Bem-Estar Cuidador. Student: Organizador Acadêmico, Tutor Revisão, Metas, Redação ENEM, Orientação Vocacional. Voice integrado ao Health para lembretes por ligação.</div>
+        <div class="tld2">Entregável: ARVA Health e Student em produção, Voice integrado ao Health</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 5 · Semanas 19–22</div>
+        <div class="tlt">ARVA Children + ARVA Autism + Voice GA</div>
+        <div class="tld">Children: Saúde e Vacinas, Vida Escolar, Atividades, Marcos de Desenvolvimento, Memória Afetiva, Segurança Digital. Autism: Central de Terapias, Diário Comportamental, Guia de Direitos, Comunicação Escolar, Rede de Apoio, Autocuidado. ARVA Voice GA: outbound completo, URA conversacional, Voice disponível para todas as linhas.</div>
+        <div class="tld2">Entregável: Ecossistema completo — 6 linhas + 2 agentes + Voice em produção</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Fase 6 · Semanas 23–26</div>
+        <div class="tlt">ARVAStore — Marketplace de Blocos</div>
+        <div class="tld">Catálogo público de blocos certificados. Sistema de certificação para blocos de parceiros. API para desenvolvedores externos criarem e publicarem blocos. Programa de revenue share para criadores. Primeiros blocos de parceiros publicados.</div>
+        <div class="tld2">Entregável: Ecossistema ARVA aberto com marketplace e programa de parceiros</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="ft-inner">
+      <div>
+        <div class="ft-brand">ARV<span>A</span></div>
+        <div style="font-size:.78rem;color:var(--slate);margin-top:.35rem;font-family:'Inter',sans-serif;font-weight:300;">Plataforma de Agentes Virtuais Autônomos</div>
+      </div>
+      <div class="ft-meta">
+        <div>Conceito v2.0 · Inclui SDR · Support · Voice · FluxoARVA</div>
+        <div>Grupo Facebrasil · Abril 2026</div>
+        <div style="opacity:.4;margin-top:.3rem">Confidencial · Bíblia FBR v1.0</div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

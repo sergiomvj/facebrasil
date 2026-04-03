@@ -14,6 +14,11 @@ export async function middleware(request: NextRequest) {
         path.startsWith('/api/auth/callback') ||
         path.startsWith('/fbrapps/') ||
         path.startsWith('/business/') ||
+        path.startsWith('/arva/') ||
+        path.startsWith('/facebrasilshop/') ||
+        path.startsWith('/facebrasiltv/') ||
+        path.startsWith('/fbrnews/') ||
+        path.startsWith('/novafacebrasil/') ||
         /\.(svg|png|jpg|jpeg|gif|webp|ico|html|css|js|woff|woff2|ttf)$/.test(path)
     ) {
         return NextResponse.next()
