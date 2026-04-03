@@ -17,16 +17,12 @@ export async function middleware(request: NextRequest) {
 
     // Check if it's one of our static apps or an old business route
     if (staticApps.includes(rootPath) || path.startsWith('/business/')) {
-        const targetRoute = rootPath || pathParts[1] // fallback for /business/arva
+        const targetRoute = rootPath || pathParts[1]
         
-        // If it's already the clean static path (e.g. /arva), just serve it
-        if (path === `/${targetRoute}` || path.startsWith(`/${targetRoute}/`)) {
-            return NextResponse.next()
-        }
-        
-        // Otherwise (it's /pt/arva or /business/arva), redirect to the clean version
-        const remainingPath = path.substring(path.indexOf(targetRoute) + targetRoute.length)
-        return NextResponse.redirect(new URL(`/${targetRoute}${remainingPath}`, request.url))
+        // Rewrite internally to the .html file in public root
+        // This ensures facebrasil.com/arva serves public/arva.html
+        const staticFileUrl = new URL(`/${targetRoute}.html`, request.url)
+        return NextResponse.rewrite(staticFileUrl)
     }
 
     if (
