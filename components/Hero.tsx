@@ -37,7 +37,7 @@ const Hero: React.FC<HeroProps> = ({ post }) => {
             {categoryName}
           </span>
           <Link href={`/article/${post.slug}`}>
-            <h1 className="text-3xl font-black leading-tight text-white tracking-tight line-clamp-3 hover:text-blue-400 transition-colors">
+            <h1 className="text-[20px] font-black leading-tight text-white tracking-tight line-clamp-3 hover:text-blue-400 transition-colors">
               {post.title}
             </h1>
           </Link>
@@ -61,7 +61,7 @@ const Hero: React.FC<HeroProps> = ({ post }) => {
             {categoryName} do Dia
           </span>
           <Link href={`/article/${post.slug}`}>
-            <h1 className="text-4xl lg:text-6xl font-black leading-tight text-white tracking-tight hover:text-blue-400 transition-colors cursor-pointer">
+            <h1 className="text-[24px] lg:text-[40px] font-black leading-tight text-white tracking-tight hover:text-blue-400 transition-colors cursor-pointer">
               {post.title}
             </h1>
           </Link>
