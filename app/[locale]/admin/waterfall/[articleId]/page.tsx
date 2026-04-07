@@ -716,7 +716,7 @@ export default function WaterfallPage() {
                             <Waves className="w-8 h-8 text-white animate-pulse" />
                         </div>
                     </div>
-                    <p className="text-white font-black uppercase tracking-widest text-sm">Chiara está escrevendo...</p>
+                    <p className="text-white font-black uppercase tracking-widest text-sm">Processando...</p>
                     <p className="text-slate-500 text-xs">5 slides IG · Thread X · Posts Facebook</p>
                 </div>
             )}
