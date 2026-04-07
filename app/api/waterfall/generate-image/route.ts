@@ -58,7 +58,7 @@ export async function POST(req: Request) {
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
         const { platform, articleTitle, contentHint, sessionId } = await req.json() as {
-            platform: Platform;
+            platform: string;
             articleTitle: string;
             contentHint: string;
             sessionId?: string;
@@ -68,15 +68,24 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'platform e articleTitle são obrigatórios' }, { status: 400 });
         }
 
-        const spec = PLATFORM_SPECS[platform];
+        let specPlatform = platform as Platform;
+        let isSlide = false;
+        let slideNumber = '';
+        if (platform.startsWith('instagram_carousel_slide_')) {
+            specPlatform = 'instagram_carousel';
+            isSlide = true;
+            slideNumber = platform.replace('instagram_carousel_slide_', '');
+        }
+
+        const spec = PLATFORM_SPECS[specPlatform];
         if (!spec) {
-            return NextResponse.json({ error: 'Plataforma inválida' }, { status: 400 });
+            return NextResponse.json({ error: 'Plataforma inválida: ' + platform }, { status: 400 });
         }
 
         // Generate with DALL-E 3
         const imageResponse = await openai.images.generate({
             model: 'dall-e-3',
-            prompt: buildImagePrompt(platform, articleTitle, contentHint),
+            prompt: buildImagePrompt(specPlatform, articleTitle, contentHint),
             n: 1,
             size: spec.size,
             quality: 'standard',
@@ -109,15 +118,23 @@ export async function POST(req: Request) {
         if (sessionId) {
             const { data: session } = await supabaseAdmin
                 .from('waterfall_sessions')
-                .select('images')
+                .select('images, slide_images')
                 .eq('id', sessionId)
                 .single();
 
-            const currentImages = ((session as { images?: Record<string, string> })?.images) || {};
-            await supabaseAdmin
-                .from('waterfall_sessions')
-                .update({ images: { ...currentImages, [platform]: publicUrl } })
-                .eq('id', sessionId);
+            if (isSlide) {
+                const currentSlideImages = ((session as any)?.slide_images) || {};
+                await supabaseAdmin
+                    .from('waterfall_sessions')
+                    .update({ slide_images: { ...currentSlideImages, [slideNumber]: publicUrl } })
+                    .eq('id', sessionId);
+            } else {
+                const currentImages = ((session as any)?.images) || {};
+                await supabaseAdmin
+                    .from('waterfall_sessions')
+                    .update({ images: { ...currentImages, [platform]: publicUrl } })
+                    .eq('id', sessionId);
+            }
         }
 
         return NextResponse.json({ success: true, imageUrl: publicUrl });
