@@ -313,9 +313,8 @@ function EditorContent() {
                             type="text"
                             placeholder="O título será gerado pela IA após você inserir o conteúdo e as palavras-chave..."
                             value={title}
-                            readOnly
-                            className="w-full bg-slate-900/50 text-3xl md:text-5xl font-black tracking-tight placeholder:text-slate-700/50 focus:outline-none border border-white/5 rounded-2xl p-6 text-slate-300 select-none opacity-80 cursor-not-allowed"
-                            title="O título deve ser gerado através do botão 'Criar Título do Artigo'"
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full bg-slate-900/50 text-3xl md:text-5xl font-black tracking-tight placeholder:text-slate-700/50 focus:outline-none border border-white/5 rounded-2xl p-6 text-white focus:border-purple-500/30 transition-colors"
                         />
                     </div>
 

@@ -11,7 +11,7 @@ import {
 import Link from 'next/link';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface Article { id: string; title: string; excerpt?: string; content?: string; category?: { name: string }; }
+interface Article { id: string; title: string; excerpt?: string; content?: string; slug?: string; category?: { name: string }; }
 interface Slide { number: number; text: string; }
 interface Tweet { number: number; text: string; }
 interface WaterfallData {
@@ -154,9 +154,12 @@ function InstagramCard({
     const [activeSlide, setActiveSlide] = useState(0);
     const [carouselPostStatus, setCarouselPostStatus] = useState<PostStatus>({ status: 'idle' });
     const [captionPostStatus, setCaptionPostStatus] = useState<PostStatus>({ status: 'idle' });
+    const [generatingAll, setGeneratingAll] = useState(false);
+    const [generatingAllProgress, setGeneratingAllProgress] = useState(0);
 
     const slides = data.carousel.slides;
     const carouselText = slides.map(s => `Slide ${s.number}:\n${s.text}`).join('\n\n');
+    const allGenerated = slides.every(s => slideImages[String(s.number)]);
 
     const handlePostCarousel = async () => {
         setCarouselPostStatus({ status: 'posting' });
@@ -179,6 +182,31 @@ function InstagramCard({
             imageUrl: captionImage,
         });
         setCaptionPostStatus(result);
+    };
+
+    const handleGenerateAll = async () => {
+        setGeneratingAll(true);
+        setGeneratingAllProgress(0);
+        for (let i = 0; i < slides.length; i++) {
+            const slide = slides[i];
+            setActiveSlide(i);
+            try {
+                const res = await fetch('/api/waterfall/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        platform: `instagram_carousel_slide_${slide.number}`,
+                        articleTitle,
+                        contentHint: slide.text,
+                        sessionId,
+                    }),
+                });
+                const json = await res.json();
+                if (json.success) onSlideImageGenerated(String(slide.number), json.imageUrl);
+            } catch { /* continua pro próximo */ }
+            setGeneratingAllProgress(i + 1);
+        }
+        setGeneratingAll(false);
     };
 
     return (
@@ -209,8 +237,11 @@ function InstagramCard({
                     <div className="flex gap-1.5">
                         {slides.map((slide, i) => (
                             <button key={slide.number} onClick={() => setActiveSlide(i)}
-                                className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${activeSlide === i ? 'bg-pink-500 text-white' : 'bg-slate-800 text-slate-500 hover:bg-slate-700'}`}>
+                                className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all relative ${activeSlide === i ? 'bg-pink-500 text-white' : 'bg-slate-800 text-slate-500 hover:bg-slate-700'}`}>
                                 {slide.number}
+                                {slideImages[String(slide.number)] && (
+                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border border-slate-900" />
+                                )}
                             </button>
                         ))}
                     </div>
@@ -249,6 +280,20 @@ function InstagramCard({
                             </div>
                         ))}
                     </div>
+
+                    {/* Gerar todas as imagens */}
+                    {!allGenerated && (
+                        <button
+                            onClick={handleGenerateAll}
+                            disabled={generatingAll}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-pink-500/30 hover:border-pink-500/60 text-pink-400 hover:text-pink-300 font-black uppercase tracking-widest text-[10px] transition-all disabled:opacity-50 bg-pink-500/5 hover:bg-pink-500/10"
+                        >
+                            {generatingAll
+                                ? <><Loader2 className="w-3 h-3 animate-spin" />Gerando slide {generatingAllProgress}/{slides.length}...</>
+                                : <><ImageIcon className="w-3 h-3" />Gerar todas as imagens ({slides.filter(s => !slideImages[String(s.number)]).length} pendentes)</>
+                            }
+                        </button>
+                    )}
 
                     <div className="flex items-center justify-between pt-1 border-t border-white/5">
                         <CopyButton text={carouselText} />
@@ -500,7 +545,7 @@ export default function WaterfallPage() {
         const load = async () => {
             setArticleLoading(true);
             const { data } = await supabase.from('articles')
-                .select('id, title, excerpt, content, category:categories(name)')
+                .select('id, title, excerpt, content, slug, category:categories(name)')
                 .eq('id', articleId).single();
             if (data) {
                 const raw = data as any;
@@ -535,10 +580,13 @@ export default function WaterfallPage() {
         if (!article) return;
         setIsGenerating(true); setError(null); setGenerated(null);
         setSlideImages({}); setOtherImages({});
+        const articleUrl = article.slug
+            ? `https://facebrasil.com/article/${article.slug}`
+            : undefined;
         try {
             const res = await fetch('/api/waterfall/generate', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: article.title, excerpt: article.excerpt || '', content: article.content || '', category: article.category?.name || '', tone, angle, audience }),
+                body: JSON.stringify({ title: article.title, excerpt: article.excerpt || '', content: article.content || '', category: article.category?.name || '', tone, angle, audience, articleUrl }),
             });
             const json = await res.json();
             if (!res.ok || !json.success) throw new Error(json.error);

@@ -28,6 +28,7 @@ interface WaterfallRequest {
     tone: string;
     angle: string;
     audience: string;
+    articleUrl?: string;
 }
 
 function buildUserPrompt(data: WaterfallRequest): string {
@@ -54,12 +55,15 @@ function buildUserPrompt(data: WaterfallRequest): string {
         familias: 'famílias brasileiras nos EUA, crianças bicultural topics',
     };
 
+    const linkSnippet = data.articleUrl ? data.articleUrl : '[link do artigo]';
+
     return `
 Artigo da Facebrasil:
 TÍTULO: ${data.title}
 CATEGORIA: ${data.category || 'Geral'}
 RESUMO: ${data.excerpt || ''}
 CONTEÚDO: ${data.content.substring(0, 3000)}
+LINK DO ARTIGO: ${linkSnippet}
 
 Configurações de geração:
 - TOM: ${toneMap[data.tone] || data.tone}
@@ -75,10 +79,10 @@ Gere o seguinte JSON (sem markdown, somente JSON puro):
         { "number": 2, "text": "..." },
         { "number": 3, "text": "..." },
         { "number": 4, "text": "..." },
-        { "number": 5, "text": "SIGA @facebrasil para mais notícias da diáspora brasileira nos EUA 🇧🇷" }
+        { "number": 5, "text": "SIGA @facebrasil para mais notícias da diáspora brasileira nos EUA 🇧🇷\\n🔗 ${linkSnippet}" }
       ]
     },
-    "caption": "..."
+    "caption": "... 🔗 ${linkSnippet}"
   },
   "twitter": {
     "thread": [
@@ -88,23 +92,23 @@ Gere o seguinte JSON (sem markdown, somente JSON puro):
       { "number": 4, "text": "..." },
       { "number": 5, "text": "..." },
       { "number": 6, "text": "..." },
-      { "number": 7, "text": "... 🔗 Link na bio @facebrasil" }
+      { "number": 7, "text": "... 🔗 ${linkSnippet}" }
     ],
-    "single_tweet": "..."
+    "single_tweet": "... 🔗 ${linkSnippet}"
   },
   "facebook": {
-    "story_post": "...",
-    "engagement_post": "..."
+    "story_post": "... 🔗 Leia o artigo completo: ${linkSnippet}",
+    "engagement_post": "... 🔗 ${linkSnippet}"
   }
 }
 
 Regras por formato:
-- Instagram carousel: Slide 1 é o hook visual (pergunta ou dado chocante). Slides 2-4 são 1 ponto cada (conciso, máx 2 linhas). Slide 5 é o CTA de seguir. Use linguagem bullet simplificada.
-- Instagram caption: máx 150 palavras, 3-5 hashtags no final, CTA claro
-- Twitter thread: tweet 1 é o hook (máx 270 chars), tweets seguintes desenvolvem. CADA tweet máx 270 chars
-- Twitter single_tweet: máx 270 chars. Hot take provocador que convida ao clique
-- Facebook story_post: 200-350 palavras, storytelling, termine com pergunta aberta
-- Facebook engagement_post: 80-120 palavras, pergunta direta à comunidade, convite ao compartilhamento`;
+- Instagram carousel: Slide 1 é o hook visual (pergunta ou dado chocante). Slides 2-4 são 1 ponto cada (conciso, máx 2 linhas). Slide 5 é o CTA de seguir com o link do artigo.
+- Instagram caption: máx 150 palavras, 3-5 hashtags no final, CTA claro com link do artigo no final
+- Twitter thread: tweet 1 é o hook (máx 270 chars), tweets seguintes desenvolvem. CADA tweet máx 270 chars. Último tweet inclui o link do artigo.
+- Twitter single_tweet: máx 270 chars incluindo o link. Hot take provocador que convida ao clique com link do artigo.
+- Facebook story_post: 200-350 palavras, storytelling, termine com link do artigo para leitura completa
+- Facebook engagement_post: 80-120 palavras, pergunta direta à comunidade, convite ao compartilhamento, link do artigo`;
 }
 
 export async function POST(req: Request) {
