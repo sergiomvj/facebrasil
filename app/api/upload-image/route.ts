@@ -1,11 +1,14 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     console.log('[Upload API] Request received');
     try {
+        const contentType = req.headers.get('content-type') || '';
+        console.log('[Upload API] Content-Type:', contentType);
+
         const formData = await req.formData();
         const file = formData.get('image') as File;
 
