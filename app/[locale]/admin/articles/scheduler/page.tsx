@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import { Download, Upload, Play, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { generateArticle } from '@/app/actions/ai-actions';
 import { upsertArticle } from '@/app/actions/article-actions';
+import { createClient } from '@/lib/supabase/client';
 
 interface CSVMockup {
     Topic: string;
@@ -26,6 +27,7 @@ export default function ArticleScheduler() {
     const [rows, setRows] = useState<ProcessingState[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const supabase = createClient();
 
     const downloadTemplate = () => {
         const template = 'Topic,Keywords,Style,Size,Language,Scope,Category,PublishedAt\n' +
@@ -75,6 +77,17 @@ export default function ArticleScheduler() {
         if (rows.length === 0) return alert('Nenhum dado importado.');
 
         setIsProcessing(true);
+
+        // Map categories from text to UUID
+        const { data: categoriesData } = await supabase.from('categories').select('id, name, slug');
+        let catsMap = new Map();
+        if (categoriesData) {
+            categoriesData.forEach((c: any) => {
+                if (c.name) catsMap.set(c.name.toLowerCase().trim(), c.id);
+                if (c.slug) catsMap.set(c.slug.toLowerCase().trim(), c.id);
+            });
+        }
+
         let updatedRows = [...rows];
 
         for (let i = 0; i < updatedRows.length; i++) {
@@ -117,7 +130,7 @@ export default function ArticleScheduler() {
                     language: updatedRows[i].Language,
                     translation_group_id: crypto.randomUUID(),
                     read_time: Math.ceil(aiResult.content.split(' ').length / 200) || 1,
-                    category_id: null, // Note: We might need to resolve exact UUID from slug if Category text is used
+                    category_id: updatedRows[i].Category ? (catsMap.get(updatedRows[i].Category.toLowerCase().trim()) || null) : null,
                     published_at: publishedDate,
                     updated_at: new Date().toISOString(),
                 };

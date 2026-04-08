@@ -531,15 +531,24 @@ export default function ArticlesListPage() {
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="flex flex-col">
-                                                <span className={`text-[9px] uppercase font-black mb-1 w-fit ${post.status === 'PUBLISHED' ? 'text-green-400' : 'text-amber-400'}`}>
-                                                    {post.status}
-                                                </span>
-                                                <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {formatDateAmerican(post.published_at || post.created_at)}
-                                                </div>
-                                            </div>
+                                            {(() => {
+                                                const isScheduled = post.published_at && new Date(post.published_at).getTime() > Date.now();
+                                                const displayStatus = isScheduled ? 'AGENDADO' : post.status;
+                                                const statusColor = isScheduled ? 'text-purple-400 bg-purple-400/10 px-1.5 py-0.5 rounded border border-purple-400/20' : 
+                                                    (post.status === 'PUBLISHED' ? 'text-green-400' : 'text-amber-400');
+                                                
+                                                return (
+                                                    <div className="flex flex-col items-start gap-1">
+                                                        <span className={`text-[9px] uppercase font-black w-fit ${statusColor}`}>
+                                                            {displayStatus}
+                                                        </span>
+                                                        <div className={`flex items-center gap-1 text-[10px] font-medium ${isScheduled ? 'text-purple-300 font-semibold' : 'text-slate-500'}`}>
+                                                            <Calendar className="w-3 h-3" />
+                                                            {formatDateAmerican(post.published_at || post.created_at)}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="p-4 text-center font-mono text-xs text-slate-400">
                                             {post.views || 0}
