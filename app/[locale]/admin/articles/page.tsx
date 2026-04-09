@@ -368,6 +368,7 @@ export default function ArticlesListPage() {
                                         <option value="">Geral (Sem escopo fixo)</option>
                                         {aiCategory && categories.find(c => c.id === aiCategory)?.escopo?.map((topic, i) => (
                                             <option key={i} value={topic}>{topic}</option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
