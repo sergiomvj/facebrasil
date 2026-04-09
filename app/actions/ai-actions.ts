@@ -8,6 +8,32 @@ function getOpenAI() {
     });
 }
 
+export const AVAILABLE_MODELS = [
+    { id: 'gpt-4o', name: 'IA Padrão (GPT-4o)', provider: 'openai' },
+    { id: 'google/gemma-4-31b-it:free', name: 'Gemma 4 31B (Free)', provider: 'openrouter' },
+    { id: 'perplexity/pplx-embed-v1-0.6b', name: 'Perplexity Embed', provider: 'openrouter' },
+    { id: 'xiaomi/mimo-v2-flash', name: 'Xiaomi Mimo V2 Flash', provider: 'openrouter' },
+];
+
+function getAiClient(modelId: string) {
+    const model = AVAILABLE_MODELS.find(m => m.id === modelId);
+    
+    if (model?.provider === 'openrouter') {
+        return new OpenAI({
+            apiKey: process.env.OPENROUTER_API_KEY,
+            baseURL: 'https://openrouter.ai/api/v1',
+            defaultHeaders: {
+                "HTTP-Referer": "https://facebrasil.news",
+                "X-Title": "Facebrasil Admin",
+            }
+        });
+    }
+
+    return new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+}
+
 export interface GenerateArticleOptions {
     topic: string;
     keywords: string[];
@@ -15,6 +41,7 @@ export interface GenerateArticleOptions {
     size: 'small' | 'medium' | 'large';
     language: string;
     scope?: string;
+    model?: string;
 }
 
 export interface GenerateArticleResult {
@@ -27,6 +54,7 @@ export interface GenerateArticleResult {
 export async function generateArticle(options: GenerateArticleOptions): Promise<GenerateArticleResult> {
     try {
         const wordCount = options.size === 'small' ? 400 : options.size === 'medium' ? 800 : 1200;
+        const selectedModel = options.model || 'gpt-4o';
 
         const prompt = `Crie um artigo de alta qualidade em ${options.language === 'en' ? 'Inglês' : options.language === 'es' ? 'Espanhol' : 'Português Brasileiro'} sobre o tema: "${options.topic}".
         ${options.scope ? `O artigo deve focar especificamente no seguinte escopo/tópico: "${options.scope}".` : ''}
@@ -35,8 +63,10 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
         O tamanho aproximado deve ser de ${wordCount} palavras.
         Retorne no formato JSON com as chaves "title" e "content" (em HTML semântico).`;
 
-        const completion = await getOpenAI().chat.completions.create({
-            model: 'gpt-4o',
+        const client = getAiClient(selectedModel);
+
+        const completion = await client.chat.completions.create({
+            model: selectedModel,
             messages: [
                 { role: 'system', content: 'Você é um assistente especializado em criar artigos de alta qualidade para blogs. Sempre retorne JSON válido.' },
                 { role: 'user', content: prompt }
@@ -59,6 +89,7 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
         return { success: false, error: error.message };
     }
 }
+
 
 export async function generateKeywords(topic: string): Promise<{ success: boolean; keywords?: string[]; error?: string }> {
     try {

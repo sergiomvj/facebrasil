@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import { Download, Upload, Play, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
-import { generateArticle } from '@/app/actions/ai-actions';
+import { generateArticle, AVAILABLE_MODELS } from '@/app/actions/ai-actions';
 import { upsertArticle } from '@/app/actions/article-actions';
 import { createClient } from '@/lib/supabase/client';
 
@@ -28,6 +28,7 @@ export default function ArticleScheduler() {
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
+    const [selectedModel, setSelectedModel] = useState('gpt-4o');
 
     const downloadTemplate = () => {
         const template = 'Topic,Keywords,Style,Size,Language,Scope,Category,PublishedAt\n' +
@@ -104,7 +105,8 @@ export default function ArticleScheduler() {
                     style: updatedRows[i].Style,
                     size: updatedRows[i].Size,
                     language: updatedRows[i].Language,
-                    scope: updatedRows[i].Scope
+                    scope: updatedRows[i].Scope,
+                    model: selectedModel
                 });
 
                 if (!aiResult.success || !aiResult.title || !aiResult.content) {
@@ -193,9 +195,25 @@ export default function ArticleScheduler() {
             {rows.length > 0 && (
                 <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
                     <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {rows.length} Artigo(s) Carregado(s)
-                        </span>
+                        <div className="flex items-center gap-6">
+                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                {rows.length} Artigo(s) Carregado(s)
+                            </span>
+
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Modelo IA:</span>
+                                <select
+                                    value={selectedModel}
+                                    onChange={(e) => setSelectedModel(e.target.value)}
+                                    disabled={isProcessing}
+                                    className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-semibold focus:ring-1 focus:ring-accent-yellow outline-none transition-all cursor-pointer disabled:opacity-50"
+                                >
+                                    {AVAILABLE_MODELS.map(m => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
 
                         <button
                             onClick={processBatch}

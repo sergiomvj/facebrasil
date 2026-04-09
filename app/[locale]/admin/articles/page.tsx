@@ -7,7 +7,7 @@ import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { deleteArticle, upsertArticle, updateArticleScheduleDate } from '@/app/actions/article-actions';
-import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
+import { generateArticle, generateKeywords, AVAILABLE_MODELS } from '@/app/actions/ai-actions';
 import { routing } from '@/i18n/routing';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
 import { formatDateAmerican } from '@/lib/utils';
@@ -58,6 +58,7 @@ export default function ArticlesListPage() {
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const [aiTopic, setAiTopic] = useState('');
     const [aiKeywords, setAiKeywords] = useState<string[]>([]);
+    const [aiModel, setAiModel] = useState('gpt-4o');
     const [aiStyle, setAiStyle] = useState('jornalístico e informativo');
     const [aiSize, setAiSize] = useState<'small' | 'medium' | 'large'>('medium');
     const [aiCategory, setAiCategory] = useState('');
@@ -114,7 +115,8 @@ export default function ArticlesListPage() {
                 style: aiStyle,
                 size: aiSize,
                 language: selectedLanguage === 'all' ? 'pt' : selectedLanguage,
-                scope: aiScope
+                scope: aiScope,
+                model: aiModel
             });
 
             if (result.success && result.title && result.content) {
@@ -366,8 +368,27 @@ export default function ArticlesListPage() {
                                         <option value="">Geral (Sem escopo fixo)</option>
                                         {aiCategory && categories.find(c => c.id === aiCategory)?.escopo?.map((topic, i) => (
                                             <option key={i} value={topic}>{topic}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                    <BrainCircuit className="w-3 h-3 text-purple-400" /> Modelo de IA (LLM)
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        value={aiModel}
+                                        onChange={(e) => setAiModel(e.target.value)}
+                                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-purple-500/50 outline-none transition-all appearance-none cursor-pointer pr-10"
+                                    >
+                                        {AVAILABLE_MODELS.map(m => (
+                                            <option key={m.id} value={m.id}>{m.name}</option>
                                         ))}
                                     </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <div className="border-t-2 border-r-2 border-slate-500 w-2 h-2 rotate-45 transform translate-y-[-2px]"></div>
+                                    </div>
                                 </div>
                             </div>
 
