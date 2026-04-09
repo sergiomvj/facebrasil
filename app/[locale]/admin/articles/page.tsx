@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, BrainCircuit, X, Type, FileImage, FileText, CheckCircle2, Key, Waves } from 'lucide-react';
+import { Trash2, Edit, User, Eye, Plus, Search, Filter, Globe, BarChart2, Calendar, Layout, Info, Sparkles, Brain, X, Type, FileImage, FileText, CheckCircle2, Key, Waves } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -134,7 +134,7 @@ export default function ArticlesListPage() {
                     content: result.content,
                     status: 'DRAFT',
                     language: selectedLanguage === 'all' ? 'pt' : selectedLanguage,
-                    translation_group_id: crypto.randomUUID(),
+                    translation_group_id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2),
                     read_time: Math.ceil(result.content.split(' ').length / 200) || 1,
                     category_id: aiCategory || null,
                     updated_at: new Date().toISOString(),
@@ -290,7 +290,7 @@ export default function ArticlesListPage() {
                         <div className="p-6 border-b border-white/5 flex items-center justify-between bg-slate-950/50">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-purple-500/20 rounded-lg">
-                                    <BrainCircuit className="w-6 h-6 text-purple-400" />
+                                    <Brain className="w-6 h-6 text-purple-400" />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-black text-white uppercase tracking-tighter">Gerar Artigo com IA</h2>
@@ -376,7 +376,7 @@ export default function ArticlesListPage() {
 
                             <div className="space-y-2">
                                 <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
-                                    <BrainCircuit className="w-3 h-3 text-purple-400" /> Modelo de IA (LLM)
+                                    <Brain className="w-3 h-3 text-purple-400" /> Modelo de IA (LLM)
                                 </label>
                                 <div className="relative">
                                     <select

@@ -131,7 +131,7 @@ export default function ArticleScheduler() {
                     content: aiResult.content,
                     status: 'DRAFT-IA' as any,
                     language: updatedRows[i].Language,
-                    translation_group_id: crypto.randomUUID(),
+                    translation_group_id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2),
                     read_time: Math.ceil(aiResult.content.split(' ').length / 200) || 1,
                     category_id: updatedRows[i].Category ? (catsMap.get(updatedRows[i].Category.toLowerCase().trim()) || null) : null,
                     published_at: publishedDate,
