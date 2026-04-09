@@ -3,7 +3,8 @@
 import React, { useState, useRef } from 'react';
 import Papa from 'papaparse';
 import { Download, Upload, Play, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
-import { generateArticle, AVAILABLE_MODELS } from '@/app/actions/ai-actions';
+import { generateArticle } from '@/app/actions/ai-actions';
+import { AVAILABLE_MODELS } from '@/lib/ai-models';
 import { upsertArticle } from '@/app/actions/article-actions';
 import { createClient } from '@/lib/supabase/client';
 
