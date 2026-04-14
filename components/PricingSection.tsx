@@ -112,7 +112,7 @@ export default function PricingSection() {
                             </div>
 
                             <Link
-                                href={`/${locale}/advertise`}
+                                href={`/${locale}/advertise?package=${pkg.id}`}
                                 className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
                                     pkg.popular
                                     ? 'bg-primary text-white hover:bg-primary-dark shadow-xl shadow-primary/20'

@@ -1,21 +1,21 @@
 {
     "Search": {
-        "title": "RESULTADOS DE BÚSQUEDA",
-        "loading": "Buscando artículos...",
+        "title": "RESULTADOS DE BÃšSQUEDA",
+        "loading": "Buscando artÃ­culos...",
         "noResults": "No se encontraron resultados para \"{query}\"",
-        "enterTerm": "Ingrese un término para buscar"
+        "enterTerm": "Ingrese un tÃ©rmino para buscar"
     },
     "Privacy": {
-        "title": "POLÍTICA DE PRIVACIDAD",
+        "title": "POLÃTICA DE PRIVACIDAD",
         "category": "Soporte"
     },
     "Terms": {
-        "title": "TÉRMINOS DE USO",
+        "title": "TÃ‰RMINOS DE USO",
         "category": "Soporte"
     },
     "Metadata": {
         "title": "Nova Facebrasil",
-        "description": "La revista de la comunidad brasileña en EE. UU."
+        "description": "La revista de la comunidad brasileÃ±a en EE. UU."
     },
     "Navbar": {
         "news": "Noticias",
@@ -24,8 +24,8 @@
             "wellbeing": "Bienestar",
             "lifestyle": "Estilo de Vida",
             "business": "Negocios",
-            "faceBrasilInAmerica": "Face Brasil en América",
-            "immigration": "Inmigración"
+            "faceBrasilInAmerica": "Face Brasil en AmÃ©rica",
+            "immigration": "InmigraciÃ³n"
         },
         "community": "Comunidad",
         "events": "Eventos",
@@ -34,53 +34,53 @@
         "admin": "Admin"
     },
     "Common": {
-        "readMore": "Leer Más",
+        "readMore": "Leer MÃ¡s",
         "loading": "Cargando...",
         "error": "Ocurreu un error",
         "back": "Volver"
     },
     "Footer": {
-        "about": "La voz digital líder de la comunidad brasileña en los EE. UU., celebrando la cultura, o éxito y o estilo de vida desde 2010.",
-        "categories": "Categorías",
+        "about": "La voz digital lÃ­der de la comunidad brasileÃ±a en los EE. UU., celebrando la cultura, o Ã©xito y o estilo de vida desde 2010.",
+        "categories": "CategorÃ­as",
         "magazine": "Revista",
         "support": "Soporte",
         "digitalEditions": "Ediciones Digitales",
-        "printSubscription": "Suscripción Impresa",
+        "printSubscription": "SuscripciÃ³n Impresa",
         "advertise": "Anuncie con Nosotros",
         "ambassador": "Sea nuestro Embajador",
         "aboutUs": "Sobre Nosotros",
         "contact": "Contacto",
-        "privacy": "Política de Privacidad",
-        "terms": "Términos de Uso",
+        "privacy": "PolÃ­tica de Privacidad",
+        "terms": "TÃ©rminos de Uso",
         "rights": "Todos los derechos reservados."
     },
     "Home": {
-        "hero_label": "DESTACADO DEL DÍA",
-        "latest_news": "ÚLTIMAS NOTICIAS",
-        "read_more": "Leer más",
+        "hero_label": "DESTACADO DEL DÃA",
+        "latest_news": "ÃšLTIMAS NOTICIAS",
+        "read_more": "Leer mÃ¡s",
         "ai_insights": "INSIGHTS DE IA",
-        "popular_posts": "MÁS LEÍDAS",
+        "popular_posts": "MÃS LEÃDAS",
         "featured": "DESTACADOS",
         "view_all": "Ver todo",
         "updates": "Actualizaciones",
-        "latestNews": "Más Recientes",
+        "latestNews": "MÃ¡s Recientes",
         "highlights": "Destacados",
-        "viewMore": "Ver Más",
-        "happened": "Sucedió",
+        "viewMore": "Ver MÃ¡s",
+        "happened": "SucediÃ³",
         "agenda": "Agenda",
-        "viewMoreNews": "Ver Más Noticias",
+        "viewMoreNews": "Ver MÃ¡s Noticias",
         "soon": "Nuevas actualizaciones pronto...",
-        "mostRead": "Más Leídos",
+        "mostRead": "MÃ¡s LeÃ­dos",
         "readTime": "{time} min lectura",
         "waitingContent": "Esperando contenido..."
     },
     "Contact": {
         "title": "CONTACTO",
         "category": "Soporte",
-        "description": "¿Alguna duda, sugerencia o propuesta comercial? Nuestro equipo está listo para atenderle.",
+        "description": "Â¿Alguna duda, sugerencia o propuesta comercial? Nuestro equipo estÃ¡ listo para atenderle.",
         "form": {
             "name": "Nombre completo",
-            "email": "Su correo electrónico",
+            "email": "Su correo electrÃ³nico",
             "message": "Mensaje",
             "submit": "ENVIAR"
         }
@@ -88,12 +88,12 @@
     "Advertise": {
         "title": "ANUNCIE CON NOSOTROS",
         "category": "Revista",
-        "description": "Conecte su marca con la audiencia brasileña más grande y cualificada de los Estados Unidos. Facebrasil ofrece soluciones cross-media que garantizan visibilidad y resultados reales.",
+        "description": "Conecte su marca con la audiencia brasileÃ±a mÃ¡s grande y cualificada de los Estados Unidos. Facebrasil ofrece soluciones cross-media que garantizan visibilidad y resultados reales.",
         "channels": {
             "title": "Nuestros Canales",
             "print": {
                 "title": "Revista Impresa",
-                "description": "Distribución en más de 500 puntos premium en Florida y EE. UU."
+                "description": "DistribuciÃ³n en mÃ¡s de 500 puntos premium en Florida y EE. UU."
             },
             "digital": {
                 "title": "Portal Digital (SEO Enhanced)",
@@ -101,9 +101,34 @@
             },
             "social": {
                 "title": "Redes Sociales",
-                "description": "Más de 100k seguidores comprometidos y apasionados por Brasil."
+                "description": "MÃ¡s de 100k seguidores comprometidos y apasionados por Brasil."
             }
         },
-        "mediakit": "Solicite nuestro Media Kit 2026 por correo electrónico a ads@facebrasil.com."
+        "mediakit": "Solicite nuestro Media Kit 2026 por correo electrÃ³nico a ads@facebrasil.com.",
+        "form": {
+            "eyebrow": "Solicitud comercial",
+            "title": "Reciba una propuesta de Facebrasil",
+            "subtitle": "Comparta sus datos y nuestro equipo comercial se pondrÃ¡ en contacto para validar formato, inventario y cronograma de la campaÃ±a.",
+            "package": "Paquete de interÃ©s",
+            "packageA": "Paquete A",
+            "packageB": "Paquete B",
+            "packageC": "Paquete C",
+            "packageADesc": "Entrada y validaciÃ³n comercial inicial",
+            "packageBDesc": "Mayor visibilidad e informes detallados",
+            "packageCDesc": "OperaciÃ³n premium con atenciÃ³n dedicada",
+            "companyName": "Empresa",
+            "contactName": "Nombre del contacto",
+            "email": "Correo electrÃ³nico",
+            "phone": "TelÃ©fono",
+            "whatsapp": "WhatsApp",
+            "websiteUrl": "Sitio web de la empresa",
+            "industry": "Sector",
+            "monthlyBudget": "Presupuesto estimado",
+            "notes": "Objetivo de la campaÃ±a",
+            "footnote": "Al enviar, su solicitud entra directamente en la cola comercial de Facebrasil.",
+            "submit": "Solicitar propuesta",
+            "submitting": "Enviando",
+            "success": "Solicitud registrada con Ã©xito. Nuestro equipo comercial se pondrÃ¡ en contacto pronto."
+        }
     }
 }

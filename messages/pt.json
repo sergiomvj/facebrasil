@@ -126,6 +126,31 @@
             "choosePackage": "Escolher Pacote",
             "commercialPolicy": "Mais informações sobre a nossa política de comercialização",
             "advertiseBtn": "Anuncie na Facebrasil"
+        },
+        "form": {
+            "eyebrow": "SolicitaÃ§Ã£o comercial",
+            "title": "Receba uma proposta da Facebrasil",
+            "subtitle": "Preencha seus dados e nossa equipe comercial entra em contato para validar formato, inventÃ¡rio e cronograma da campanha.",
+            "package": "Pacote de interesse",
+            "packageA": "Pacote A",
+            "packageB": "Pacote B",
+            "packageC": "Pacote C",
+            "packageADesc": "Entrada e validaÃ§Ã£o comercial inicial",
+            "packageBDesc": "Maior destaque e relatÃ³rios detalhados",
+            "packageCDesc": "OperaÃ§Ã£o premium com atendimento dedicado",
+            "companyName": "Empresa",
+            "contactName": "Nome do contato",
+            "email": "E-mail",
+            "phone": "Telefone",
+            "whatsapp": "WhatsApp",
+            "websiteUrl": "Site da empresa",
+            "industry": "Segmento",
+            "monthlyBudget": "OrÃ§amento estimado",
+            "notes": "Objetivo da campanha",
+            "footnote": "Ao enviar, sua solicitaÃ§Ã£o entra direto na fila comercial da Facebrasil.",
+            "submit": "Solicitar proposta",
+            "submitting": "Enviando",
+            "success": "SolicitaÃ§Ã£o registrada com sucesso. Nossa equipe comercial vai falar com vocÃª em breve."
         }
     }
 }

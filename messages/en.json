@@ -126,6 +126,31 @@
             "choosePackage": "Choose Package",
             "commercialPolicy": "More information about our commercial policy",
             "advertiseBtn": "Advertise on Facebrasil"
+        },
+        "form": {
+            "eyebrow": "Commercial request",
+            "title": "Receive a proposal from Facebrasil",
+            "subtitle": "Share your details and our commercial team will contact you to validate format, inventory, and campaign schedule.",
+            "package": "Interested package",
+            "packageA": "Package A",
+            "packageB": "Package B",
+            "packageC": "Package C",
+            "packageADesc": "Entry option with initial validation",
+            "packageBDesc": "More visibility and detailed reporting",
+            "packageCDesc": "Premium operation with dedicated support",
+            "companyName": "Company",
+            "contactName": "Contact name",
+            "email": "Email",
+            "phone": "Phone",
+            "whatsapp": "WhatsApp",
+            "websiteUrl": "Company website",
+            "industry": "Industry",
+            "monthlyBudget": "Estimated budget",
+            "notes": "Campaign goal",
+            "footnote": "When you submit, your request goes directly to Facebrasil's commercial queue.",
+            "submit": "Request proposal",
+            "submitting": "Sending",
+            "success": "Request submitted successfully. Our commercial team will contact you soon."
         }
     }
 }

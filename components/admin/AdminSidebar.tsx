@@ -50,6 +50,7 @@ const navItems: NavItem[] = [
     { name: 'Vídeos Reportados', href: '/admin/video-reports', icon: Video, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Hero Diário', href: '/admin/daily-hero', icon: Star, allowedRoles: ['ADMIN', 'EDITOR'] },
     { name: 'Anúncios', href: '/admin/ads', icon: DollarSign, allowedRoles: ['ADMIN'] },
+    { name: 'Leads Ads', href: '/admin/ads/leads', icon: DollarSign, allowedRoles: ['ADMIN'] },
     { name: 'Páginas', href: '/admin/pages', icon: FileText, allowedRoles: ['ADMIN'] },
     { name: 'Gamificação', href: '/admin/gamification', icon: Trophy, allowedRoles: ['ADMIN'] },
     { name: 'FacebrasilShop', href: '/admin/shop', icon: Star, allowedRoles: ['ADMIN'] },

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export interface Ad {
     id: string;
     title: string;
-    position: 'super_hero' | 'sidebar' | 'column_1' | 'column_2' | 'column_3' | 'super_footer';
+    position: 'super_hero' | 'sidebar' | 'column' | 'column_1' | 'column_2' | 'column_3' | 'super_footer';
     image_url: string;
     mobile_image_url?: string;
     link_url: string;
@@ -28,6 +28,11 @@ export const adService = {
         location?: { country_code?: string, region_code?: string, zip?: string }
     ): Promise<Ad[]> {
         try {
+            const requestedPositions =
+                position === 'column'
+                    ? ['column', 'column_1', 'column_2', 'column_3']
+                    : [position];
+
             // 1. Get publication ID
             const { data: pubData } = await supabase
                 .from('publications')
@@ -52,7 +57,7 @@ export const adService = {
                 .from('ads')
                 .select('*')
                 .in('id', adIds)
-                .eq('position', position)
+                .in('position', requestedPositions)
                 .eq('is_active', true)
                 .lte('start_date', new Date().toISOString())
                 .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`);

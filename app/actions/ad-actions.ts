@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 
 interface AdPayload {
     title: string;
-    position: 'super_hero' | 'sidebar' | 'column_1' | 'column_2' | 'column_3' | 'super_footer';
+    position: 'super_hero' | 'sidebar' | 'column' | 'column_1' | 'column_2' | 'column_3' | 'super_footer';
     image_url?: string;
     mobile_image_url?: string;
     link_url: string;

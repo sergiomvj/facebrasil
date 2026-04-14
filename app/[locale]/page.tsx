@@ -163,6 +163,14 @@ export default async function Home({
       <Hero post={mainHero} />
       <FeaturedCarousel posts={carouselPosts} />
 
+      <div className="max-w-[1400px] mx-auto w-full px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
+          <AdSpace position="column_1" />
+          <AdSpace position="column_2" />
+          <AdSpace position="column_3" />
+        </div>
+      </div>
+
       <div className="max-w-[1400px] mx-auto w-full px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 py-16">
         {/* Main Column: Últimas Notícias */}
         <div className="lg:col-span-8 space-y-12">
