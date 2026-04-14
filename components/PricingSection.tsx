@@ -1,11 +1,13 @@
 "use client";
 
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { Check, ArrowRight, Info, Star, Zap, Shield, Mail } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 export default function PricingSection() {
     const t = useTranslations('Advertise.packages');
+    const locale = useLocale();
     const [isPolicyOpen, setIsPolicyOpen] = useState(false);
 
     const packages = [
@@ -109,8 +111,8 @@ export default function PricingSection() {
                                 ))}
                             </div>
 
-                            <a 
-                                href="https://openclaw.fbrapps.com/shopping-cart" 
+                            <Link
+                                href={`/${locale}/advertise`}
                                 className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
                                     pkg.popular
                                     ? 'bg-primary text-white hover:bg-primary-dark shadow-xl shadow-primary/20'
@@ -119,7 +121,7 @@ export default function PricingSection() {
                             >
                                 {t('choosePackage')}
                                 <ArrowRight className="w-4 h-4" />
-                            </a>
+                            </Link>
                         </div>
                     ))}
                 </div>
