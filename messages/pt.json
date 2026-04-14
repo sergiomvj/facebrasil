@@ -104,6 +104,28 @@
                 "description": "Mais de 100k seguidores engajados e apaixonados pelo Brasil."
             }
         },
-        "mediakit": "Solicite nosso Media Kit 2026 através do e-mail ads@facebrasil.com."
+        "mediakit": "Solicite nosso Media Kit 2026 através do e-mail ads@facebrasil.com.",
+        "packages": {
+            "title": "Pacotes de Anúncios Facebrasil",
+            "subtitle": "Oferta de Lançamento: Ganhe 100% de BÔNUS!",
+            "packageA": "Pacote A",
+            "packageB": "Pacote B",
+            "packageC": "Pacote C",
+            "bonus": "Ganhe 100% de BÔNUS!",
+            "adsA": "60 anúncios tamanho A",
+            "adsB": "60 anúncios tamanho B",
+            "adsC": "60 anúncios tamanho C",
+            "totalAds": "Total: 120 anúncios",
+            "visibility": "Visibilidade no portal",
+            "reportsBasic": "Relatórios básicos",
+            "reportsDetailed": "Relatórios detalhados",
+            "reportsPremium": "Relatórios premium",
+            "supportEmail": "Suporte por email",
+            "supportPriority": "Suporte prioritário",
+            "accountManager": "Gerente de conta dedicado",
+            "choosePackage": "Escolher Pacote",
+            "commercialPolicy": "Mais informações sobre a nossa política de comercialização",
+            "advertiseBtn": "Anuncie na Facebrasil"
+        }
     }
 }

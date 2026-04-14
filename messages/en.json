@@ -104,6 +104,28 @@
                 "description": "Over 100k followers engaged and passionate about Brazil."
             }
         },
-        "mediakit": "Request our Media Kit 2026 via email at ads@facebrasil.com."
+        "mediakit": "Request our Media Kit 2026 via email at ads@facebrasil.com.",
+        "packages": {
+            "title": "Facebrasil Ad Packages",
+            "subtitle": "Launch Offer: Get 100% BONUS!",
+            "packageA": "Package A",
+            "packageB": "Package B",
+            "packageC": "Package C",
+            "bonus": "Get 100% BONUS!",
+            "adsA": "60 size A ads",
+            "adsB": "60 size B ads",
+            "adsC": "60 size C ads",
+            "totalAds": "Total: 120 ads",
+            "visibility": "Portal visibility",
+            "reportsBasic": "Basic reports",
+            "reportsDetailed": "Detailed reports",
+            "reportsPremium": "Premium reports",
+            "supportEmail": "Email support",
+            "supportPriority": "Priority support",
+            "accountManager": "Dedicated account manager",
+            "choosePackage": "Choose Package",
+            "commercialPolicy": "More information about our commercial policy",
+            "advertiseBtn": "Advertise on Facebrasil"
+        }
     }
 }

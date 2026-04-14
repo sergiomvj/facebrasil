@@ -15,6 +15,8 @@ import { TrendingUp, Clock, BookOpen } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 import AdSpace from '@/components/AdSpace';
+import CategoryTabs from '@/components/CategoryTabs';
+import PricingSection from '@/components/PricingSection';
 
 import { Metadata } from 'next';
 import { FALLBACK_ARTICLE_IMAGE } from '@/lib/constants';
@@ -102,7 +104,13 @@ export default async function Home({
     mainHero,
     highlightFaceData,
     highlightImigracaoData,
-    highlightEventosData
+    highlightEventosData,
+    newsTab,
+    healthTab,
+    wellbeingTab,
+    lifestyleTab,
+    businessTab,
+    communityTab
   ] = await Promise.all([
     fetchPosts({
       limit: 8,
@@ -116,8 +124,24 @@ export default async function Home({
     fetchMainHero(undefined, supabase),
     fetchPosts({ category: ['face-brasileira', 'face-brasil-na-america', 'face-do-brasil'], limit: 1 }, supabase),
     fetchPosts({ category: ['imigracao', 'imigração'], limit: 1 }, supabase),
-    fetchPosts({ category: ['aconteceu', 'eventos'], limit: 1 }, supabase)
+    fetchPosts({ category: ['aconteceu', 'eventos'], limit: 1 }, supabase),
+    // Data for Tabs
+    fetchPosts({ category: 'noticias', limit: 3 }, supabase),
+    fetchPosts({ category: 'saude', limit: 3 }, supabase),
+    fetchPosts({ category: 'bem-estar', limit: 3 }, supabase),
+    fetchPosts({ category: 'estilo-de-vida', limit: 3 }, supabase),
+    fetchPosts({ category: 'negocios', limit: 3 }, supabase),
+    fetchPosts({ category: 'comunidade', limit: 3 }, supabase)
   ]);
+
+  const tabsData = [
+    { category: 'noticias', label: tNav('news'), posts: newsTab.data, href: '/category/noticias' },
+    { category: 'saude', label: tNav('categories.health'), posts: healthTab.data, href: '/category/saude' },
+    { category: 'bem-estar', label: tNav('categories.wellbeing'), posts: wellbeingTab.data, href: '/category/bem-estar' },
+    { category: 'estilo-de-vida', label: tNav('categories.lifestyle'), posts: lifestyleTab.data, href: '/category/estilo-de-vida' },
+    { category: 'negocios', label: tNav('categories.business'), posts: businessTab.data, href: '/category/negocios' },
+    { category: 'comunidade', label: tNav('community'), posts: communityTab.data, href: '/category/comunidade' },
+  ];
 
   const allLatest = latestData.data || [];
   const carouselPosts = featuredPosts.length > 0 ? featuredPosts : allLatest.slice(0, 5);
@@ -153,17 +177,7 @@ export default async function Home({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {latestNews.map((article, index) => {
-                const columnPosition = (['column_1', 'column_2', 'column_3'] as const)[index] || 'column_1';
-                return (
-                  <div key={article.id} className="flex flex-col gap-4">
-                    <ArticleCard article={article} />
-                    <AdSpace position={columnPosition} className="mx-auto" />
-                  </div>
-                );
-              })}
-            </div>
+            <CategoryTabs initialData={tabsData} />
 
             {/* Infinite Feed Section */}
             <section className="mt-12">
@@ -221,13 +235,7 @@ export default async function Home({
               </div>
             </div>
 
-            <div className="mt-12 text-center">
-              <Link href="/category/noticias">
-                <button className="px-8 py-3 rounded-full border dark:border-white/10 border-gray-300 dark:hover:bg-white/5 hover:bg-gray-100 dark:text-white text-gray-900 font-bold transition-all hover:scale-105 active:scale-95 text-sm uppercase tracking-wider">
-                  {t('viewMoreNews')}
-                </button>
-              </Link>
-            </div>
+            {/* Seção 'Ver Mais Notícias' removida pois já existe no CategoryTabs */}
           </section>
         </div>
 
@@ -315,6 +323,8 @@ export default async function Home({
         </div>
       </div>
       <EditionsSection posts={editorialPosts} />
+
+      <PricingSection />
 
       <div className="py-12 bg-slate-100 dark:bg-slate-900/50 flex justify-center">
         <AdSpace position="super_footer" />
