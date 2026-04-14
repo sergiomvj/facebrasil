@@ -75,11 +75,17 @@ export default function LoginPage() {
 
         try {
             if (mode === 'login') {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                console.log('[Login] Attempting sign in for:', email);
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('[Login] Supabase error:', error.message);
+                    throw error;
+                }
 
+                console.log('[Login] Sign in success, session:', !!data.session);
                 const nextUrl = searchParams.get('next') || `/${locale}/dashboard`;
+                console.log('[Login] Redirecting to:', nextUrl);
                 router.push(nextUrl);
             } else {
                 const { error, data } = await supabase.auth.signUp({

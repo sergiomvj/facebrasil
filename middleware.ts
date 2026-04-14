@@ -74,6 +74,10 @@ export async function middleware(request: NextRequest) {
         /^\/(pt|en|es)\/(dashboard|gamification|settings)/.test(path) ||
         /^\/(dashboard|gamification|settings)/.test(path)
 
+    if (isAdminRoute || isProtectedRoute) {
+        console.log(`[Middleware] Auth Check: path=${path}, user=${user?.id || 'none'}, error=${getUserError?.message || 'none'}`)
+    }
+
     if ((isAdminRoute || isProtectedRoute) && !user) {
         const locale = path.split('/')[1] || 'pt'
         const validLocales = ['pt', 'en', 'es']

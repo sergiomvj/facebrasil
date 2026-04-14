@@ -41,7 +41,13 @@ export async function protectAdmin() {
 
     if (role !== "ADMIN") {
         console.warn(`[AdminGuard] Unauthorized admin access attempt by user ${userId} (Role: ${role})`);
-        throw new Error("Não autorizado. Você precisa ser Administrador para realizar esta ação.");
+        
+        // Detailed error for developers in terminal
+        if (!role) {
+            console.error(`[AdminGuard] CRITICAL: User ${userId} has no role assigned in profiles table.`);
+        }
+
+        throw new Error(`Não autorizado. Nível de acesso necessário: ADMINISTRADOR. Seu nível atual: ${role || 'NENHUM'}`);
     }
 
     return { userId, role };
