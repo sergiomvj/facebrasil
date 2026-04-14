@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// GET /api/waterfall/social-credentials  — load all credentials
+// GET /api/waterfall/social-credentials - load all credentials
 export async function GET() {
     try {
-        const { data, error } = await supabaseAdmin
+        const supabaseAdmin = getSupabaseAdmin();
+        const { data, error } = await (supabaseAdmin as any)
             .from('social_credentials')
             .select('platform, credentials');
 
@@ -22,15 +18,16 @@ export async function GET() {
     }
 }
 
-// POST /api/waterfall/social-credentials  — upsert credentials for a platform
+// POST /api/waterfall/social-credentials - upsert credentials for a platform
 export async function POST(req: Request) {
     try {
+        const supabaseAdmin = getSupabaseAdmin();
         const { platform, credentials } = await req.json();
         if (!platform || !credentials) {
-            return NextResponse.json({ error: 'platform e credentials obrigatórios' }, { status: 400 });
+            return NextResponse.json({ error: 'platform e credentials obrigatorios' }, { status: 400 });
         }
 
-        const { error } = await supabaseAdmin
+        const { error } = await (supabaseAdmin as any)
             .from('social_credentials')
             .upsert({ platform, credentials, updated_at: new Date().toISOString() }, { onConflict: 'platform' });
 

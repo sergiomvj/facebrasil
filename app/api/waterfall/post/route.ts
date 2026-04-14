@@ -1,30 +1,25 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { TwitterApi } from 'twitter-api-v2';
+import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// ─── Load credentials from DB ──────────────────────────────────────────────
 async function loadCredentials(platform: string): Promise<Record<string, string> | null> {
-    const { data } = await supabaseAdmin
+    const supabaseAdmin = getSupabaseAdmin();
+    const { data } = await (supabaseAdmin as any)
         .from('social_credentials')
         .select('credentials')
         .eq('platform', platform)
         .single();
-    return (data?.credentials as Record<string, string>) || null;
+    return (data?.credentials as Record<string, string> | undefined) || null;
 }
 
-// ─── Log the post result ───────────────────────────────────────────────────
 async function logPost(sessionId: string, platform: string, contentType: string, result: {
     success: boolean; postId?: string; postUrl?: string; error?: string;
 }) {
-    await supabaseAdmin.from('waterfall_posts').insert({
+    const supabaseAdmin = getSupabaseAdmin();
+    await (supabaseAdmin as any).from('waterfall_posts').insert({
         session_id: sessionId,
         platform,
         content_type: contentType,
@@ -36,7 +31,6 @@ async function logPost(sessionId: string, platform: string, contentType: string,
     });
 }
 
-// ─── POST Facebook ─────────────────────────────────────────────────────────
 async function postFacebook(
     creds: Record<string, string>,
     text: string,
@@ -45,7 +39,7 @@ async function postFacebook(
     const pageId = creds.page_id;
     const token = creds.page_access_token;
 
-    if (!pageId || !token) throw new Error('Credenciais Facebook incompletas: page_id e page_access_token são obrigatórios');
+    if (!pageId || !token) throw new Error('Credenciais Facebook incompletas: page_id e page_access_token sao obrigatorios');
 
     const endpoint = imageUrl
         ? `https://graph.facebook.com/v19.0/${pageId}/photos`
@@ -72,7 +66,6 @@ async function postFacebook(
     };
 }
 
-// ─── POST Instagram Carousel ────────────────────────────────────────────────
 async function postInstagramCarousel(
     creds: Record<string, string>,
     caption: string,
@@ -81,12 +74,11 @@ async function postInstagramCarousel(
     const igAccountId = creds.ig_account_id;
     const token = creds.access_token;
 
-    if (!igAccountId || !token) throw new Error('Credenciais Instagram incompletas: ig_account_id e access_token são obrigatórios');
+    if (!igAccountId || !token) throw new Error('Credenciais Instagram incompletas: ig_account_id e access_token sao obrigatorios');
     if (slideImageUrls.length === 0) throw new Error('Nenhuma imagem de slide gerada. Gere as imagens dos slides primeiro.');
 
     const base = `https://graph.facebook.com/v19.0/${igAccountId}`;
 
-    // Step 1: Create item containers
     const mediaIds: string[] = [];
     for (const imgUrl of slideImageUrls) {
         const body = new URLSearchParams({
@@ -100,7 +92,6 @@ async function postInstagramCarousel(
         mediaIds.push(data.id);
     }
 
-    // Step 2: Create carousel container
     const carouselBody = new URLSearchParams({
         media_type: 'CAROUSEL',
         caption,
@@ -111,7 +102,6 @@ async function postInstagramCarousel(
     const carouselData = await carouselRes.json();
     if (!carouselRes.ok || carouselData.error) throw new Error(`Erro criando carrossel: ${carouselData.error?.message}`);
 
-    // Step 3: Publish
     const publishBody = new URLSearchParams({
         creation_id: carouselData.id,
         access_token: token,
@@ -127,7 +117,6 @@ async function postInstagramCarousel(
     };
 }
 
-// ─── POST Instagram Caption (single image) ──────────────────────────────────
 async function postInstagramCaption(
     creds: Record<string, string>,
     caption: string,
@@ -137,17 +126,15 @@ async function postInstagramCaption(
     const token = creds.access_token;
 
     if (!igAccountId || !token) throw new Error('Credenciais Instagram incompletas');
-    if (!imageUrl) throw new Error('Imagem obrigatória para post no Instagram. Gere a imagem primeiro.');
+    if (!imageUrl) throw new Error('Imagem obrigatoria para post no Instagram. Gere a imagem primeiro.');
 
     const base = `https://graph.facebook.com/v19.0/${igAccountId}`;
 
-    // Create media container
     const mediaBody = new URLSearchParams({ image_url: imageUrl, caption, access_token: token });
     const mediaRes = await fetch(`${base}/media`, { method: 'POST', body: mediaBody });
     const mediaData = await mediaRes.json();
     if (!mediaRes.ok || mediaData.error) throw new Error(`Erro criando media: ${mediaData.error?.message}`);
 
-    // Publish
     const publishBody = new URLSearchParams({ creation_id: mediaData.id, access_token: token });
     const publishRes = await fetch(`${base}/media_publish`, { method: 'POST', body: publishBody });
     const publishData = await publishRes.json();
@@ -155,11 +142,10 @@ async function postInstagramCaption(
 
     return {
         postId: publishData.id,
-        postUrl: `https://www.instagram.com/`,
+        postUrl: 'https://www.instagram.com/',
     };
 }
 
-// ─── POST Twitter ───────────────────────────────────────────────────────────
 async function postTwitter(
     creds: Record<string, string>,
     text: string,
@@ -167,7 +153,7 @@ async function postTwitter(
 ): Promise<{ postId: string; postUrl: string }> {
     const { api_key, api_secret, access_token, access_token_secret } = creds;
     if (!api_key || !api_secret || !access_token || !access_token_secret) {
-        throw new Error('Credenciais Twitter incompletas: api_key, api_secret, access_token e access_token_secret são obrigatórios');
+        throw new Error('Credenciais Twitter incompletas: api_key, api_secret, access_token e access_token_secret sao obrigatorios');
     }
 
     const client = new TwitterApi({
@@ -181,12 +167,11 @@ async function postTwitter(
     let mediaId: string | undefined;
     if (imageUrl) {
         try {
-            // Download image and upload to Twitter
-            const imgBuffer = await fetch(imageUrl).then(r => r.arrayBuffer());
+            const imgBuffer = await fetch(imageUrl).then((r) => r.arrayBuffer());
             const uploadResult = await rw.v1.uploadMedia(Buffer.from(imgBuffer), { mimeType: 'image/png' });
             mediaId = uploadResult;
         } catch {
-            // Post without image if upload fails
+            // Post without image if upload fails.
         }
     }
 
@@ -202,7 +187,6 @@ async function postTwitter(
     };
 }
 
-// ─── POST Twitter Thread ─────────────────────────────────────────────────────
 async function postTwitterThread(
     creds: Record<string, string>,
     tweets: string[]
@@ -238,18 +222,17 @@ async function postTwitterThread(
     };
 }
 
-// ─── Main Handler ───────────────────────────────────────────────────────────
 export async function POST(req: Request) {
     try {
         const body = await req.json();
         const {
-            platform,    // 'facebook' | 'instagram_carousel' | 'instagram_caption' | 'twitter_tweet' | 'twitter_thread'
-            contentType, // for logging
+            platform,
+            contentType,
             sessionId,
             text,
-            texts,       // for thread (array)
+            texts,
             imageUrl,
-            slideImageUrls, // for carousel (array)
+            slideImageUrls,
         } = body;
 
         const creds = await loadCredentials(
@@ -259,7 +242,7 @@ export async function POST(req: Request) {
 
         if (!creds) {
             return NextResponse.json({
-                error: 'Credenciais não configuradas. Vá em Configurações de Redes Sociais e adicione suas credenciais.',
+                error: 'Credenciais nao configuradas. Va em Configuracoes de Redes Sociais e adicione suas credenciais.',
                 notConfigured: true,
             }, { status: 400 });
         }
@@ -283,7 +266,7 @@ export async function POST(req: Request) {
                 result = await postTwitterThread(creds, texts || [text]);
                 break;
             default:
-                return NextResponse.json({ error: 'Plataforma inválida' }, { status: 400 });
+                return NextResponse.json({ error: 'Plataforma invalida' }, { status: 400 });
         }
 
         if (sessionId) {
@@ -291,7 +274,6 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json({ success: true, ...result });
-
     } catch (error: any) {
         console.error('[Waterfall Post API]', error);
         return NextResponse.json({ error: error.message || 'Erro interno' }, { status: 500 });
