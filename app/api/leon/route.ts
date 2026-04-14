@@ -5,10 +5,6 @@ import {
     type HelpDocEntry,
 } from '@/lib/help/admin-help';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
 function buildSystemPrompt(entry: HelpDocEntry, route: string) {
     return `Voce e o Leon, agente virtual de ajuda contextual do painel administrativo da Nova Facebrasil.
 
@@ -32,6 +28,9 @@ Contexto oficial da pagina atual:
 
 export async function POST(req: Request) {
     try {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
         const { message, history, route, helpEntry } = await req.json();
 
         if (!message) {

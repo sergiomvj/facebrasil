@@ -5,11 +5,6 @@ import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 type Platform = 'instagram_carousel' | 'instagram_caption' | 'twitter' | 'facebook';
 
 const PLATFORM_SPECS: Record<Platform, { size: '1024x1024' | '1792x1024' | '1024x1792'; label: string }> = {
@@ -55,6 +50,10 @@ atmospheric, or environmental compositions.`;
 
 export async function POST(req: Request) {
     try {
+        const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
         const { platform, articleTitle, contentHint, sessionId } = await req.json() as {

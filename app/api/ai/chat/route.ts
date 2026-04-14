@@ -1,13 +1,17 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
     const { message, articleContent, articleTitle, history, feature } = await request.json();
 
     if (!message) {
