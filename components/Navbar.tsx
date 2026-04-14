@@ -56,7 +56,7 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const navItems = []; // Menu categorizado movido para abas na Home
+  const navItems: { key: string; label: string; href: string }[] = []; // Menu categorizado movido para abas na Home
 
   const handleSignOut = async () => {
     await signOut();
@@ -256,11 +256,6 @@ const Navbar: React.FC = () => {
                   <ChevronRight className="size-4 opacity-30" />
                 </Link>
               ))}
-
-              <div className="my-4 h-px bg-gray-100 dark:bg-white/5" />
-
-                Comunidade
-              </Link>
 
               <div className="my-2 h-px bg-gray-100 dark:bg-white/5" />
 
