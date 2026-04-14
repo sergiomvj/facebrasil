@@ -53,3 +53,30 @@ export async function createAdvertiseLead(payload: AdvertiseLeadPayload) {
 
     return { success: true };
 }
+
+const VALID_LEAD_STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost'] as const;
+
+export async function updateAdvertiseLeadStatus(id: string, status: string) {
+    if (!id) {
+        return { success: false, error: 'Lead invalido.' };
+    }
+
+    if (!VALID_LEAD_STATUSES.includes(status as (typeof VALID_LEAD_STATUSES)[number])) {
+        return { success: false, error: 'Status invalido.' };
+    }
+
+    const { error } = await (supabaseAdmin as any)
+        .from('advertising_leads')
+        .update({
+            status,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+    if (error) {
+        console.error('[AdvertiseLead] update status error:', error);
+        return { success: false, error: 'Nao foi possivel atualizar o status.' };
+    }
+
+    return { success: true };
+}
