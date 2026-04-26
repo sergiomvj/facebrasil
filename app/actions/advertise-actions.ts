@@ -11,7 +11,7 @@ interface AdvertiseLeadPayload {
     whatsapp?: string;
     websiteUrl?: string;
     industry?: string;
-    monthlyBudget?: string;
+    monthly_budget?: string;
     notes?: string;
     locale?: string;
 }
@@ -30,7 +30,7 @@ export async function createAdvertiseLead(payload: AdvertiseLeadPayload) {
         return { success: false, error: 'Preencha empresa, contato e e-mail.' };
     }
 
-    const { error } = await (supabaseAdmin as any).from('advertising_leads').insert({
+    const { data, error } = await (supabaseAdmin as any).from('advertising_leads').insert({
         package_code: packageCode,
         company_name: companyName,
         contact_name: contactName,
@@ -39,19 +39,19 @@ export async function createAdvertiseLead(payload: AdvertiseLeadPayload) {
         whatsapp: payload.whatsapp?.trim() || null,
         website_url: payload.websiteUrl?.trim() || null,
         industry: payload.industry?.trim() || null,
-        monthly_budget: payload.monthlyBudget?.trim() || null,
+        monthly_budget: payload.monthly_budget?.trim() || null,
         notes: payload.notes?.trim() || null,
         locale: payload.locale?.trim() || 'pt',
         source_page: '/advertise',
         status: 'new',
-    });
+    }).select('id').single();
 
     if (error) {
         console.error('[AdvertiseLead] insert error:', error);
-        return { success: false, error: 'Nao foi possivel registrar sua solicitacao agora.' };
+        return { success: false, error: 'Não foi possível registrar sua solicitação agora.' };
     }
 
-    return { success: true };
+    return { success: true, id: data.id };
 }
 
 const VALID_LEAD_STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost'] as const;

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Be an Enrolled Agent in USA — Guia Completo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #112040;
+    --gold: #c9922a;
+    --gold-light: #e8b84b;
+    --cream: #f5f0e8;
+    --cream-dark: #ede6d6;
+    --accent-green: #1a7a4a;
+    --text-dark: #1a1a2e;
+    --text-mid: #3d4a6b;
+    --text-light: #8892a4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); overflow-x: hidden; }
+
+  .hero {
+    background: var(--navy);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(201,146,42,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 20%, rgba(26,122,74,0.08) 0%, transparent 50%);
+  }
+  .hero-flag { font-size: 64px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; position: relative; z-index: 1; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .hero-label { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:20px; position:relative; z-index:1; animation: fadeUp 0.8s ease forwards 0.3s; opacity:0; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(42px,7vw,88px); font-weight:900; color:var(--cream); line-height:1.0; margin-bottom:16px; position:relative; z-index:1; animation: fadeUp 0.8s ease forwards 0.5s; opacity:0; }
+  .hero h1 em { color:var(--gold-light); font-style:italic; }
+  .hero-sub { font-size:20px; color:rgba(245,240,232,0.65); font-weight:300; max-width:560px; line-height:1.6; margin:20px auto 40px; position:relative; z-index:1; animation: fadeUp 0.8s ease forwards 0.7s; opacity:0; }
+  .hero-salary { display:inline-flex; align-items:center; gap:12px; background:rgba(201,146,42,0.15); border:1px solid rgba(201,146,42,0.4); border-radius:100px; padding:14px 32px; color:var(--gold-light); font-family:'Playfair Display',serif; font-size:28px; font-weight:700; position:relative; z-index:1; animation: fadeUp 0.8s ease forwards 0.9s; opacity:0; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .toc { background:var(--navy-mid); padding:0; position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(201,146,42,0.2); overflow-x:auto; }
+  .toc-inner { display:flex; gap:0; min-width:max-content; margin:0 auto; max-width:1200px; }
+  .toc a { color:rgba(245,240,232,0.6); text-decoration:none; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:16px 20px; transition:all 0.2s; border-bottom:2px solid transparent; white-space:nowrap; }
+  .toc a:hover { color:var(--gold-light); border-bottom-color:var(--gold); background:rgba(201,146,42,0.05); }
+
+  section { max-width:1100px; margin:0 auto; padding:80px 40px; }
+  .section-tag { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:12px; display:flex; align-items:center; gap:10px; }
+  .section-tag::after { content:''; flex:1; max-width:60px; height:1px; background:var(--gold); opacity:0.4; }
+  h2 { font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,52px); font-weight:700; color:var(--navy); line-height:1.1; margin-bottom:24px; }
+  h2 em { color:var(--gold); font-style:italic; }
+  .lead { font-size:18px; line-height:1.8; color:var(--text-mid); max-width:720px; margin-bottom:40px; }
+
+  .overview-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; margin-top:40px; }
+  .card { background:white; border:1px solid rgba(0,0,0,0.07); border-radius:16px; padding:28px; transition:transform 0.2s,box-shadow 0.2s; }
+  .card:hover { transform:translateY(-4px); box-shadow:0 20px 60px rgba(10,22,40,0.12); }
+  .card-icon { font-size:32px; margin-bottom:12px; }
+  .card-title { font-weight:600; font-size:14px; letter-spacing:0.5px; color:var(--navy); margin-bottom:6px; }
+  .card-text { font-size:13px; color:var(--text-mid); line-height:1.6; }
+  .card.gold { background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%); }
+  .card.gold .card-title, .card.gold .card-text { color:white; }
+  .card.navy { background:var(--navy); }
+  .card.navy .card-title { color:var(--gold-light); }
+  .card.navy .card-text { color:rgba(245,240,232,0.7); }
+
+  .bg-cream { background:var(--cream); }
+  .bg-white { background:white; }
+  .bg-navy { background:var(--navy); }
+  .bg-navy h2 { color:var(--cream); }
+  .bg-navy .lead { color:rgba(245,240,232,0.7); }
+  .bg-navy .section-tag { color:var(--gold-light); }
+
+  .salary-box { background:linear-gradient(135deg,var(--navy) 0%,#112a50 100%); border-radius:20px; padding:40px; margin:40px 0; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:24px; border:1px solid rgba(201,146,42,0.2); }
+  .salary-stat { text-align:center; }
+  .salary-num { font-family:'Playfair Display',serif; font-size:40px; font-weight:900; color:var(--gold-light); }
+  .salary-label { font-size:12px; color:rgba(245,240,232,0.55); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+
+  .quote-block { border-left:3px solid var(--gold); padding:20px 28px; background:rgba(201,146,42,0.06); border-radius:0 12px 12px 0; margin:32px 0; font-family:'Playfair Display',serif; font-size:20px; font-style:italic; color:var(--navy); line-height:1.6; }
+  .quote-block cite { display:block; font-family:'DM Sans',sans-serif; font-size:12px; font-style:normal; color:var(--text-light); margin-top:10px; letter-spacing:1px; text-transform:uppercase; }
+
+  .phase-grid { display:grid; gap:20px; margin-top:40px; }
+  .phase { display:grid; grid-template-columns:120px 1fr; gap:24px; background:white; border-radius:16px; overflow:hidden; border:1px solid rgba(0,0,0,0.07); }
+  .phase-label { background:var(--navy); color:white; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px; text-align:center; }
+  .phase-label .days { font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--gold-light); line-height:1; }
+  .phase-label .days-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(245,240,232,0.5); margin-top:4px; }
+  .phase-content { padding:24px; }
+  .phase-title { font-weight:700; font-size:16px; color:var(--navy); margin-bottom:8px; }
+  .phase-desc { font-size:13px; color:var(--text-mid); line-height:1.7; }
+  .phase-tasks { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .task-tag { background:var(--cream-dark); color:var(--text-mid); font-size:11px; padding:4px 10px; border-radius:100px; font-family:'DM Mono',monospace; }
+
+  .app-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-top:32px; }
+  .app-card { background:rgba(255,255,255,0.08); border:1px solid rgba(201,146,42,0.2); border-radius:14px; padding:24px 20px; text-align:center; transition:background 0.2s; }
+  .app-card:hover { background:rgba(201,146,42,0.1); }
+  .app-emoji { font-size:36px; margin-bottom:10px; }
+  .app-name { font-weight:700; font-size:14px; color:var(--cream); margin-bottom:4px; }
+  .app-use { font-size:12px; color:rgba(245,240,232,0.55); line-height:1.5; }
+
+  .materials-cols { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:40px; }
+  .material-group h3 { font-family:'Playfair Display',serif; font-size:22px; margin-bottom:16px; }
+  .material-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .material-list li { background:white; border-radius:10px; padding:14px 18px; font-size:13px; border-left:3px solid var(--gold); display:flex; flex-direction:column; gap:4px; }
+  .material-list li.free { border-left-color:var(--accent-green); }
+  .mat-name { font-weight:600; color:var(--navy); }
+  .mat-desc { color:var(--text-light); font-size:12px; }
+  .mat-badge { display:inline-block; font-size:9px; letter-spacing:1px; text-transform:uppercase; padding:2px 7px; border-radius:100px; font-family:'DM Mono',monospace; width:fit-content; }
+  .mat-badge.paid { background:#fff0e0; color:var(--gold); }
+  .mat-badge.free { background:#e0f5ec; color:var(--accent-green); }
+
+  .office-steps { display:grid; gap:16px; margin-top:40px; }
+  .office-step { background:white; border-radius:14px; padding:24px 28px 24px 24px; display:grid; grid-template-columns:48px 1fr; gap:20px; align-items:start; border:1px solid rgba(0,0,0,0.06); transition:box-shadow 0.2s; }
+  .office-step:hover { box-shadow:0 8px 30px rgba(10,22,40,0.09); }
+  .step-num { width:48px; height:48px; background:var(--navy); color:var(--gold-light); font-family:'Playfair Display',serif; font-size:22px; font-weight:900; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step-body h4 { font-weight:700; color:var(--navy); margin-bottom:6px; font-size:15px; }
+  .step-body p { font-size:13px; color:var(--text-mid); line-height:1.7; }
+
+  .auto-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-top:40px; }
+  .auto-card { background:white; border-radius:16px; padding:28px; border:1px solid rgba(0,0,0,0.07); position:relative; overflow:hidden; }
+  .auto-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; background:linear-gradient(90deg,var(--gold),var(--gold-light)); }
+  .auto-icon { font-size:28px; margin-bottom:12px; }
+  .auto-title { font-weight:700; font-size:15px; color:var(--navy); margin-bottom:8px; }
+  .auto-text { font-size:13px; color:var(--text-mid); line-height:1.7; }
+
+  .apps-showcase { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; margin-top:40px; }
+  .app-showcase-card { background:var(--navy); border-radius:20px; padding:32px; position:relative; overflow:hidden; }
+  .app-showcase-card::after { content:''; position:absolute; bottom:-40px;right:-40px; width:120px;height:120px; border-radius:50%; background:rgba(201,146,42,0.1); }
+  .app-showcase-card .emoji { font-size:36px; margin-bottom:16px; }
+  .app-showcase-card h4 { font-family:'Playfair Display',serif; font-size:20px; color:var(--cream); margin-bottom:8px; }
+  .app-showcase-card p { font-size:13px; color:rgba(245,240,232,0.6); line-height:1.7; }
+  .tech-stack { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+  .tech { background:rgba(201,146,42,0.15); color:var(--gold-light); font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.5px; padding:4px 10px; border-radius:100px; border:1px solid rgba(201,146,42,0.25); }
+
+  .cta-section { background:linear-gradient(135deg,var(--navy) 0%,#0d2040 60%,#152a4a 100%); text-align:center; padding:100px 40px; }
+  .cta-btn { display:inline-block; font-weight:700; font-size:15px; padding:18px 48px; border-radius:100px; text-decoration:none; letter-spacing:0.5px; transition:transform 0.2s,box-shadow 0.2s; }
+  .cta-btn:hover { transform:translateY(-2px); }
+
+  footer { background:var(--navy); color:rgba(245,240,232,0.4); text-align:center; padding:32px 40px; font-size:12px; letter-spacing:0.5px; border-top:1px solid rgba(201,146,42,0.15); }
+  footer strong { color:var(--gold-light); }
+
+  @media(max-width:640px){
+    .materials-cols{grid-template-columns:1fr}
+    .phase{grid-template-columns:1fr}
+    .phase-label{flex-direction:row;padding:16px 24px;gap:12px}
+    section{padding:60px 20px}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-flag">🇺🇸🇧🇷</div>
+  <div class="hero-label">Guia Completo · Contador Brasileiro → EA Certificado</div>
+  <h1>Be an <em>Enrolled Agent</em><br>in the USA</h1>
+  <p class="hero-sub">Você já tem o conhecimento. Você já tem a experiência. Agora é só atravessar o oceano — sem sair de casa.</p>
+  <div class="hero-salary">💰 Earn around <strong>&nbsp;$80,000/year&nbsp;</strong></div>
+</div>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#visao">📋 Visão Geral</a>
+    <a href="#plano">📚 60 Dias de Estudo</a>
+    <a href="#ingles">🚀 Inglês + IA</a>
+    <a href="#materiais">📄 Materiais</a>
+    <a href="#taxoffice">💼 Tax Office</a>
+    <a href="#automacao">🤖 Automação</a>
+    <a href="#apps">💻 Apps & Sistemas</a>
+  </div>
+</nav>
+
+<!-- VISÃO GERAL -->
+<div class="bg-cream" id="visao">
+<section>
+  <div class="section-tag">Seção 01 · Por Que Isso Faz Todo Sentido</div>
+  <h2>Sua maior <em>vantagem</em><br>já está na sua mochila</h2>
+  <p class="lead">Você passou anos estudando legislação tributária, auditando balanços, sobrevivendo ao SPED, ao SEFAZ e à fúria da Receita Federal. Adivinhe? O fisco americano — o IRS — é exatamente o tipo de monstro que você já aprendeu a domar. E o Enrolled Agent é o passaporte que legitima isso perante os olhos americanos.</p>
+
+  <div class="quote-block">
+    "O Enrolled Agent é o único profissional de impostos que recebe autorização federal do governo dos EUA para representar contribuintes perante o IRS — sem restrição geográfica."
+    <cite>IRS — Internal Revenue Service</cite>
+  </div>
+
+  <div class="overview-grid">
+    <div class="card navy">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">Credencial Federal</div>
+      <div class="card-text">Única certificação diretamente concedida pelo IRS. Válida nos 50 estados americanos + territórios.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📝</div>
+      <div class="card-title">3 Provas (SEE)</div>
+      <div class="card-text">Special Enrollment Examination: Individuals, Businesses e Representation/Procedures/Ethics. Sem pré-requisito de graduação americana.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌎</div>
+      <div class="card-title">100% Remoto Possível</div>
+      <div class="card-text">Você pode atender clientes americanos e brasileiros nos EUA sem sair do Brasil. A internet é o escritório.</div>
+    </div>
+    <div class="card gold">
+      <div class="card-icon">🚀</div>
+      <div class="card-title">Nicho Poderoso</div>
+      <div class="card-text">Mais de 1.7 milhão de brasileiros nos EUA — e pouquíssimos EAs que falam português. Você resolve dois idiomas de uma vez.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📅</div>
+      <div class="card-title">1 Ano de Prep</div>
+      <div class="card-text">6 meses para inglês técnico + 6 meses para as provas. Realista, estratégico e executável mesmo com trabalho.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💳</div>
+      <div class="card-title">Custo Acessível</div>
+      <div class="card-text">Taxa de cada prova: ~$203 USD. Preparatório completo: $300–600 USD. Investimento total abaixo de R$5.000.</div>
+    </div>
+  </div>
+
+  <div class="salary-box">
+    <div class="salary-stat"><div class="salary-num">$80k</div><div class="salary-label">Média anual (solo EA)</div></div>
+    <div class="salary-stat"><div class="salary-num">$120k</div><div class="salary-label">EA sênior em firma</div></div>
+    <div class="salary-stat"><div class="salary-num">$150k+</div><div class="salary-label">Tax Office próprio</div></div>
+    <div class="salary-stat"><div class="salary-num">1.7M</div><div class="salary-label">Brasileiros nos EUA</div></div>
+    <div class="salary-stat"><div class="salary-num">&lt;500</div><div class="salary-label">EAs que falam PT</div></div>
+  </div>
+</section>
+</div>
+
+<!-- PLANO 60 DIAS -->
+<div class="bg-white" id="plano">
+<section>
+  <div class="section-tag">Seção 02 · Metodologia de Estudo</div>
+  <h2>📚 Plano de <em>60 dias</em><br>para passar no SEE</h2>
+  <p class="lead">Um plano agressivo mas realista para quem já tem base contábil. Você não está aprendendo contabilidade do zero — está aprendendo <em>a linguagem americana</em> do que você já domina. Foco, consistência e 2h por dia fazem o trabalho.</p>
+
+  <div class="phase-grid">
+    <div class="phase">
+      <div class="phase-label"><div class="days">1–10</div><div class="days-label">dias</div></div>
+      <div class="phase-content">
+        <div class="phase-title">🔍 Diagnóstico & Fundamentos do IRS</div>
+        <div class="phase-desc">Faça o simulado diagnóstico para mapear seus pontos fracos. Estude a estrutura do SEE (partes 1, 2 e 3), a lógica do sistema tributário americano (filing status, tax brackets, deductions) e o vocabulário fiscal em inglês. Configure seu ambiente de estudo com Anki e Notion.</div>
+        <div class="phase-tasks">
+          <span class="task-tag">Simulado diagnóstico</span><span class="task-tag">Tax system overview</span><span class="task-tag">Anki deck fiscal</span><span class="task-tag">Filing status</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-label"><div class="days">11–25</div><div class="days-label">dias</div></div>
+      <div class="phase-content">
+        <div class="phase-title">👤 Parte 1 — Individuals</div>
+        <div class="phase-desc">Income types (W-2, 1099, K-1), exclusions and deductions, itemized vs standard, credits (Child Tax Credit, EITC), AMT, capital gains, self-employment tax, retirement accounts (IRA, 401k). Foco em questões de múltipla escolha. Mínimo 200 questões práticas nesse bloco.</div>
+        <div class="phase-tasks">
+          <span class="task-tag">Form 1040</span><span class="task-tag">Credits & Deductions</span><span class="task-tag">Capital Gains</span><span class="task-tag">Retirement Plans</span><span class="task-tag">AMT</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-label"><div class="days">26–42</div><div class="days-label">dias</div></div>
+      <div class="phase-content">
+        <div class="phase-title">🏢 Parte 2 — Businesses</div>
+        <div class="phase-desc">Entidades (Sole Proprietor, Partnership, S-Corp, C-Corp, LLC), depreciação (MACRS, Section 179, Bonus), payroll taxes (941, 940), estimated taxes, business credits, farm income, at-risk rules, passive activity. Esta é geralmente a mais difícil — reserve mais tempo e mais questões.</div>
+        <div class="phase-tasks">
+          <span class="task-tag">C-Corp vs S-Corp</span><span class="task-tag">Depreciation MACRS</span><span class="task-tag">Payroll 941/940</span><span class="task-tag">Partnership K-1</span><span class="task-tag">Passive Activity</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-label"><div class="days">43–52</div><div class="days-label">dias</div></div>
+      <div class="phase-content">
+        <div class="phase-title">⚖️ Parte 3 — Representation, Practices & Procedures</div>
+        <div class="phase-desc">Circular 230 (regras de conduta do EA), poder de representação perante o IRS, audits, appeals, collections, installment agreements, Offer in Compromise, TPPS, e-services. O exame adora situações práticas reais — estude os cenários com cuidado.</div>
+        <div class="phase-tasks">
+          <span class="task-tag">Circular 230</span><span class="task-tag">POA (Form 2848)</span><span class="task-tag">Offer in Compromise</span><span class="task-tag">IRS Appeals</span><span class="task-tag">Ethics</span>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-label"><div class="days">53–60</div><div class="days-label">dias</div></div>
+      <div class="phase-content">
+        <div class="phase-title">🎯 Revisão Final & Simulados Cronometrados</div>
+        <div class="phase-desc">Revise os 30% dos tópicos onde você errou mais. Faça 3 simulados completos cronometrados (100 questões em 3h30). Agende a prova no Prometric. Cuide do sono, alimentação e mentalize que você vai arrasar — porque vai mesmo. Você já fez isso antes, em outro idioma.</div>
+        <div class="phase-tasks">
+          <span class="task-tag">3 simulados completos</span><span class="task-tag">Flashcard review</span><span class="task-tag">Agendar Prometric</span><span class="task-tag">Mental prep</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-block" style="margin-top:40px">
+    "Você não precisa estudar o que já sabe. Você precisa aprender como chamar pelo nome certo em inglês o que já domina em português."
+    <cite>Estratégia do Contador Bilíngue</cite>
+  </div>
+</section>
+</div>
+
+<!-- INGLÊS -->
+<div class="bg-navy" id="ingles">
+<section>
+  <div class="section-tag">Seção 03 · Linguagem é Poder</div>
+  <h2>🚀 Inglês Técnico com <em>IA</em><br>em 6 meses</h2>
+  <p class="lead">Você não precisa do inglês perfeito do BBC. Você precisa do inglês do IRS — preciso, técnico e funcional. A boa notícia: as IAs de hoje são os melhores professores particulares que já existiram. E a maioria é gratuita.</p>
+
+  <div class="app-grid">
+    <div class="app-card"><div class="app-emoji">🤖</div><div class="app-name">Claude / ChatGPT</div><div class="app-use">Simule reuniões com clientes americanos, pratique explicações de tax terms, peça correção de textos técnicos em tempo real</div></div>
+    <div class="app-card"><div class="app-emoji">🎧</div><div class="app-name">Elsa Speak</div><div class="app-use">Pronuncia americana com feedback de IA. Ideal para treinar o sotaque e a fluência antes de atender clientes por vídeo</div></div>
+    <div class="app-card"><div class="app-emoji">🗣️</div><div class="app-name">Speechify + TTS</div><div class="app-use">Ouça os materiais do IRS em voz alta enquanto lê. Treina ouvido e vocabulário técnico simultaneamente</div></div>
+    <div class="app-card"><div class="app-emoji">🃏</div><div class="app-name">Anki + GPT</div><div class="app-use">Gere automaticamente flashcards dos termos fiscais americanos com exemplos contextuais e frases reais do IRS</div></div>
+    <div class="app-card"><div class="app-emoji">📺</div><div class="app-name">YouTube — IRS Oficial</div><div class="app-use">Canal oficial do IRS tem centenas de vídeos com linguagem técnica real. Ative as legendas e pause para absorver</div></div>
+    <div class="app-card"><div class="app-emoji">🌐</div><div class="app-name">Tandem / Preply</div><div class="app-use">Encontre parceiros americanos que queiram aprender português. Você ensina português, aprende inglês — custo zero</div></div>
+    <div class="app-card"><div class="app-emoji">✍️</div><div class="app-name">Grammarly Pro</div><div class="app-use">Corrija seus e-mails e documentos fiscais em inglês com sugestões de tom profissional e precisão técnica</div></div>
+    <div class="app-card"><div class="app-emoji">🎙️</div><div class="app-name">Otter.ai + GPT</div><div class="app-use">Grave suas respostas em inglês, transcreva com Otter e peça ao ChatGPT para corrigir e sugerir versões mais naturais</div></div>
+  </div>
+
+  <div style="margin-top:40px;background:rgba(201,146,42,0.12);border-radius:16px;padding:32px;border:1px solid rgba(201,146,42,0.25)">
+    <h3 style="color:var(--gold-light);font-family:'Playfair Display',serif;font-size:22px;margin-bottom:16px">📅 Cronograma Semanal de Inglês</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:16px"><div style="color:var(--gold-light);font-weight:700;font-size:13px;margin-bottom:8px">📖 SEG/QUA/SEX</div><div style="color:rgba(245,240,232,0.6);font-size:12px;line-height:1.7">30min leitura de publicação do IRS. 20min Anki com vocabulário fiscal. 10min escrita de resumo em inglês.</div></div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:16px"><div style="color:var(--gold-light);font-weight:700;font-size:13px;margin-bottom:8px">🎧 TER/QUI</div><div style="color:rgba(245,240,232,0.6);font-size:12px;line-height:1.7">45min ouça podcasts tributários americanos (Talking Tax — Bloomberg, Tax Foundation Podcast). 15min repetição em voz alta.</div></div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:16px"><div style="color:var(--gold-light);font-weight:700;font-size:13px;margin-bottom:8px">🤖 SÁB</div><div style="color:rgba(245,240,232,0.6);font-size:12px;line-height:1.7">1h de role-play com Claude: simule consulta com cliente americano, explique formas de declaração, discuta planejamento fiscal.</div></div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:16px"><div style="color:var(--gold-light);font-weight:700;font-size:13px;margin-bottom:8px">✍️ DOM</div><div style="color:rgba(245,240,232,0.6);font-size:12px;line-height:1.7">Escreva 1 e-mail profissional em inglês para um cliente hipotético. Use Grammarly. Envie para revisão de parceiro no Tandem.</div></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- MATERIAIS -->
+<div class="bg-cream" id="materiais">
+<section>
+  <div class="section-tag">Seção 04 · Arsenal de Estudo</div>
+  <h2>📄 Os melhores <em>materiais</em><br>gratuitos e pagos</h2>
+  <p class="lead">Não se perca no mar de cursos. Escolha uma linha de preparatório pago e complemente com os recursos gratuitos oficiais. Menos recursos, mais foco.</p>
+
+  <div class="materials-cols">
+    <div class="material-group">
+      <h3 style="color:var(--accent-green)">🆓 Gratuitos</h3>
+      <ul class="material-list">
+        <li class="free"><span class="mat-badge free">FREE</span><span class="mat-name">IRS.gov — Publication Library</span><span class="mat-desc">Pub 17 (Individuals), Pub 334 (Business), Pub 15 (Payroll). A fonte primária de tudo. Pesado, mas definitivo.</span></li>
+        <li class="free"><span class="mat-badge free">FREE</span><span class="mat-name">IRS Tax Practitioner Institute</span><span class="mat-desc">Webinars gratuitos do IRS para profissionais. Conteúdo atualizado a cada temporada fiscal.</span></li>
+        <li class="free"><span class="mat-badge free">FREE</span><span class="mat-name">r/taxpros — Reddit</span><span class="mat-desc">Comunidade ativa de profissionais tributários americanos. Casos reais, discussões, dicas de prova.</span></li>
+        <li class="free"><span class="mat-badge free">FREE</span><span class="mat-name">Tax Foundation — Explainers</span><span class="mat-desc">taxfoundation.org tem artigos didáticos em inglês claro sobre todos os aspectos do sistema tributário americano.</span></li>
+        <li class="free"><span class="mat-badge free">FREE</span><span class="mat-name">YouTube: EA Exam (Joshua Jenson)</span><span class="mat-desc">Canal dedicado ao SEE com explicações detalhadas de cada parte. Ideal para revisão visual dos conceitos.</span></li>
+        <li class="free"><span class="mat-badge free">FREE</span><span class="mat-name">Prometric Sample Questions</span><span class="mat-desc">O próprio site da Prometric disponibiliza amostras de questões do SEE para você entender o estilo da prova.</span></li>
+      </ul>
+    </div>
+    <div class="material-group">
+      <h3 style="color:var(--gold)">💳 Pagos (vale o investimento)</h3>
+      <ul class="material-list">
+        <li><span class="mat-badge paid">PAGO · ~$499</span><span class="mat-name">Gleim EA Review</span><span class="mat-desc">O preparatório mais completo do mercado. Banco com +3.000 questões, simulados adaptativos e vídeos por tópico. Nota 9.5/10.</span></li>
+        <li><span class="mat-badge paid">PAGO · ~$399</span><span class="mat-name">Fast Forward Academy (FFA)</span><span class="mat-desc">Interface moderna, analytics de desempenho, app mobile. Ótima taxa de aprovação. Muito indicado por EAs aprovados.</span></li>
+        <li><span class="mat-badge paid">PAGO · ~$249</span><span class="mat-name">Surgent EA Review</span><span class="mat-desc">Tecnologia de estudo adaptativo que foca nos seus pontos fracos. Promete aprovação em menos tempo de estudo.</span></li>
+        <li><span class="mat-badge paid">PAGO · ~$199</span><span class="mat-name">PassKey Learning Systems</span><span class="mat-desc">Livro texto completo em 3 volumes. Excelente para quem prefere leitura estruturada e grifar conteúdo.</span></li>
+        <li><span class="mat-badge paid">PAGO · ~$97</span><span class="mat-name">Udemy: EA Exam Prep Courses</span><span class="mat-desc">Opções mais baratas com boas avaliações. Busque cursos de Sebastian Bricio ou David Pineda — ambos EAs certificados.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- TAX OFFICE -->
+<div class="bg-white" id="taxoffice">
+<section>
+  <div class="section-tag">Seção 05 · Construindo o Negócio</div>
+  <h2>💼 Estrutura para abrir<br>seu <em>Tax Office</em></h2>
+  <p class="lead">Brasileiros nos EUA são um nicho perfeito: precisam declarar tanto no Brasil quanto nos EUA, muitas vezes têm rendas internacionais, empresas abertas, propriedades — e pouquíssimos profissionais bilíngues para os atender. Você não vai disputar mercado com ninguém.</p>
+
+  <div class="office-steps">
+    <div class="office-step"><div class="step-num">1</div><div class="step-body"><h4>✅ Obtenha o PTIN (Preparer Tax Identification Number)</h4><p>Antes mesmo de ser EA, todo preparador de impostos nos EUA precisa de um PTIN. Custa $19,75/ano e é obtido no IRS em menos de 24h online. Este é literalmente o passo zero — sem PTIN, você não assina nada. Faça isso logo que decidir seguir este caminho.</p></div></div>
+    <div class="office-step"><div class="step-num">2</div><div class="step-body"><h4>🏢 Estrutura Jurídica — LLC ou Sole Proprietor</h4><p>Para começar atendendo remotamente do Brasil ou como freelancer nos EUA, o Sole Proprietor é suficiente. Quando o volume crescer, abra uma LLC em um estado sem imposto de renda estadual (Wyoming, Nevada ou Delaware). Use Stripe Atlas, Northwest Registered Agent ou Doola para abrir de forma 100% online.</p></div></div>
+    <div class="office-step"><div class="step-num">3</div><div class="step-body"><h4>🎯 Nicho dentro do Nicho — Escolha seu Cliente Ideal</h4><p>Não tente atender todo mundo. Defina: trabalhadores com visto H-1B? Proprietários de pequenas empresas brasileiras? Investidores com renda nos dois países? Artistas e influenciadores? Profissionais de saúde que emigraram? Quanto mais específico o nicho, mais referências você gera e mais caro pode cobrar.</p></div></div>
+    <div class="office-step"><div class="step-num">4</div><div class="step-body"><h4>🛠️ Stack de Ferramentas Profissionais</h4><p>Tax software: Drake Tax (~$300/ano) ou TaxSlayer Pro. CRM: Taxdome (all-in-one para tax offices) ou HoneyBook. Pagamentos: Stripe ou Square. Videoconferência: Zoom com gravação. Armazenamento seguro: Canopy ou SmartVault. Assinatura digital: DocuSign. Conjunto mensal abaixo de $200.</p></div></div>
+    <div class="office-step"><div class="step-num">5</div><div class="step-body"><h4>📣 Aquisição de Clientes — Onde os Brasileiros Estão</h4><p>Facebook Groups de brasileiros em cada cidade americana (Miami, Orlando, NYC, Boston, Atlanta). Instagram com conteúdo educativo em português sobre impostos americanos. Parcerias com advogados de imigração, corretores de imóveis e contadores brasileiros. LinkedIn para profissionais e empresas. Indicação gera indicação — o primeiro cliente é o mais difícil.</p></div></div>
+    <div class="office-step"><div class="step-num">6</div><div class="step-body"><h4>💰 Precificação Estratégica</h4><p>Declaração básica (Form 1040 simples): $250–400. Declaração com renda de múltiplos estados: $400–700. Empresas (1120S, 1065): $800–2.000. Representação perante o IRS (aqui o EA brilha!): $150–300/hora. Planejamento tributário anual (retainer): $1.500–3.000/ano por cliente. Com 50 clientes de declaração + 10 em retainer você passa dos $80k.</p></div></div>
+    <div class="office-step"><div class="step-num">7</div><div class="step-body"><h4>📋 Compliance e Seguro Profissional</h4><p>Contrate E&O Insurance (Errors & Omissions) desde o início — custa ~$500–800/ano e protege você de erros humanos. Renove seu PTIN anualmente. Complete os 72 CPE credits exigidos pelo IRS a cada 3 anos para manter o EA ativo. Assine a newsletter NATP para se manter atualizado.</p></div></div>
+  </div>
+</section>
+</div>
+
+<!-- AUTOMAÇÃO -->
+<div class="bg-cream" id="automacao">
+<section>
+  <div class="section-tag">Seção 06 · Trabalhe Menos, Fature Mais</div>
+  <h2>🤖 Automação com<br><em>N8N + IA</em></h2>
+  <p class="lead">A maior vantagem competitiva de um tax office moderno não é ter mais funcionários — é ter agentes virtuais que trabalham 24/7 sem reclamar, sem errar pedidos repetitivos e sem precisar de férias. Veja o que dá para automatizar agora.</p>
+
+  <div class="auto-grid">
+    <div class="auto-card"><div class="auto-icon">📥</div><div class="auto-title">Intake de Novos Clientes</div><div class="auto-text">N8N conectado a um formulário (Typeform/Fillout) → cria pasta no Google Drive → envia e-mail de boas-vindas personalizado → agenda call no Calendly → notifica você no Slack. Tudo sem um clique seu.</div></div>
+    <div class="auto-card"><div class="auto-icon">📑</div><div class="auto-title">Organização de Documentos</div><div class="auto-text">Cliente envia W-2, 1099, recibos por WhatsApp ou e-mail → N8N classifica com GPT-4 Vision → nomeia os arquivos corretamente → coloca nas pastas certas do Taxdome. Zero organização manual.</div></div>
+    <div class="auto-card"><div class="auto-icon">💬</div><div class="auto-title">Chatbot Fiscal Bilíngue</div><div class="auto-text">Agente treinado nas FAQs do IRS e nas suas políticas de escritório. Responde perguntas comuns em português e inglês, 24/7. Integrado ao WhatsApp Business via N8N + Evolution API. Escalona para você só quando necessário.</div></div>
+    <div class="auto-card"><div class="auto-icon">⏰</div><div class="auto-title">Lembretes de Prazo</div><div class="auto-text">N8N monitora os deadlines fiscais (April 15, October 15, quarterly estimates) e dispara e-mails ou WhatsApp personalizados para cada cliente com o que falta entregar. Nunca mais cliente esquecendo de te mandar documento.</div></div>
+    <div class="auto-card"><div class="auto-icon">📊</div><div class="auto-title">Relatórios Automáticos</div><div class="auto-text">Toda segunda-feira de manhã, N8N compila quantos clientes ativos, quais declarações estão em progresso, pagamentos recebidos e pendentes, e te envia um resumo no Slack ou WhatsApp. Dashboard sem esforço.</div></div>
+    <div class="auto-card"><div class="auto-icon">🔄</div><div class="auto-title">Follow-up Automatizado</div><div class="auto-text">Cliente recebe a declaração e some? N8N dispara sequência de follow-up por e-mail em D+3, D+7 e D+14 perguntando se há dúvidas, pedindo assinatura e avaliação Google. Conversão de upsell para planejamento anual.</div></div>
+  </div>
+
+  <div style="background:white;border-radius:16px;padding:32px;margin-top:32px;border:1px solid rgba(0,0,0,0.07)">
+    <h3 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:20px">🔧 Stack Técnico Recomendado</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
+      <div style="text-align:center;padding:16px;background:var(--cream);border-radius:12px"><div style="font-size:24px;margin-bottom:8px">⚙️</div><div style="font-weight:700;font-size:13px;color:var(--navy)">N8N</div><div style="font-size:11px;color:var(--text-light)">Orquestrador de automações (self-hosted ou cloud)</div></div>
+      <div style="text-align:center;padding:16px;background:var(--cream);border-radius:12px"><div style="font-size:24px;margin-bottom:8px">🧠</div><div style="font-weight:700;font-size:13px;color:var(--navy)">OpenAI API</div><div style="font-size:11px;color:var(--text-light)">GPT-4o para classificação, redação e análise de docs</div></div>
+      <div style="text-align:center;padding:16px;background:var(--cream);border-radius:12px"><div style="font-size:24px;margin-bottom:8px">📱</div><div style="font-weight:700;font-size:13px;color:var(--navy)">Evolution API</div><div style="font-size:11px;color:var(--text-light)">WhatsApp Business integrado ao N8N</div></div>
+      <div style="text-align:center;padding:16px;background:var(--cream);border-radius:12px"><div style="font-size:24px;margin-bottom:8px">📁</div><div style="font-weight:700;font-size:13px;color:var(--navy)">Taxdome</div><div style="font-size:11px;color:var(--text-light)">CRM + portal do cliente + e-sign + billing</div></div>
+      <div style="text-align:center;padding:16px;background:var(--cream);border-radius:12px"><div style="font-size:24px;margin-bottom:8px">🗄️</div><div style="font-weight:700;font-size:13px;color:var(--navy)">Supabase</div><div style="font-size:11px;color:var(--text-light)">Banco de dados para apps e dashboards personalizados</div></div>
+      <div style="text-align:center;padding:16px;background:var(--cream);border-radius:12px"><div style="font-size:24px;margin-bottom:8px">📧</div><div style="font-weight:700;font-size:13px;color:var(--navy)">Resend</div><div style="font-size:11px;color:var(--text-light)">E-mails transacionais profissionais via API</div></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- APPS -->
+<div class="bg-white" id="apps">
+<section>
+  <div class="section-tag">Seção 07 · Tecnologia como Diferencial</div>
+  <h2>💻 Apps e sistemas<br>de <em>apoio ao cliente</em></h2>
+  <p class="lead">Seu tax office vai se diferenciar não só pelo conhecimento técnico — mas pela experiência que o cliente tem. Uma plataforma bonita, simples e em português cria lealdade que nenhum preço baixo quebra.</p>
+
+  <div class="apps-showcase">
+    <div class="app-showcase-card"><div class="emoji">📱</div><h4>Portal do Cliente</h4><p>Mini-app web onde o cliente acompanha o status da declaração em tempo real ("Documentos recebidos → Em análise → Pronto para assinatura → Enviado ao IRS"). Construído com Next.js ou Bubble.io. Login via e-mail + magic link. Interface em português.</p><div class="tech-stack"><span class="tech">Next.js</span><span class="tech">Supabase</span><span class="tech">Tailwind</span><span class="tech">Vercel</span></div></div>
+    <div class="app-showcase-card"><div class="emoji">🧮</div><h4>Calculadora de Impostos</h4><p>Ferramenta gratuita de aquisição de leads: o visitante entra no seu site, insere a renda e situação básica, e recebe uma estimativa do imposto. Ao final: "Quer uma análise completa? Agende uma consulta." Gera leads qualificados todos os dias.</p><div class="tech-stack"><span class="tech">React</span><span class="tech">Claude API</span><span class="tech">Vercel</span></div></div>
+    <div class="app-showcase-card"><div class="emoji">📋</div><h4>Checklist Inteligente</h4><p>Cliente responde 5 perguntas (casado? tem filhos? trabalha autônomo? tem investimentos?) e recebe uma lista personalizada exata dos documentos que precisa reunir. Enviada por e-mail com template de organização. Menos idas e vindas, mais eficiência.</p><div class="tech-stack"><span class="tech">Typeform</span><span class="tech">N8N</span><span class="tech">GPT-4o</span><span class="tech">Resend</span></div></div>
+    <div class="app-showcase-card"><div class="emoji">🤝</div><h4>Agente de Vendas (SDR Virtual)</h4><p>Chatbot no site treinado para responder dúvidas, qualificar o lead ("você tem empresa nos EUA?", "quantos anos mora lá?"), calcular o valor estimado do serviço e agendar a consulta automaticamente no Calendly. Trabalha quando você está dormindo.</p><div class="tech-stack"><span class="tech">Voiceflow</span><span class="tech">OpenAI</span><span class="tech">Calendly API</span><span class="tech">N8N</span></div></div>
+    <div class="app-showcase-card"><div class="emoji">📊</div><h4>Dashboard de Gestão</h4><p>Painel interno para você ver: receita do mês, clientes ativos, declarações pendentes por deadline, tarefas do dia. Integrado ao Taxdome via API. Exibido em tela no escritório ou acessado pelo celular. Clareza total, decisões rápidas.</p><div class="tech-stack"><span class="tech">Metabase</span><span class="tech">Supabase</span><span class="tech">Taxdome API</span></div></div>
+    <div class="app-showcase-card"><div class="emoji">🌎</div><h4>App Bilíngue FBAR & FATCA</h4><p>Ferramenta específica para brasileiros com contas nos EUA e no Brasil: guia passo-a-passo sobre obrigações de reporte, calcula thresholds, gera checklist de compliance. Um produto premium separado para clientes de alto patrimônio.</p><div class="tech-stack"><span class="tech">React Native</span><span class="tech">Claude API</span><span class="tech">Stripe</span></div></div>
+  </div>
+</section>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div style="max-width:800px;margin:0 auto">
+    <div class="section-tag" style="justify-content:center;color:var(--gold-light)">O próximo passo começa hoje</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,60px);color:var(--cream);margin-bottom:20px">Você já é o profissional.<br>Agora torne-se <em style="color:var(--gold-light)">certificado</em>.</h2>
+    <p style="color:rgba(245,240,232,0.65);font-size:18px;max-width:560px;margin:0 auto 40px;line-height:1.7">Em 12 meses, você pode ter o EA na carteira, o Tax Office aberto, os primeiros clientes pagando e uma operação automatizada rodando enquanto você dorme.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:60px">
+      <a href="https://www.irs.gov/tax-professionals/enrolled-agents" target="_blank" class="cta-btn" style="background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy)">🏛️ Saiba mais no IRS.gov</a>
+      <a href="https://www.prometric.com/test-takers/search/irs" target="_blank" class="cta-btn" style="background:transparent;border:1px solid rgba(201,146,42,0.5);color:var(--gold-light)">📝 Agendar prova SEE</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px">
+      <div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:24px;border:1px solid rgba(201,146,42,0.15)"><div style="font-size:28px;margin-bottom:8px">🗓️</div><div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:6px">Mês 1–6</div><div style="font-size:12px;color:rgba(245,240,232,0.5)">Inglês técnico + primeiros conteúdos do SEE</div></div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:24px;border:1px solid rgba(201,146,42,0.15)"><div style="font-size:28px;margin-bottom:8px">📚</div><div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:6px">Mês 7–9</div><div style="font-size:12px;color:rgba(245,240,232,0.5)">Plano intensivo de 60 dias + aprovação nas 3 partes</div></div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:24px;border:1px solid rgba(201,146,42,0.15)"><div style="font-size:28px;margin-bottom:8px">🚀</div><div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:6px">Mês 10–12</div><div style="font-size:12px;color:rgba(245,240,232,0.5)">Tax Office aberto, primeiros clientes, automações rodando</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Documento criado como guia informativo. Valores e taxas podem variar. Consulte sempre o site oficial do IRS em <strong>irs.gov</strong> para informações atualizadas. · <strong>Enrolled Agent Guide for Brazilian CPAs</strong> · 2025–2026
+</footer>
+
+</body>
+</html>

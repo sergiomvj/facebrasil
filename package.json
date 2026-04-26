@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^9.2.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.94.0",
     "@tailwindcss/typography": "^0.5.19",
@@ -33,6 +34,7 @@
     "recharts": "^2.15.4",
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
+    "stripe": "^22.0.1",
     "tailwind-merge": "^3.4.0",
     "twitter-api-v2": "^1.29.0"
   },

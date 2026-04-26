@@ -25,7 +25,7 @@ export default function AdvertiseLeadForm({ initialPackage = 'B' }: AdvertiseLea
         whatsapp: '',
         websiteUrl: '',
         industry: '',
-        monthlyBudget: '',
+        monthly_budget: '',
         notes: '',
     });
 
@@ -43,24 +43,39 @@ export default function AdvertiseLeadForm({ initialPackage = 'B' }: AdvertiseLea
                 locale,
             });
 
-            if (!response.success) {
+            if (!response.success || !response.id) {
                 setResult({ type: 'error', message: response.error || t('submit') });
                 return;
             }
 
-            setResult({ type: 'success', message: t('success') });
-            setFormData({
-                packageCode: formData.packageCode,
-                companyName: '',
-                contactName: '',
-                email: '',
-                phone: '',
-                whatsapp: '',
-                websiteUrl: '',
-                industry: '',
-                monthlyBudget: '',
-                notes: '',
-            });
+            // Redirecionar para o Checkout do Stripe
+            try {
+                const checkoutResponse = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        packageCode: formData.packageCode,
+                        leadId: response.id,
+                        email: formData.email,
+                    }),
+                });
+
+                const { url, error } = await checkoutResponse.json();
+
+                if (error) {
+                    setResult({ type: 'error', message: error });
+                    return;
+                }
+
+                if (url) {
+                    window.location.href = url;
+                }
+            } catch (err) {
+                console.error('Checkout error:', err);
+                setResult({ type: 'error', message: 'Erro ao iniciar pagamento. Tente novamente.' });
+            }
         });
     };
 
@@ -98,8 +113,13 @@ export default function AdvertiseLeadForm({ initialPackage = 'B' }: AdvertiseLea
                                             : 'border-gray-200 bg-white text-gray-900 hover:border-primary/30 dark:border-white/10 dark:bg-slate-950 dark:text-white'
                                     }`}
                                 >
-                                    <div className="text-xs font-black uppercase tracking-[0.2em]">{t(`package${pkg}`)}</div>
-                                    <div className={`mt-1 text-xs ${isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
+                                    <div className="flex justify-between items-start">
+                                        <div className="text-xs font-black uppercase tracking-[0.2em]">{t(`package${pkg}`)}</div>
+                                        <div className={`text-[10px] font-bold ${isSelected ? 'text-white/90' : 'text-primary'}`}>
+                                            {pkg === 'A' ? '$200' : pkg === 'B' ? '$500' : '$1000'}
+                                        </div>
+                                    </div>
+                                    <div className={`mt-1 text-[11px] leading-tight ${isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
                                         {t(`package${pkg}Desc`)}
                                     </div>
                                 </button>
@@ -179,8 +199,8 @@ export default function AdvertiseLeadForm({ initialPackage = 'B' }: AdvertiseLea
                 <label className="md:col-span-2">
                     <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('monthlyBudget')}</span>
                     <input
-                        value={formData.monthlyBudget}
-                        onChange={(e) => handleChange('monthlyBudget', e.target.value)}
+                        value={formData.monthly_budget}
+                        onChange={(e) => handleChange('monthly_budget', e.target.value)}
                         className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition-all focus:border-primary/40 dark:border-white/10 dark:bg-slate-950 dark:text-white"
                     />
                 </label>
