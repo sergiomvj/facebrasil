@@ -60,9 +60,3 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-// Configuração para permitir o corpo bruto (importante para o Stripe)
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
