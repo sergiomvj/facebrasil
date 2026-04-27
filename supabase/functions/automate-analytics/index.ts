@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     
     const { data: articles, error: artError } = await supabase
         .from('articles')
-        .select('id, title, published_at, views')
+        .select('id, title, published_at, views, disable_view_simulation')
         .gte('published_at', sevenDaysAgo)
         .eq('status', 'PUBLISHED');
 
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
           shouldIncrement = true;
         }
 
-        if (shouldIncrement) {
+        if (shouldIncrement && !article.disable_view_simulation) {
           const { error: updErr } = await supabase.rpc('increment_article_views', { p_article_id: article.id });
           if (updErr) {
             await supabase.from('articles').update({ views: (article.views || 0) + 1 }).eq('id', article.id);

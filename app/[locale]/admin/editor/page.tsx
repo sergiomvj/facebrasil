@@ -37,6 +37,7 @@ function EditorContent() {
     const [articleLanguage, setArticleLanguage] = useState('pt');
     const [translationGroupId, setTranslationGroupId] = useState('');
     const [colocarHero, setColocarHero] = useState(false);
+    const [disableViewSimulation, setDisableViewSimulation] = useState(false);
     
     // SEO Strategy State
     const [seoKeywords, setSeoKeywords] = useState<string[]>([]);
@@ -155,6 +156,7 @@ function EditorContent() {
                 setArticleLanguage(post.language || 'pt');
                 setTranslationGroupId(post.translation_group_id || '');
                 setColocarHero(post.colocar_hero || false);
+                setDisableViewSimulation(post.disable_view_simulation || false);
                 setSeoApplied(post.seo_applied || false);
 
                 // Parse featured_image if JSON string or object
@@ -234,6 +236,7 @@ function EditorContent() {
             language: articleLanguage,
             translation_group_id: translationGroupId || null,
             colocar_hero: colocarHero,
+            disable_view_simulation: disableViewSimulation,
             author_id: authorId || null,
             seo_applied: seoApplied,
             ai_context: seoKeywords.length > 0 ? { seoKeywords } : null
@@ -435,6 +438,25 @@ function EditorContent() {
                                         <div className={`absolute top-1 left-1 bg-white w-3 h-3 rounded-full transition-transform ${colocarHero ? 'translate-x-5' : ''}`}></div>
                                     </div>
                                     <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">Destaque como Hero Article</span>
+                                </label>
+                            </div>
+
+                            <div className="space-y-1 pt-3">
+                                <label className="flex items-center gap-3 cursor-pointer group">
+                                    <div className="relative">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only"
+                                            checked={disableViewSimulation}
+                                            onChange={(e) => setDisableViewSimulation(e.target.checked)}
+                                        />
+                                        <div className={`w-10 h-5 rounded-full transition-colors ${disableViewSimulation ? 'bg-amber-500' : 'bg-slate-800'}`}></div>
+                                        <div className={`absolute top-1 left-1 bg-white w-3 h-3 rounded-full transition-transform ${disableViewSimulation ? 'translate-x-5' : ''}`}></div>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">Desativar simulação de views</span>
+                                        <p className="text-[10px] text-slate-600 mt-0.5">Impede o script automático de incrementar as views deste artigo.</p>
+                                    </div>
                                 </label>
                             </div>
                         </div>
