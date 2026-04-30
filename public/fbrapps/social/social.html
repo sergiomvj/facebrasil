@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FBR-Social — Social Media Visual Agent — Conceito MVP v1.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --brand: #F97316;
+      --brand-dim: rgba(249, 115, 22, 0.18);
+      --brand-faint: rgba(249, 115, 22, 0.06);
+      --accent: #EC4899;
+      --accent-dim: rgba(236, 72, 153, 0.18);
+      --accent-faint: rgba(236, 72, 153, 0.05);
+      --dark: #080E1A;
+      --dark-2: #0D1626;
+      --dark-3: #152035;
+      --dark-4: #1E2E48;
+      --dark-5: #263A5A;
+      --slate: #7A90B4;
+      --slate-light: #A8BDD8;
+      --white: #EEF4FF;
+      --green: #22C55E;
+      --red: #EF4444;
+      --amber: #F59E0B;
+      --teal: #14B8A6;
+      --violet: #8B5CF6;
+      --grid-line: rgba(100, 130, 180, 0.055);
+      --gutter: 2rem;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+
+    .glow-a {
+      position: fixed;
+      top: -25vh;
+      left: -15vw;
+      width: 80vw;
+      height: 80vh;
+      background: radial-gradient(ellipse, rgba(249, 115, 22, 0.07) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-b {
+      position: fixed;
+      bottom: -25vh;
+      right: -15vw;
+      width: 80vw;
+      height: 80vh;
+      background: radial-gradient(ellipse, var(--accent-faint) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      background: rgba(8, 14, 26, 0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--grid-line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.05rem;
+      letter-spacing: -.04em;
+      color: var(--white);
+    }
+
+    .nav-logo span {
+      color: var(--brand);
+    }
+
+    .nav-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .55rem;
+      font-weight: 500;
+      letter-spacing: .12em;
+      color: var(--accent);
+      background: var(--accent-faint);
+      border: 1px solid var(--accent-dim);
+      padding: .15rem .55rem;
+      border-radius: 99px;
+      margin-left: .6rem;
+      vertical-align: middle;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: .72rem;
+      color: var(--slate);
+      text-decoration: none;
+      transition: color .2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .nav-links a:hover {
+      color: var(--white);
+    }
+
+    @media(max-width:680px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    header,
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 9rem 0 7rem;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .hero {
+      min-height: 100vh;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--brand);
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: var(--brand-faint);
+      padding: .38rem 1rem;
+      border-radius: 99px;
+      margin-bottom: 2.8rem;
+      animation: fadeUp .7s ease both;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand);
+      box-shadow: 0 0 8px var(--brand);
+      animation: pulsate 2.2s infinite;
+    }
+
+    @keyframes pulsate {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .2
+      }
+    }
+
+    .hero-title,
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: clamp(3.2rem, 9vw, 7rem);
+      line-height: .96;
+      letter-spacing: -.04em;
+      color: var(--white);
+      animation: fadeUp .8s .1s ease both;
+    }
+
+    h1 em,
+    .hero-title .accent {
+      color: var(--brand);
+      font-style: normal;
+    }
+
+    .hero-title .muted {
+      color: var(--slate);
+    }
+
+    .hero-title .skyline {
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      margin-top: 2.2rem;
+      font-size: 1.05rem;
+      color: var(--slate-light);
+      max-width: 620px;
+      font-weight: 300;
+      line-height: 1.9;
+      animation: fadeUp .8s .2s ease both;
+    }
+
+    .hero-sub strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--slate-light);
+      max-width: 620px;
+      font-weight: 300;
+      line-height: 1.9;
+      margin-top: 1.5rem;
+    }
+
+    .hero-pills {
+      margin-top: 3rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .9rem;
+      animation: fadeUp .8s .3s ease both;
+    }
+
+    .hpill {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: var(--slate);
+      padding: .42rem 1rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.018);
+    }
+
+    .hpill .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .d-g {
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    .d-o {
+      background: var(--brand);
+      box-shadow: 0 0 6px var(--brand);
+    }
+
+    .d-b {
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    .d-a {
+      background: var(--amber);
+      box-shadow: 0 0 6px var(--amber);
+    }
+
+    .d-v {
+      background: var(--violet);
+      box-shadow: 0 0 6px var(--violet);
+    }
+
+    .d-t {
+      background: var(--teal);
+      box-shadow: 0 0 6px var(--teal);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* header-meta old style adapters */
+    .header-meta {
+      margin-top: 3rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      animation: fadeUp .8s .3s ease both;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--slate);
+    }
+
+    .meta-item strong,
+    .meta-label {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--slate);
+      opacity: .55;
+      font-weight: 400;
+      margin-bottom: .1rem;
+    }
+
+    .meta-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .64rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--brand);
+      border: 1px solid rgba(249, 115, 22, 0.22);
+      background: var(--brand-faint);
+      padding: .32rem .9rem;
+      border-radius: 99px;
+      margin-bottom: 2.5rem;
+    }
+
+    section {
+      padding: 6.5rem 0;
+      border-bottom: 1px solid var(--grid-line);
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .vision-block {
+      padding: 6.5rem 0;
+      border-bottom: 1px solid var(--grid-line);
+      position: relative;
+      z-index: 1;
+      background: var(--dark-2);
+    }
+
+    .vision-block h2 {
+      color: var(--white);
+    }
+
+    .vision-quote {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--slate-light);
+      border-left: 3px solid var(--brand);
+      padding-left: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .container,
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 var(--gutter) 8rem;
+    }
+
+    .stag,
+    .section-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .63rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 1rem;
+    }
+
+    .stitle,
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      color: var(--white);
+      margin-bottom: 1.1rem;
+    }
+
+    h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--white);
+      margin: 2rem 0 .8rem;
+    }
+
+    h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 1.5rem 0 .6rem;
+    }
+
+    .slead,
+    p {
+      font-size: .97rem;
+      color: var(--slate-light);
+      max-width: 700px;
+      font-weight: 300;
+      margin-bottom: 1rem;
+      line-height: 1.85;
+    }
+
+    p strong,
+    .slead strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4rem;
+      margin-top: 2rem;
+    }
+
+    @media(max-width:660px) {
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .icard {
+      padding: 2rem 2.2rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.018);
+      transition: all .28s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .icard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--brand), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .icard:hover {
+      border-color: rgba(249, 115, 22, 0.22);
+      background: var(--brand-faint);
+      transform: translateY(-2px);
+    }
+
+    .icard:hover::before {
+      opacity: 1;
+    }
+
+    .icard.span2 {
+      grid-column: span 2;
+      border-color: var(--accent-dim);
+      background: var(--accent-faint);
+    }
+
+    .icard.span2::before {
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 1;
+    }
+
+    @media(max-width:660px) {
+      .icard.span2 {
+        grid-column: span 1;
+      }
+    }
+
+    .icard-icon {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 1.1rem;
+    }
+
+    .icard-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.02rem;
+      color: var(--white);
+      margin-bottom: .55rem;
+    }
+
+    .icard-body {
+      font-size: .83rem;
+      color: var(--slate);
+      line-height: 1.75;
+    }
+
+    .icard-body em {
+      color: var(--slate-light);
+      font-style: normal;
+    }
+
+    .icard-body strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .pillar-row {
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+      margin-top: 2rem;
+    }
+
+    .pillar {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 1.4rem;
+      align-items: flex-start;
+      padding: 1.4rem 1.8rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.015);
+      transition: all .25s;
+    }
+
+    .pillar:hover {
+      border-color: var(--accent-dim);
+      background: var(--accent-faint);
+    }
+
+    .pillar-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-faint);
+      border: 1px solid var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .pillar-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: .98rem;
+      color: var(--white);
+      margin-bottom: .4rem;
+    }
+
+    .pillar-desc {
+      font-size: .82rem;
+      color: var(--slate);
+      line-height: 1.7;
+    }
+
+    .pillar-desc strong {
+      color: var(--slate-light);
+      font-weight: 500;
+    }
+
+    .grid-2,
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    .grid-card,
+    .fcard {
+      padding: 1.7rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.018);
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grid-card::after,
+    .fcard::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .grid-card:hover,
+    .fcard:hover {
+      border-color: var(--accent-dim);
+      background: var(--accent-faint);
+      transform: translateY(-2px);
+    }
+
+    .grid-card:hover::after,
+    .fcard:hover::after {
+      opacity: 1;
+    }
+
+    .ficon,
+    .grid-card .icon {
+      font-size: 1.55rem;
+      display: block;
+      margin-bottom: .95rem;
+    }
+
+    .fname {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: .96rem;
+      color: var(--white);
+      margin-bottom: .32rem;
+    }
+
+    .ftag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: .6rem;
+    }
+
+    .fdesc {
+      font-size: .79rem;
+      color: var(--slate);
+      line-height: 1.55;
+    }
+
+    .fbadge {
+      margin-top: .85rem;
+      padding-top: .85rem;
+      border-top: 1px solid var(--accent-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .64rem;
+      color: var(--slate);
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+
+    .fpill {
+      background: var(--accent-faint);
+      border: 1px solid var(--accent-dim);
+      padding: .1rem .45rem;
+      border-radius: 4px;
+      color: var(--slate-light);
+    }
+
+    .ag-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem;
+      margin-top: 2rem;
+    }
+
+    @media(max-width:720px) {
+      .ag-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media(max-width:460px) {
+      .ag-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .agcard {
+      padding: 1.5rem;
+      border: 1px solid var(--accent-dim);
+      border-radius: 14px;
+      background: var(--accent-faint);
+      position: relative;
+      overflow: hidden;
+      transition: all .25s;
+    }
+
+    .agcard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .agcard:hover {
+      background: var(--accent-dim);
+      transform: translateY(-3px);
+    }
+
+    .agcard:hover::before {
+      opacity: 1;
+    }
+
+    .agem {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: .75rem;
+    }
+
+    .agname {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--white);
+      margin-bottom: .22rem;
+    }
+
+    .agspace {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: .6rem;
+    }
+
+    .agdesc {
+      font-size: .78rem;
+      color: var(--slate);
+      line-height: 1.55;
+    }
+
+    .aghb {
+      margin-top: .85rem;
+      padding-top: .85rem;
+      border-top: 1px solid var(--accent-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .64rem;
+      color: var(--slate);
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .aghb::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 5px var(--green);
+      flex-shrink: 0;
+    }
+
+    .flow,
+    .flow-list {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+      margin-top: 2rem;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.3rem;
+      padding: 1.3rem 1.7rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.015);
+      transition: all .25s;
+    }
+
+    .flow-step:hover {
+      border-color: var(--accent-dim);
+      background: var(--accent-faint);
+    }
+
+    .fstep-num,
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent-faint);
+      border: 1px solid var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: .08rem;
+    }
+
+    .fstep-content .ft,
+    .step-content h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: .91rem;
+      color: var(--white);
+      margin-bottom: .22rem;
+      margin-top: 0;
+    }
+
+    .fstep-content .fd,
+    .step-content p {
+      font-size: .8rem;
+      color: var(--slate);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .kpi-grid,
+    .metrics-strip,
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .kpi-card,
+    .metric-cell {
+      padding: 1.6rem 1.4rem;
+      text-align: center;
+      border: 1px solid var(--dark-4);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.018);
+      transition: border-color .25s;
+    }
+
+    .kpi-card:hover,
+    .metric-cell:hover {
+      border-color: var(--accent-dim);
+    }
+
+    .kpi-val,
+    .metric-value,
+    .metric-val {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 2.4rem;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: .45rem;
+    }
+
+    .kpi-lab,
+    .metric-label {
+      font-size: .74rem;
+      color: var(--slate);
+      line-height: 1.45;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .funnel {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+      margin-top: 2rem;
+    }
+
+    .funnel-stage {
+      display: grid;
+      grid-template-columns: 32px 1fr 2fr 120px;
+      gap: 1rem;
+      align-items: center;
+      padding: 1.1rem 1.5rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.015);
+      transition: all .25s;
+    }
+
+    .funnel-stage:hover {
+      border-color: var(--accent-dim);
+      background: var(--accent-faint);
+    }
+
+    .funnel-stage-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--accent);
+    }
+
+    .funnel-stage-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--white);
+    }
+
+    .funnel-stage-desc {
+      font-size: .8rem;
+      color: var(--slate);
+      line-height: 1.55;
+    }
+
+    .funnel-stage-agent {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .62rem;
+      color: var(--accent);
+      text-align: right;
+    }
+
+    @media(max-width:700px) {
+      .funnel-stage {
+        grid-template-columns: 32px 1fr;
+      }
+
+      .funnel-stage-desc,
+      .funnel-stage-agent {
+        display: none;
+      }
+    }
+
+    .scope-grid,
+    .networks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .scope-cell,
+    .network-card {
+      background: rgba(255, 255, 255, 0.018);
+      border: 1px solid var(--dark-4);
+      border-radius: 12px;
+      padding: 1.4rem;
+      transition: border-color .25s;
+    }
+
+    .scope-cell:hover,
+    .network-card:hover {
+      border-color: var(--accent-dim);
+    }
+
+    .scope-cell h4,
+    .network-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .64rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .75rem;
+      font-weight: 500;
+    }
+
+    .scope-cell ul,
+    .team-agents {
+      list-style: none;
+      padding: 0;
+    }
+
+    .scope-cell ul li {
+      font-size: .8rem;
+      color: var(--slate);
+      padding: .35rem 0;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .scope-cell ul li::before,
+    .team-agents li::before {
+      content: '→ ';
+      color: var(--accent);
+    }
+
+    .scope-cell ul li:last-child {
+      border-bottom: none;
+    }
+
+    .phases {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .phase {
+      border: 1px solid var(--dark-4);
+      border-radius: 12px;
+      padding: 1.6rem;
+      background: rgba(255, 255, 255, 0.018);
+      position: relative;
+      transition: border-color .25s;
+    }
+
+    .phase:hover {
+      border-color: var(--accent-dim);
+    }
+
+    .phase-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: .5rem;
+    }
+
+    .phase h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 1rem;
+    }
+
+    .phase ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .phase ul li {
+      font-size: .8rem;
+      color: var(--slate);
+      padding: .35rem 0;
+      border-bottom: 1px solid var(--grid-line);
+      line-height: 1.5;
+    }
+
+    .phase ul li:last-child {
+      border-bottom: none;
+    }
+
+    .phase-badge {
+      position: absolute;
+      top: 1.1rem;
+      right: 1.1rem;
+      background: var(--accent);
+      color: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .52rem;
+      letter-spacing: .08em;
+      padding: .2rem .55rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .stack-table,
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      font-size: .82rem;
+    }
+
+    .stack-table th,
+    table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--slate);
+      text-align: left;
+      padding: .8rem 1rem;
+      border-bottom: 1px solid var(--dark-4);
+    }
+
+    .stack-table td,
+    table td {
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--grid-line);
+      color: var(--slate-light);
+      vertical-align: top;
+    }
+
+    .stack-table tr:hover td,
+    table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .stack-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--accent);
+    }
+
+    .stack-table td:nth-child(2) {
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    .compare-table th {
+      background: var(--dark-2);
+    }
+
+    pre,
+    .code-block {
+      background: var(--dark-2);
+      color: #A8BDD8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      line-height: 1.8;
+      padding: 1.8rem 2rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      border: 1px solid var(--dark-4);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: .1rem .35rem;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .highlight-box,
+    .callout {
+      border-left: 3px solid var(--brand);
+      padding: 1.2rem 1.8rem;
+      margin: 2rem 0;
+      background: var(--brand-faint);
+      border-radius: 0 10px 10px 0;
+    }
+
+    .highlight-box p,
+    .callout p {
+      font-size: .88rem;
+      color: var(--slate-light);
+      line-height: 1.8;
+      font-weight: 300;
+      margin: 0;
+    }
+
+    .highlight-box strong,
+    .callout strong {
+      color: var(--white);
+      font-weight: 600;
+      display: block;
+      margin-bottom: .4rem;
+    }
+
+    .callout-blue,
+    .highlight-box.blue {
+      border-left-color: var(--accent);
+      background: var(--accent-faint);
+    }
+
+    .callout-green,
+    .highlight-box.green {
+      border-left-color: var(--green);
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.4rem;
+      margin: 2rem 0;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.018);
+      border: 1px solid var(--dark-4);
+      border-radius: 14px;
+      padding: 1.7rem;
+      position: relative;
+      overflow: hidden;
+      transition: all .25s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .card.pink::before {
+      background: var(--red);
+    }
+
+    .card.green::before {
+      background: var(--green);
+    }
+
+    .card.multi::before {
+      background: linear-gradient(90deg, var(--brand), var(--accent), var(--teal));
+    }
+
+    .card:hover {
+      border-color: var(--accent-dim);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: .95rem;
+    }
+
+    .card h3 {
+      margin: 0 0 .6rem;
+      color: var(--white);
+    }
+
+    .card p {
+      font-size: .8rem;
+      color: var(--slate);
+      line-height: 1.6;
+      margin: 0;
+      max-width: none;
+    }
+
+    .network-formats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin: .5rem 0;
+    }
+
+    .format-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .06em;
+      padding: .22rem .65rem;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--slate-light);
+      border: 1px solid var(--dark-4);
+      border-radius: 5px;
+    }
+
+    .network-dims {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .62rem;
+      color: var(--slate);
+      opacity: .55;
+    }
+
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+      margin-top: 2rem;
+    }
+
+    .pipeline-step {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 1rem;
+      min-height: 70px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .pipeline-agent {
+      background: var(--dark-2);
+      color: var(--white);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--dark-4);
+      border-radius: 12px 0 0 12px;
+    }
+
+    .pipeline-agent::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--brand);
+    }
+
+    .pipeline-agent.blue::before {
+      background: var(--accent);
+    }
+
+    .pipeline-agent.green::before {
+      background: var(--green);
+    }
+
+    .pipeline-agent.orange::before {
+      background: var(--amber);
+    }
+
+    .pipeline-agent .agent-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      color: var(--slate);
+      margin-bottom: .3rem;
+      letter-spacing: .1em;
+    }
+
+    .pipeline-agent .agent-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .pipeline-body {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid var(--dark-4);
+      border-left: none;
+      border-radius: 0 12px 12px 0;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .pipeline-body .task-line {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--slate);
+      padding: .2rem 0;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .task-line::before {
+      content: '→';
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    @media(max-width:600px) {
+      .pipeline-step {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline-agent {
+        border-radius: 12px 12px 0 0;
+      }
+
+      .pipeline-body {
+        border-left: 1px solid var(--dark-4);
+        border-radius: 0 0 12px 12px;
+      }
+    }
+
+    .platform-card {
+      padding: 1.4rem;
+      border: 1px solid var(--dark-4);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.018);
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s;
+    }
+
+    .platform-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .platform-card.youtube-short::before {
+      background: #FF0000;
+    }
+
+    .platform-card.youtube-video::before {
+      background: #CC0000;
+    }
+
+    .platform-card.instagram::before {
+      background: #E1306C;
+    }
+
+    .platform-card.tiktok::before {
+      background: #69C9D0;
+    }
+
+    .platform-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .6rem;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+      margin-bottom: .6rem;
+      color: var(--accent);
+    }
+
+    .platform-card.youtube-short .platform-label {
+      color: #FF0000;
+    }
+
+    .platform-card.youtube-video .platform-label {
+      color: #CC0000;
+    }
+
+    .platform-card.instagram .platform-label {
+      color: #E1306C;
+    }
+
+    .platform-card.tiktok .platform-label {
+      color: #69C9D0;
+    }
+
+    .platform-card h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: .7rem;
+      color: var(--white);
+    }
+
+    .platform-specs {
+      list-style: none;
+      padding: 0;
+    }
+
+    .platform-specs li {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: var(--slate);
+      padding: .3rem 0;
+      border-bottom: 1px solid var(--grid-line);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .platform-specs li:last-child {
+      border-bottom: none;
+    }
+
+    .platform-specs li span {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .team-card {
+      background: rgba(255, 255, 255, 0.018);
+      border: 1px solid var(--dark-4);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color .25s;
+    }
+
+    .team-card:hover {
+      border-color: var(--accent-dim);
+    }
+
+    .team-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .3rem;
+    }
+
+    .team-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      margin: 0 0 .4rem;
+      color: var(--white);
+    }
+
+    .team-card .team-mission {
+      font-size: .8rem;
+      color: var(--slate);
+      font-style: italic;
+      margin-bottom: .9rem;
+      line-height: 1.5;
+    }
+
+    .team-agents li {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: var(--slate);
+      padding: .28rem 0;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .team-agents li:last-child {
+      border-bottom: none;
+    }
+
+    .warming-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: .8rem;
+    }
+
+    .warming-table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--slate);
+      text-align: left;
+      padding: .7rem 1rem;
+      border-bottom: 1px solid var(--dark-4);
+    }
+
+    .warming-table td {
+      padding: .7rem 1rem;
+      border-bottom: 1px solid var(--grid-line);
+      color: var(--slate-light);
+      vertical-align: top;
+    }
+
+    .warming-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: var(--accent);
+    }
+
+    .warming-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .arch-diagram {
+      background: var(--dark-2);
+      padding: 1.8rem 2rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      border: 1px solid var(--dark-4);
+      border-radius: 12px;
+    }
+
+    .arch-diagram pre {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .agent-box {
+      background: var(--dark-2);
+      color: var(--slate-light);
+      padding: 1.8rem;
+      margin: 1.5rem 0;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      line-height: 1.7;
+      border: 1px solid var(--dark-4);
+    }
+
+    .agent-box.pink {
+      border-left-color: var(--red);
+    }
+
+    .agent-box.green {
+      border-left-color: var(--green);
+    }
+
+    .agent-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+
+    .agent-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: .5rem;
+    }
+
+    .agent-key {
+      color: var(--accent);
+      min-width: 110px;
+    }
+
+    .agent-val {
+      color: var(--slate-light);
+    }
+
+    .check-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 1.5rem;
+    }
+
+    .check-list li {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--slate);
+      padding: .55rem 0;
+      border-bottom: 1px solid var(--grid-line);
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      line-height: 1.5;
+    }
+
+    .check-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-size: .75rem;
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+
+    .check-list li:last-child {
+      border-bottom: none;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--grid-line);
+    }
+
+    .section-number {
+      border: 1px solid var(--accent);
+      padding: .2rem .6rem;
+      border-radius: 5px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin: 2.5rem 0 2rem;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--grid-line);
+    }
+
+    .divider-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--slate);
+      opacity: .5;
+      white-space: nowrap;
+    }
+
+    footer {
+      padding: 4rem 0 5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ft-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 2rem;
+      border-top: 1px solid var(--grid-line);
+    }
+
+    @media(max-width:600px) {
+      .ft-inner {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: flex-start;
+      }
+    }
+
+    .ft-brand,
+    .footer-brand {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: -.04em;
+      color: var(--white);
+    }
+
+    .ft-brand span,
+    .footer-brand span {
+      color: var(--brand);
+    }
+
+    .ft-meta,
+    .footer-note {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .66rem;
+      color: var(--slate);
+      text-align: right;
+      line-height: 1.9;
+    }
+
+    @media(max-width:640px) {
+
+      .hero,
+      header {
+        padding-left: 1.2rem;
+        padding-right: 1.2rem;
+      }
+
+      section {
+        padding: 4rem 1.2rem;
+      }
+
+      footer {
+        padding: 2.5rem 1.2rem 4rem;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .grid-bg,
+      .glow-a,
+      .glow-b {
+        display: none;
+      }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow-a"></div>
+  <div class="glow-b"></div>
+
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">FBR<span>·</span>SOCIAL <span class="nav-badge">v1.0</span></div>
+    <ul class="nav-links">
+      <a href="#conceito">// conceito</a>
+      <a href="#redes">// redes</a>
+      <a href="#pipeline">// pipeline</a>
+      <a href="#agentes">// agentes</a>
+      <a href="#arquitetura">// arquitetura</a>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="wrapper">
+    <div class="hero">
+      <div class="hero-eyebrow">
+        <div class="pulse-dot"></div>
+        FBR-Social · Visual Engagement Agent
+      </div>
+
+      <h1 class="hero-title">
+        FBR<span class="accent">·</span>Social<br>
+        <span class="muted">Visual</span><br>
+        <span class="skyline">Intelligence</span>
+      </h1>
+
+      <p class="hero-sub">
+        Social Media Visual Agent · Automação de Artes para Redes Sociais. Transforma briefings em artes prontas
+        consumindo assets do <strong>FBR-Design</strong> e entregando materiais formatados no
+        <strong>FBR-Click</strong>.
+      </p>
+
+      <div class="hero-pills">
+        <div class="hpill">
+          <div class="dot d-v"></div>Visual Agent
+        </div>
+        <div class="hpill">
+          <div class="dot d-o"></div>FBR-Design Sync
+        </div>
+        <div class="hpill">
+          <div class="dot d-g"></div>Multi-Redes
+        </div>
+        <div class="hpill">
+          <div class="dot d-b"></div>Artes IA
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- CONCEITO -->
+    <section id="conceito">
+      <div class="section-label">
+        <span class="section-number">01</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>O que é o FBR-Social</h2>
+
+      <p>
+        O FBR-Social é o sistema de automação de artes visuais para redes sociais do Facebrasil Group.
+        Enquanto o FBR-Design cobre a produção gráfica geral — cartões, banners, flyers, apresentações —
+        o FBR-Social é especializado exclusivamente em <strong>formatos de redes sociais</strong>:
+        Feed, Stories, Reels, Covers, Thumbnails, Carrosséis e demais formatos de cada plataforma.
+      </p>
+
+      <p>
+        Cada produto do Facebrasil Group possui identidade visual própria e presença em múltiplas
+        redes sociais. O FBR-Social centraliza a produção desses materiais, garantindo consistência
+        de marca, velocidade de entrega e qualidade profissional — sem depender de ferramentas
+        externas de design ou de designers manuais para cada peça.
+      </p>
+
+      <div class="callout callout-blue">
+        <strong>Princípio fundamental:</strong> O FBR-Social não inventa — ele executa. Os assets base
+        (logos, fontes, paletas de cores) vêm do FBR-Design via brand kit. O FBR-Social aplica esses
+        assets com maestria nos formatos e dimensões corretos de cada rede social.
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <span class="card-icon">🎯</span>
+          <h3>Foco Total em Social</h3>
+          <p>Especializado em formatos de redes sociais. Conhece as especificações exatas de cada plataforma e formato —
+            dimensões, safe zones, limites de texto, aspect ratios.</p>
+        </div>
+        <div class="card pink">
+          <span class="card-icon">🔗</span>
+          <h3>Integrado ao FBR-Design</h3>
+          <p>Consome brand kits do FBR-Design via API. Logos, fontes e paletas são fornecidos pelo sistema irmão — sem
+            duplicação de dados, sem inconsistências de marca.</p>
+        </div>
+        <div class="card green">
+          <span class="card-icon">🏢</span>
+          <h3>Multi-Produto FBR</h3>
+          <p>Atende todos os produtos do Facebrasil Group. Cada produto tem seu perfil de brand kit, redes ativas e
+            templates específicos. Um sistema, múltiplas marcas.</p>
+        </div>
+        <div class="card multi">
+          <span class="card-icon">⚡</span>
+          <h3>Variantes Automáticas</h3>
+          <p>A partir de um único briefing, gera automaticamente todas as variantes de formato para todas as redes
+            ativas do produto — Feed, Stories, LinkedIn, TikTok e mais.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIFERENÇA -->
+    <section id="diferenca">
+      <div class="section-label">
+        <span class="section-number">02</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>FBR-Design vs FBR-Social</h2>
+
+      <p>
+        Os dois sistemas são complementares, não concorrentes. Compartilham a mesma filosofia
+        técnica e arquitetural, mas servem propósitos distintos.
+      </p>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Dimensão</th>
+            <th>FBR-Design</th>
+            <th>FBR-Social</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Propósito</td>
+            <td>Materiais gráficos gerais — cartões, banners, flyers, apresentações, panfletos</td>
+            <td>Artes para redes sociais — Feed, Stories, Reels, Covers, Carrosséis, Thumbs</td>
+          </tr>
+          <tr>
+            <td>Destinatário</td>
+            <td>Clientes externos da FBR (empresas, marcas)</td>
+            <td>Produtos internos do Facebrasil Group</td>
+          </tr>
+          <tr>
+            <td>Brand Kits</td>
+            <td>Cria e gerencia brand kits dos clientes</td>
+            <td>Consome brand kits do FBR-Design via API</td>
+          </tr>
+          <tr>
+            <td>Templates</td>
+            <td>Cartão de visitas, flyer, banner, apresentação, letterhead…</td>
+            <td>Feed quadrado, Stories vertical, LinkedIn horizontal, TikTok, YouTube Thumb…</td>
+          </tr>
+          <tr>
+            <td>Formatos de saída</td>
+            <td>PNG, JPG, PDF — tamanhos customizados por categoria</td>
+            <td>PNG, JPG — dimensões fixas por rede social e formato</td>
+          </tr>
+          <tr>
+            <td>Canal FBR-Click</td>
+            <td>#fbr-design</td>
+            <td>#fbr-social</td>
+          </tr>
+          <tr>
+            <td>Aprovação</td>
+            <td>Supervisor do cliente</td>
+            <td>Responsável do produto FBR</td>
+          </tr>
+          <tr>
+            <td>Relação</td>
+            <td>Sistema irmão — fornece assets base</td>
+            <td>Sistema irmão — consome assets base</td>
+          </tr>
+          <tr>
+            <td>VPS</td>
+            <td>VPS dedicada FBR-Design</td>
+            <td>VPS dedicada FBR-Social (isolamento total)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box">
+        <h3>A relação entre os sistemas</h3>
+        <p>
+          FBR-Design é a fonte de verdade das identidades visuais. FBR-Social é o executor especializado
+          em social media. Quando um brand kit é atualizado no FBR-Design, o FBR-Social reflete
+          automaticamente essa atualização em todos os jobs subsequentes. Os sistemas se comunicam via
+          REST API autenticada — nunca compartilham banco de dados.
+        </p>
+      </div>
+    </section>
+
+    <!-- REDES & FORMATOS -->
+    <section id="redes">
+      <div class="section-label">
+        <span class="section-number">03</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>Redes Sociais & Formatos</h2>
+
+      <p>
+        O FBR-Social conhece as especificações exatas de cada rede social e formato.
+        A partir de um único briefing, o sistema determina quais variantes gerar
+        com base nas redes ativas do produto FBR solicitado.
+      </p>
+
+      <div class="networks-grid">
+        <div class="network-card">
+          <div class="network-name">📸 Instagram</div>
+          <div class="network-formats">
+            <span class="format-badge">Feed 1:1</span>
+            <span class="format-badge">Feed 4:5</span>
+            <span class="format-badge">Stories</span>
+            <span class="format-badge">Reels Cover</span>
+            <span class="format-badge">Carrossel</span>
+          </div>
+          <div class="network-dims">1080×1080 · 1080×1350 · 1080×1920</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">📘 Facebook</div>
+          <div class="network-formats">
+            <span class="format-badge">Feed</span>
+            <span class="format-badge">Stories</span>
+            <span class="format-badge">Cover</span>
+            <span class="format-badge">Event Cover</span>
+            <span class="format-badge">Ad</span>
+          </div>
+          <div class="network-dims">1200×630 · 820×312 · 1080×1920</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">💼 LinkedIn</div>
+          <div class="network-formats">
+            <span class="format-badge">Post</span>
+            <span class="format-badge">Cover</span>
+            <span class="format-badge">Company Banner</span>
+            <span class="format-badge">Documento</span>
+          </div>
+          <div class="network-dims">1200×627 · 1584×396 · 1080×1350</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">🎵 TikTok</div>
+          <div class="network-formats">
+            <span class="format-badge">Thumb</span>
+            <span class="format-badge">In-Feed</span>
+            <span class="format-badge">TopView</span>
+          </div>
+          <div class="network-dims">1080×1920 · 9:16 vertical</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">🐦 Twitter / X</div>
+          <div class="network-formats">
+            <span class="format-badge">Post</span>
+            <span class="format-badge">Header</span>
+            <span class="format-badge">Card</span>
+          </div>
+          <div class="network-dims">1600×900 · 1500×500 · 800×418</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">▶️ YouTube</div>
+          <div class="network-formats">
+            <span class="format-badge">Thumbnail</span>
+            <span class="format-badge">Banner</span>
+            <span class="format-badge">Shorts Thumb</span>
+            <span class="format-badge">End Screen</span>
+          </div>
+          <div class="network-dims">1280×720 · 2560×1440 · 1080×1920</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">📌 Pinterest</div>
+          <div class="network-formats">
+            <span class="format-badge">Pin 2:3</span>
+            <span class="format-badge">Pin Quadrado</span>
+            <span class="format-badge">Story Pin</span>
+            <span class="format-badge">Infográfico</span>
+          </div>
+          <div class="network-dims">1000×1500 · 1000×1000 · 1080×1920</div>
+        </div>
+        <div class="network-card">
+          <div class="network-name">💬 WhatsApp</div>
+          <div class="network-formats">
+            <span class="format-badge">Status</span>
+            <span class="format-badge">Thumb Link</span>
+            <span class="format-badge">Sticker</span>
+          </div>
+          <div class="network-dims">1080×1920 · 800×418 · 512×512</div>
+        </div>
+      </div>
+
+      <div class="callout callout-green">
+        <strong>Variantes automáticas:</strong> Cada job pode gerar múltiplas variantes de uma vez.
+        O agente determina automaticamente quais formatos gerar com base nas redes ativas do produto FBR
+        e nas dimensões configuradas no template. Um briefing → N artes prontas.
+      </div>
+    </section>
+
+    <!-- PIPELINE -->
+    <section id="pipeline">
+      <div class="section-label">
+        <span class="section-number">04</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>Pipeline de Produção</h2>
+
+      <p>
+        O pipeline do FBR-Social segue a mesma lógica robusta do FBR-Design, com adaptações
+        específicas para redes sociais: busca de brand kit no sistema irmão, seleção de template
+        por rede/formato e geração automática de variantes.
+      </p>
+
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <div class="step-number">01</div>
+          <div class="step-content">
+            <div class="step-title">Recebimento do Briefing</div>
+            <p class="step-desc">
+              Operador submete briefing via frontend: produto FBR, redes alvo, tipo de conteúdo
+              (lançamento, promoção, informativo, institucional…), textos, referências visuais e
+              tom desejado. n8n aciona o agente via webhook.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">02</div>
+          <div class="step-content">
+            <div class="step-title">Busca de Brand Kit no FBR-Design</div>
+            <p class="step-desc">
+              Agente consulta FBR-Design API para recuperar o brand kit do produto FBR solicitado:
+              logos (claro/escuro), paleta de cores, fontes, guidelines de uso. Se brand kit local
+              estiver em cache e atualizado, usa cache. Sincronização automática a cada 24h.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">03</div>
+          <div class="step-content">
+            <div class="step-title">Seleção de Templates por Rede</div>
+            <p class="step-desc">
+              Para cada rede social ativa do produto, o agente seleciona o template mais adequado
+              via busca semântica: tipo de conteúdo, tom, estilo visual, setor. Retorna top 3
+              candidatos por rede com score de compatibilidade.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">04</div>
+          <div class="step-content">
+            <div class="step-title">Busca de Assets Visuais</div>
+            <p class="step-desc">
+              FBR-Social-AssetFinder (agente dedicado) busca imagens complementares em Unsplash,
+              Pexels e Pixabay com base na descrição semântica do briefing. Para imagens premium,
+              aciona MidJourney com aprovação humana obrigatória.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">05</div>
+          <div class="step-content">
+            <div class="step-title">Composição HTML por Variante</div>
+            <p class="step-desc">
+              Para cada rede/formato ativo, o agente injeta variáveis no template HTML: textos,
+              logo do produto, cores da paleta, imagens dos assets. Dimensões fixas por formato
+              garantem corte correto nas plataformas.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">06</div>
+          <div class="step-content">
+            <div class="step-title">Renderização das Variantes</div>
+            <p class="step-desc">
+              HTMLCSStoImage API renderiza cada variante nas dimensões corretas. Fallback automático
+              para Bannerbear API. Outputs salvos no MinIO com nomenclatura padronizada por produto,
+              rede e formato.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">07</div>
+          <div class="step-content">
+            <div class="step-title">Aprovação no FBR-Click</div>
+            <p class="step-desc">
+              Agente posta no canal #fbr-social como membro ativo. Preview de todas as variantes
+              geradas, organizadas por rede social. Tag @responsavel-produto para aprovação.
+              Supervisor pode aprovar individualmente por variante ou aprovar tudo de uma vez.
+            </p>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-number">08</div>
+          <div class="step-content">
+            <div class="step-title">Entrega do Pacote</div>
+            <p class="step-desc">
+              Após aprovação, pacote ZIP disponível para download com todas as variantes aprovadas,
+              organizadas em pastas por rede social. Nomenclatura clara: produto_rede_formato_data.png
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENTES -->
+    <section id="agentes">
+      <div class="section-label">
+        <span class="section-number">05</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>Agentes OpenClaw</h2>
+
+      <p>
+        O FBR-Social segue a filosofia OpenClaw obrigatória: cada agente é definido por exatamente
+        <strong>7 arquivos Markdown</strong> versionados em Git. Proibido usar CrewAI, AutoGen,
+        LangGraph ou qualquer framework de agentes externo.
+      </p>
+
+      <div class="agent-box">
+        <div class="agent-title">Agente 1 — FBR-Social-Compositor</div>
+        <div class="agent-row"><span class="agent-key">Repositório</span><span
+            class="agent-val">agents/fbr-social-compositor/</span></div>
+        <div class="agent-row"><span class="agent-key">Responsável</span><span class="agent-val">Pipeline completo — do
+            briefing ao output renderizado</span></div>
+        <div class="agent-row"><span class="agent-key">Canal</span><span class="agent-val">FBR-Click #fbr-social</span>
+        </div>
+        <div class="agent-row"><span class="agent-key">LLM primário</span><span class="agent-val">Ollama (Mac Mini M4
+            via Tailscale)</span></div>
+        <div class="agent-row"><span class="agent-key">LLM fallback 1</span><span class="agent-val">Claude API
+            (claude-sonnet-4-6)</span></div>
+        <div class="agent-row"><span class="agent-key">LLM fallback 2</span><span class="agent-val">GPT-4o (contingência
+            — nunca primário)</span></div>
+        <div class="agent-row"><span class="agent-key">Tarefa única</span><span class="agent-val">processar_briefing —
+            do recebimento à aprovação</span></div>
+      </div>
+
+      <div class="agent-box pink">
+        <div class="agent-title">Agente 2 — FBR-Social-AssetFinder</div>
+        <div class="agent-row"><span class="agent-key">Repositório</span><span
+            class="agent-val">agents/fbr-social-assetfinder/</span></div>
+        <div class="agent-row"><span class="agent-key">Responsável</span><span class="agent-val">Busca e curadoria de
+            assets visuais para social media</span></div>
+        <div class="agent-row"><span class="agent-key">Canal</span><span class="agent-val">FBR-Click #fbr-social
+            (notificações de aprovação MidJourney)</span></div>
+        <div class="agent-row"><span class="agent-key">Fontes</span><span class="agent-val">Unsplash · Pexels · Pixabay
+            (gratuitos) · MidJourney (aprovação obrigatória)</span></div>
+        <div class="agent-row"><span class="agent-key">Tarefa única</span><span class="agent-val">buscar_assets — recebe
+            descrição semântica, retorna URLs + metadados</span></div>
+        <div class="agent-row"><span class="agent-key">Restrição crítica</span><span class="agent-val">NUNCA usar
+            imagens sem licença adequada para uso comercial digital</span></div>
+      </div>
+
+      <div class="agent-box green">
+        <div class="agent-title">Agente 3 — FBR-Social-BrandSync</div>
+        <div class="agent-row"><span class="agent-key">Repositório</span><span
+            class="agent-val">agents/fbr-social-brandsync/</span></div>
+        <div class="agent-row"><span class="agent-key">Responsável</span><span class="agent-val">Sincronização de brand
+            kits com o FBR-Design</span></div>
+        <div class="agent-row"><span class="agent-key">Trigger</span><span class="agent-val">Cron a cada 24h · Webhook
+            quando FBR-Design notifica atualização de brand kit</span></div>
+        <div class="agent-row"><span class="agent-key">Tarefa única</span><span class="agent-val">sincronizar_brand_kits
+            — pull via REST API FBR-Design → cache local PostgreSQL</span></div>
+        <div class="agent-row"><span class="agent-key">Aprovação obrigatória</span><span class="agent-val">Qualquer
+            alteração de brand kit que impacte jobs em andamento</span></div>
+      </div>
+
+      <h3>7 Markdowns por Agente (obrigatório)</h3>
+      <pre>agents/fbr-social-compositor/
+├── SOUL.md        # Valores, restrições éticas e ações que sempre requerem aprovação humana
+├── IDENTITY.md    # Nome, role, canal, LLM, owner, kill switch
+├── TASKS.md       # Tarefas e passos — uma tarefa por vez, sem paralelismo
+├── AGENTS.md      # Canais de atuação, limites de autonomia, aprovações obrigatórias
+├── TOOLS.md       # APIs externas, credenciais, rate limits, fallbacks
+├── MEMORY.md      # Padrões aprendidos, histórico de decisões, preferências por produto
+└── ERRORS.md      # Tratamento de erros, escalação, mensagens para FBR-Click</pre>
+    </section>
+
+    <!-- ARQUITETURA -->
+    <section id="arquitetura">
+      <div class="section-label">
+        <span class="section-number">06</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>Arquitetura do Sistema</h2>
+
+      <div class="arch-diagram">
+        <pre>
+┌─────────────────────────────────────────────────────────────────┐
+│  FBR-Click · canal #fbr-social                                  │  ← Interface humana única
+├─────────────────────────────────────────────────────────────────┤
+│  n8n · instância dedicada FBR-Social                            │  ← Orquestração de fluxos
+├─────────────────────────────────────────────────────────────────┤
+│  OpenClaw Gateway                                               │
+│  FBR-Social-Compositor · AssetFinder · BrandSync               │  ← Execução autônoma
+├─────────────────────────────────────────────────────────────────┤
+│  Git · 3 agentes · 7 Markdowns cada                             │  ← Configuração versionada
+├─────────────────────────────────────────────────────────────────┤
+│  FastAPI · PostgreSQL 16 · Redis 7                              │  ← API, persistência, filas
+├─────────────────────────────────────────────────────────────────┤
+│  FBR-Design API ←→ BrandSync (REST autenticada)                 │  ← Integração irmã
+├─────────────────────────────────────────────────────────────────┤
+│  Ollama → Claude API → GPT-4o                                   │  ← LLM em cascata
+├─────────────────────────────────────────────────────────────────┤
+│  VPS Hostinger · Docker Compose · Tailscale                     │  ← Infraestrutura
+├─────────────────────────────────────────────────────────────────┤
+│  Grafana + Prometheus + Audit Log                               │  ← Monitoramento
+└─────────────────────────────────────────────────────────────────┘</pre>
+      </div>
+
+      <h3>Princípios de isolamento</h3>
+      <p>
+        FBR-Social roda em VPS Hostinger <strong>isolada</strong> — falha não cascadeia para FBR-Design
+        ou outros sistemas FBR. A comunicação com o FBR-Design ocorre exclusivamente via REST API
+        autenticada. <strong>Proibido</strong> acesso direto a banco de dados cruzado. Frontend nunca
+        acessa o backend diretamente — todo request passa pelo proxy Next.js.
+      </p>
+
+      <h3>Cascata de LLM (idêntica ao FBR-Design)</h3>
+      <pre>
+Camada 1 — Ollama (Mac Mini M4 32GB via Tailscale)
+  → Uso: classificação de briefing, scoring de templates, seleção por rede social
+  → Timeout: 15s · Fallback: se offline > 30s → Camada 2
+
+Camada 2 — Claude API (claude-sonnet-4-6)
+  → Uso: raciocínio complexo, composição de variáveis, adaptação por plataforma
+  → Timeout: 30s · Fallback: se rate limit ou erro → Camada 3
+
+Camada 3 — GPT-4o API (contingência)
+  → Uso: reserva total · NUNCA primário
+  → Fallback: alerta crítico no FBR-Click · owner notificado</pre>
+
+      <h3>Stack Tecnológica</h3>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Tecnologia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Backend</td>
+            <td>FastAPI + Python 3.11+</td>
+          </tr>
+          <tr>
+            <td>Frontend</td>
+            <td>Next.js 15 App Router + TypeScript strict</td>
+          </tr>
+          <tr>
+            <td>Banco de Dados</td>
+            <td>PostgreSQL 16</td>
+          </tr>
+          <tr>
+            <td>Cache e Filas</td>
+            <td>Redis 7</td>
+          </tr>
+          <tr>
+            <td>Orquestração</td>
+            <td>n8n (instância dedicada)</td>
+          </tr>
+          <tr>
+            <td>Agentes</td>
+            <td>OpenClaw Gateway · Node.js · MIT</td>
+          </tr>
+          <tr>
+            <td>Containerização</td>
+            <td>Docker + Docker Compose</td>
+          </tr>
+          <tr>
+            <td>Storage</td>
+            <td>MinIO (S3-compatible)</td>
+          </tr>
+          <tr>
+            <td>Renderização</td>
+            <td>HTMLCSStoImage API + Bannerbear (fallback)</td>
+          </tr>
+          <tr>
+            <td>Assets free</td>
+            <td>Unsplash + Pexels + Pixabay APIs</td>
+          </tr>
+          <tr>
+            <td>Geração IA premium</td>
+            <td>MidJourney API (aprovação obrigatória)</td>
+          </tr>
+          <tr>
+            <td>Monitoramento</td>
+            <td>Grafana + Prometheus</td>
+          </tr>
+          <tr>
+            <td>Rede privada</td>
+            <td>Tailscale</td>
+          </tr>
+          <tr>
+            <td>Hub humano</td>
+            <td>FBR-Click — canal #fbr-social</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PRODUTOS FBR -->
+    <section id="produtos">
+      <div class="section-label">
+        <span class="section-number">07</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>Estrutura Multi-Produto</h2>
+
+      <p>
+        Cada produto do Facebrasil Group é cadastrado no FBR-Social com seu perfil completo:
+        redes sociais ativas, brand kit vinculado ao FBR-Design, responsável de aprovação
+        e configurações específicas de estilo por plataforma.
+      </p>
+
+      <pre>
+Tabela: fbr_products
+  id              UUID
+  nome            string          -- ex: "FBR-Design", "FBR-Click", "FBR-Social"
+  slug            string          -- ex: "fbr-design"
+  brand_kit_id    UUID            -- ID no FBR-Design (sync via BrandSync)
+  redes_ativas    string[]        -- ["instagram", "facebook", "linkedin", ...]
+  responsavel_id  UUID → users    -- Owner para aprovação no FBR-Click
+  ativo           boolean
+  criado_em       timestamp</pre>
+
+      <div class="callout callout-blue">
+        <strong>Extensibilidade:</strong> Quando um novo produto FBR for lançado, basta cadastrá-lo
+        na tabela <code>fbr_products</code>, vinculá-lo a um brand kit no FBR-Design, e configurar
+        as redes ativas. O sistema já está pronto para atendê-lo.
+      </div>
+    </section>
+
+    <!-- PRINCÍPIOS -->
+    <section id="principios">
+      <div class="section-label">
+        <span class="section-number">08</span>
+        <span class="section-rule"></span>
+      </div>
+      <h2>Princípios Absolutos</h2>
+
+      <p>
+        O FBR-Social herda todos os princípios da Bíblia FBR e adiciona os específicos
+        para produção de social media.
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>🔒 Isolamento Total</h3>
+          <p>VPS dedicada. Falha no FBR-Social não afeta FBR-Design nem qualquer outro sistema FBR. Comunicação apenas
+            via REST API autenticada.</p>
+        </div>
+        <div class="card pink">
+          <h3>✋ Aprovação Humana</h3>
+          <p>Todo material para uso externo passa por aprovação humana no FBR-Click. Agentes nunca entregam diretamente
+            para as redes sociais. Publicação é responsabilidade humana.</p>
+        </div>
+        <div class="card green">
+          <h3>📐 Dimensões Corretas</h3>
+          <p>Zero tolerância para artes com dimensões erradas. Cada formato tem especificação rígida. Sistema recusa
+            renderização fora das especificações de cada rede.</p>
+        </div>
+        <div class="card">
+          <h3>🎨 Brand Kit Inviolável</h3>
+          <p>Logos, cores e fontes do brand kit não são modificados sem aprovação explícita do responsável pelo produto.
+            Consistência de marca é inegociável.</p>
+        </div>
+        <div class="card pink">
+          <h3>📜 Licenças de Imagem</h3>
+          <p>NUNCA usar imagens sem licença para uso comercial digital. Assets free de Unsplash/Pexels/Pixabay são
+            verificados. MidJourney sempre requer aprovação humana.</p>
+        </div>
+        <div class="card green">
+          <h3>🔄 Sincronização Confiável</h3>
+          <p>Brand kits sincronizados do FBR-Design a cada 24h e via webhook em atualizações. Cache local com
+            versionamento. Nunca usar brand kit desatualizado silenciosamente.</p>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h3>Filosofia OpenClaw — nunca negociável</h3>
+        <p>
+          Todo agente do FBR-Social é definido por exatamente 7 arquivos Markdown versionados em Git.
+          Proibido CrewAI, AutoGen, LangGraph ou qualquer framework externo de agentes.
+          n8n decide quando e por que um agente é chamado. OpenClaw decide o que o agente faz.
+          Cada agente trabalha em uma única tarefa por vez — sem paralelismo interno.
+          Todo agente tem owner humano designado e kill switch funcional.
+        </p>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <section style="padding: 48px 0;">
+      <p style="font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.05em;">
+        FBR-Social · Conceito MVP v1.0 · Facebrasil Group · Alinhado à Bíblia FBR v1.0 · securitycoderules.md<br>
+        Documento vivo — atualizar conforme evolução do sistema.
+      </p>
+    </section>
+
+  </main>
+
+</body>
+
+</html>

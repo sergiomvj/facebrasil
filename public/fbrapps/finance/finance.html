@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FBR-Finance — Conceito Geral do Projeto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:       #F97316;
+      --brand-glow:  rgba(249,115,22,0.18);
+      --finance:     #10B981;
+      --finance-glow:rgba(16,185,129,0.18);
+      --dark:        #0C1220;
+      --dark-2:      #101828;
+      --dark-3:      #1A2540;
+      --dark-4:      #243050;
+      --slate:       #8899BB;
+      --slate-light: #B0C2DD;
+      --white:       #F0F5FF;
+      --green:       #22C55E;
+      --red:         #EF4444;
+      --amber:       #F59E0B;
+      --blue:        #3B82F6;
+      --grid-line:   rgba(100,130,180,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--dark);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .glow-brand {
+      position: fixed; top: -20vh; left: -10vw;
+      width: 70vw; height: 70vh;
+      background: radial-gradient(ellipse, rgba(249,115,22,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .glow-finance {
+      position: fixed; bottom: -20vh; right: -10vw;
+      width: 70vw; height: 70vh;
+      background: radial-gradient(ellipse, rgba(16,185,129,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem;
+      background: rgba(12,18,32,0.85);
+      backdrop-filter: blur(16px) saturate(180%);
+      border-bottom: 1px solid var(--grid-line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800; font-size: 1.1rem; letter-spacing: -.03em; color: var(--white);
+    }
+    .nav-logo span { color: var(--finance); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: .75rem; color: var(--slate);
+      text-decoration: none; transition: color .2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .nav-links a:hover { color: var(--white); }
+    @media (max-width: 600px) { .nav-links { display: none; } }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 8rem 0 6rem;
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--finance);
+      border: 1px solid rgba(16,185,129,0.28);
+      background: rgba(16,185,129,0.07);
+      padding: .4rem 1rem; border-radius: 99px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp .7s ease both;
+    }
+    .hero-eyebrow .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--finance); box-shadow: 0 0 8px var(--finance);
+      animation: pulsate 2s infinite;
+    }
+
+    @keyframes pulsate { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .hero-title {
+      font-family: 'Outfit', sans-serif; font-weight: 800;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: 1.0; letter-spacing: -.03em; color: var(--white);
+      animation: fadeUp .8s .1s ease both;
+    }
+    .hero-title .accent { color: var(--finance); }
+    .hero-title .accent-brand { color: var(--brand); }
+    .hero-title .muted { color: var(--slate); }
+
+    .hero-sub {
+      margin-top: 2rem; font-size: 1.05rem; color: var(--slate-light);
+      max-width: 580px; font-weight: 300; line-height: 1.8;
+      animation: fadeUp .8s .2s ease both;
+    }
+
+    .hero-pills {
+      margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 1rem;
+      animation: fadeUp .8s .3s ease both;
+    }
+    .hpill {
+      display: flex; align-items: center; gap: .55rem;
+      font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--slate);
+      padding: .45rem 1rem; border: 1px solid var(--dark-4); border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+    }
+    .hpill .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-g { background: var(--finance); box-shadow: 0 0 6px var(--finance); }
+    .dot-o { background: var(--brand); box-shadow: 0 0 6px var(--brand); }
+    .dot-b { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+    .dot-a { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 6rem 0;
+      border-bottom: 1px solid var(--grid-line);
+    }
+    .stag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--finance); margin-bottom: .9rem;
+    }
+    .stitle {
+      font-family: 'Outfit', sans-serif; font-weight: 700;
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      line-height: 1.15; letter-spacing: -.02em; color: var(--white);
+      margin-bottom: 1rem;
+    }
+    .slead {
+      font-size: .95rem; color: var(--slate-light); max-width: 580px;
+      font-weight: 300; margin-bottom: 3rem; line-height: 1.8;
+    }
+
+    .fade-in { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    /* KPIs */
+    .kpi-row {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      padding: 1.5rem 1.6rem; text-align: center;
+      border: 1px solid var(--dark-4); border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      transition: border-color .25s;
+    }
+    .kpi-card:hover { border-color: rgba(16,185,129,0.25); }
+    .kpi-val {
+      font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2.2rem;
+      color: var(--finance); line-height: 1; margin-bottom: .4rem;
+    }
+    .kpi-lab { font-size: .75rem; color: var(--slate); line-height: 1.4; }
+
+    /* PROBLEM */
+    .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    @media(max-width:620px){.prob-grid{grid-template-columns:1fr;}}
+    .pcard {
+      padding: 1.8rem; border: 1px solid var(--dark-4); border-radius: 14px;
+      background: rgba(255,255,255,0.02); transition: all .25s;
+    }
+    .pcard:hover { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.04); }
+    .pcard .picon { font-size: 1.5rem; display: block; margin-bottom: .9rem; }
+    .pcard h4 { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: .95rem; color: var(--white); margin-bottom: .4rem; }
+    .pcard p { font-size: .82rem; color: var(--slate); line-height: 1.6; }
+    .pcard.wide { grid-column: span 2; border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.04); }
+    @media(max-width:620px){.pcard.wide{grid-column:span 1;}}
+
+    /* VALUE PROP */
+    .vp-box {
+      border: 1px solid rgba(16,185,129,0.25); border-radius: 18px;
+      background: rgba(16,185,129,0.04); padding: 2.5rem;
+      position: relative; overflow: hidden;
+    }
+    .vp-box::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--finance), var(--brand), transparent);
+    }
+    .vp-box blockquote {
+      font-family: 'Outfit', sans-serif; font-weight: 600;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--white); line-height: 1.5; letter-spacing: -.015em;
+    }
+    .vp-box blockquote em { color: var(--finance); font-style: normal; }
+
+    /* MODULES */
+    .mod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
+    @media(max-width:680px){.mod-grid{grid-template-columns:1fr;}}
+    .modcard {
+      padding: 1.8rem; border: 1px solid var(--dark-4); border-radius: 16px;
+      background: rgba(255,255,255,0.018); transition: all .25s; position: relative; overflow: hidden;
+    }
+    .modcard::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, transparent, var(--finance), transparent);
+      opacity:0; transition:opacity .3s;
+    }
+    .modcard:hover { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.04); transform: translateY(-2px); }
+    .modcard:hover::before { opacity: 1; }
+    .modcard.wide { grid-column: span 2; }
+    @media(max-width:680px){.modcard.wide{grid-column:span 1;}}
+    .mnum {
+      font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--finance);
+      letter-spacing: .15em; text-transform: uppercase; margin-bottom: .6rem;
+    }
+    .mname { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--white); margin-bottom: .5rem; }
+    .mdesc { font-size: .82rem; color: var(--slate); line-height: 1.6; margin-bottom: 1rem; }
+    .mfeats { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
+    .mfeats li { font-size: .78rem; color: var(--slate-light); display: flex; gap: .5rem; align-items: flex-start; }
+    .mfeats li::before { content: '→'; color: var(--finance); flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: .7rem; margin-top: .1rem; }
+
+    /* INTEGRATIONS TABLE */
+    .int-table { width: 100%; border-collapse: collapse; }
+    .int-table th {
+      font-family: 'JetBrains Mono', monospace; font-size: .65rem;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--slate);
+      padding: .7rem 1rem; text-align: left;
+      border-bottom: 1px solid var(--dark-4);
+    }
+    .int-table td {
+      padding: .85rem 1rem; font-size: .82rem; color: var(--slate-light);
+      border-bottom: 1px solid rgba(100,130,180,0.05);
+      vertical-align: top;
+    }
+    .int-table tr:hover td { background: rgba(16,185,129,0.03); }
+    .int-table td:first-child { font-family: 'Outfit', sans-serif; font-weight: 600; color: var(--white); white-space: nowrap; }
+    .badge-bi { display:inline-block; padding:.12rem .5rem; border-radius:4px; font-size:.6rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; background:rgba(16,185,129,0.15); color:var(--finance); }
+    .badge-in { display:inline-block; padding:.12rem .5rem; border-radius:4px; font-size:.6rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; background:rgba(59,130,246,0.15); color:var(--blue); }
+    .badge-out { display:inline-block; padding:.12rem .5rem; border-radius:4px; font-size:.6rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; background:rgba(249,115,22,0.15); color:var(--brand); }
+
+    /* AGENTS */
+    .ag-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.1rem; }
+    @media(max-width:720px){.ag-grid{grid-template-columns:1fr 1fr;}}
+    @media(max-width:460px){.ag-grid{grid-template-columns:1fr;}}
+    .agcard {
+      padding: 1.4rem; border: 1px solid rgba(16,185,129,0.15); border-radius: 14px;
+      background: rgba(16,185,129,0.04); position: relative; overflow: hidden;
+      transition: all .25s;
+    }
+    .agcard::before {
+      content:''; position: absolute; top:0; left:0; right:0; height:2px;
+      background: linear-gradient(90deg, transparent, var(--finance), transparent);
+      opacity:0; transition: opacity .3s;
+    }
+    .agcard:hover { background: rgba(16,185,129,0.08); transform: translateY(-3px); }
+    .agcard:hover::before { opacity:1; }
+    .agem { font-size: 1.9rem; display: block; margin-bottom: .7rem; }
+    .agname { font-family:'Outfit',sans-serif; font-weight:700; font-size:.95rem; color:var(--white); margin-bottom:.25rem; }
+    .agspace { font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--finance); text-transform:uppercase; letter-spacing:.1em; margin-bottom:.6rem; }
+    .agdesc { font-size:.78rem; color:var(--slate); line-height:1.5; }
+    .aghb {
+      margin-top:.8rem; padding-top:.8rem; border-top:1px solid rgba(16,185,129,0.1);
+      font-family:'JetBrains Mono',monospace; font-size:.65rem; color:var(--slate);
+      display:flex; align-items:center; gap:.4rem;
+    }
+    .aghb::before {
+      content:''; width:5px; height:5px; border-radius:50%;
+      background:var(--green); box-shadow:0 0 5px var(--green);
+      animation:pulsate 2s infinite;
+    }
+
+    /* ARCH */
+    .arch-box {
+      border: 1px solid var(--dark-4); border-radius: 18px;
+      background: var(--dark-2); overflow: hidden; position: relative;
+    }
+    .arch-box::before {
+      content:''; position: absolute; top:0; left:0; right:0; height:2px;
+      background: linear-gradient(90deg, transparent, var(--finance), var(--brand), transparent);
+    }
+    .arch-inner { padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .arch-layer-group { display: flex; align-items: stretch; gap: 1rem; }
+    .arch-lbl {
+      writing-mode: vertical-rl; text-orientation: mixed;
+      font-family: 'JetBrains Mono', monospace; font-size: .58rem;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--slate); opacity: .45;
+      flex-shrink: 0; display: flex; align-items: center; padding: 0 .3rem;
+    }
+    .arch-nodes { flex: 1; display: flex; flex-wrap: wrap; gap: .7rem; }
+    .anode {
+      flex: 1; min-width: 110px; padding: .9rem 1rem; border-radius: 10px;
+      border: 1px solid transparent; transition: transform .2s;
+    }
+    .anode:hover { transform: translateY(-2px); }
+    .anode .an { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: .85rem; color: var(--white); margin-bottom: .25rem; }
+    .anode .ad { font-size: .72rem; color: var(--slate); line-height: 1.4; }
+    .n-f { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.2); }
+    .n-o { background: rgba(249,115,22,0.07); border-color: rgba(249,115,22,0.2); }
+    .n-s { background: rgba(100,130,180,0.05); border-color: rgba(100,130,180,0.12); }
+    .n-g { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.14); }
+    .arch-sep {
+      text-align: center; font-family: 'JetBrains Mono', monospace;
+      font-size: .62rem; color: var(--slate); opacity: .45;
+      padding: .2rem 0;
+    }
+
+    /* DATABASE */
+    .db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:620px){.db-grid{grid-template-columns:1fr;}}
+    .dbt {
+      padding: 1.1rem 1.4rem; border: 1px solid var(--dark-4); border-radius: 10px;
+      background: rgba(255,255,255,0.015); transition: border-color .25s;
+    }
+    .dbt:hover { border-color: rgba(16,185,129,0.2); }
+    .dbt .tn { font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--finance); margin-bottom:.35rem; }
+    .dbt .td { font-size:.76rem; color:var(--slate); line-height:1.4; }
+    .tflag {
+      display:inline-block; margin-top:.55rem; margin-right:.3rem;
+      font-size:.58rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+      padding:.12rem .45rem; border-radius:4px;
+    }
+    .tf-rls { background:rgba(34,197,94,0.1); color:var(--green); }
+    .tf-cc { background:rgba(16,185,129,0.12); color:var(--finance); }
+
+    /* SECURITY */
+    .sec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px,1fr)); gap: 1.1rem; }
+    .secitem {
+      display:flex; gap:.9rem; padding:1.2rem; border:1px solid var(--dark-4); border-radius:12px;
+      background:rgba(255,255,255,0.015); transition:all .25s;
+    }
+    .secitem:hover { border-color:rgba(34,197,94,0.2); background:rgba(34,197,94,0.03); }
+    .secico {
+      font-size:1.2rem; flex-shrink:0; width:38px; height:38px;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(34,197,94,0.08); border-radius:9px;
+    }
+    .sect .sn { font-family:'Outfit',sans-serif; font-weight:600; font-size:.88rem; color:var(--white); margin-bottom:.2rem; }
+    .sect .sd { font-size:.76rem; color:var(--slate); line-height:1.4; }
+
+    /* LLM */
+    .llm-stack { display:flex; flex-direction:column; gap:.7rem; }
+    .llmlayer {
+      display:flex; align-items:center; gap:1.3rem; padding:1.1rem 1.6rem;
+      border-radius:12px; border:1px solid transparent;
+    }
+    .ll1 { background:rgba(249,115,22,0.06); border-color:rgba(249,115,22,0.2); }
+    .ll2 { background:rgba(16,185,129,0.06); border-color:rgba(16,185,129,0.18); }
+    .ll3 { background:rgba(100,130,180,0.04); border-color:rgba(100,130,180,0.12); }
+    .llnum { font-family:'Outfit',sans-serif; font-weight:800; font-size:2.2rem; opacity:.12; flex-shrink:0; width:32px; line-height:1; }
+    .ll1 .llnum { color:var(--brand); }
+    .ll2 .llnum { color:var(--finance); }
+    .ll3 .llnum { color:var(--slate); }
+    .llinfo { flex:1; }
+    .lln { font-family:'Outfit',sans-serif; font-weight:700; font-size:.95rem; color:var(--white); margin-bottom:.2rem; }
+    .lld { font-size:.78rem; color:var(--slate); }
+    .llbadge { font-family:'JetBrains Mono',monospace; font-size:.65rem; padding:.28rem .75rem; border-radius:6px; flex-shrink:0; }
+    .ll1 .llbadge { background:rgba(249,115,22,0.15); color:var(--brand); }
+    .ll2 .llbadge { background:rgba(16,185,129,0.15); color:var(--finance); }
+    .ll3 .llbadge { background:rgba(100,130,180,0.1); color:var(--slate-light); }
+    .llsep { text-align:center; font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--slate); opacity:.4; padding:.1rem; }
+
+    /* DESIGN SYSTEM */
+    .ds-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+    @media(max-width:620px){.ds-grid{grid-template-columns:1fr;}}
+    .dsblock {
+      padding:1.5rem; border:1px solid var(--dark-4); border-radius:14px;
+      background:rgba(255,255,255,0.015);
+    }
+    .dsblock h5 { font-family:'JetBrains Mono',monospace; font-size:.62rem; letter-spacing:.15em; text-transform:uppercase; color:var(--finance); margin-bottom:1rem; }
+    .fsample { margin-bottom:.9rem; }
+    .fsn { font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--slate); margin-bottom:.25rem; }
+    .ft-heading { font-family:'Outfit',sans-serif; font-weight:800; font-size:1.7rem; color:var(--white); letter-spacing:-.03em; line-height:1; }
+    .ft-h2 { font-family:'Outfit',sans-serif; font-weight:700; font-size:1.15rem; color:var(--white); letter-spacing:-.02em; }
+    .ft-body { font-family:'Inter',sans-serif; font-weight:400; font-size:.88rem; color:var(--slate-light); }
+    .ft-mono { font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--finance); }
+    .swatch-row { display:flex; gap:.55rem; flex-wrap:wrap; margin-bottom:.6rem; }
+    .sw { width:34px; height:34px; border-radius:7px; border:1px solid rgba(255,255,255,0.06); transition:transform .2s; }
+    .sw:hover { transform:scale(1.2); }
+    .stack-tags { display:flex; flex-wrap:wrap; gap:.6rem; }
+    .stag-pill {
+      display:flex; align-items:center; gap:.5rem;
+      padding:.5rem .95rem; border:1px solid var(--dark-4); border-radius:7px;
+      background:rgba(255,255,255,0.02); font-family:'JetBrains Mono',monospace;
+      font-size:.72rem; color:var(--slate-light); transition:all .2s;
+    }
+    .stag-pill:hover { border-color:rgba(16,185,129,0.25); color:var(--white); }
+    .stag-pill .pc { font-size:.58rem; color:var(--finance); opacity:.75; }
+
+    /* GOVERNANCE */
+    .gov-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+    @media(max-width:620px){.gov-grid{grid-template-columns:1fr;}}
+    .govcard {
+      padding:1.4rem 1.6rem; border:1px solid var(--dark-4); border-radius:12px;
+      background:rgba(255,255,255,0.015);
+    }
+    .govcard .gtag { font-family:'JetBrains Mono',monospace; font-size:.6rem; letter-spacing:.15em; text-transform:uppercase; color:var(--amber); margin-bottom:.5rem; }
+    .govcard h4 { font-family:'Outfit',sans-serif; font-weight:600; font-size:.92rem; color:var(--white); margin-bottom:.6rem; }
+    .govcard ul { list-style:none; display:flex; flex-direction:column; gap:.35rem; }
+    .govcard ul li { font-size:.78rem; color:var(--slate); display:flex; gap:.5rem; align-items:flex-start; }
+    .govcard ul li::before { content:'⚠'; font-size:.68rem; flex-shrink:0; color:var(--amber); }
+
+    /* TIMELINE */
+    .tl { position:relative; padding-left:2.3rem; }
+    .tl::before { content:''; position:absolute; left:6px; top:0; bottom:0; width:1px; background:linear-gradient(180deg, var(--finance), var(--brand), transparent); }
+    .tlitem { position:relative; margin-bottom:1.8rem; }
+    .tlitem::before {
+      content:''; position:absolute; left:-2rem; top:.35rem;
+      width:9px; height:9px; border-radius:50%;
+      background:var(--finance); box-shadow:0 0 7px var(--finance);
+    }
+    .tlitem:nth-child(even)::before { background:var(--brand); box-shadow:0 0 7px var(--brand); }
+    .tlb { font-family:'JetBrains Mono',monospace; font-size:.65rem; color:var(--finance); letter-spacing:.1em; text-transform:uppercase; margin-bottom:.25rem; }
+    .tlitem:nth-child(even) .tlb { color:var(--brand); }
+    .tlt { font-family:'Outfit',sans-serif; font-weight:600; font-size:.95rem; color:var(--white); margin-bottom:.25rem; }
+    .tld { font-size:.8rem; color:var(--slate); line-height:1.5; }
+    .tld2 { display:inline-block; margin-top:.35rem; font-family:'JetBrains Mono',monospace; font-size:.65rem; color:var(--slate); opacity:.6; }
+
+    /* FOOTER */
+    footer { padding: 4rem 0; border-top: 1px solid var(--grid-line); }
+    .ft-inner { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1.5rem; }
+    .ft-brand { font-family:'Outfit',sans-serif; font-weight:800; font-size:1.3rem; letter-spacing:-.03em; color:var(--white); }
+    .ft-brand span { color:var(--finance); }
+    .ft-meta { font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--slate); text-align:right; line-height:1.8; }
+  </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-brand"></div>
+<div class="glow-finance"></div>
+
+<nav>
+  <div class="nav-logo">FBR<span>·</span>Finance</div>
+  <ul class="nav-links">
+    <li><a href="#visao">// visão</a></li>
+    <li><a href="#modulos">// módulos</a></li>
+    <li><a href="#agentes">// agentes</a></li>
+    <li><a href="#arquitetura">// arquitetura</a></li>
+    <li><a href="#governanca">// governança</a></li>
+    <li><a href="#plano">// plano</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="wrapper">
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <span class="pulse-dot"></span>
+      Grupo Facebrasil · Sistema Financeiro Central · v1.0
+    </div>
+
+    <h1 class="hero-title">
+      FBR<span class="accent">·</span><br/>
+      <span class="accent">Finance</span><br/>
+      <span class="muted" style="font-size:clamp(1.8rem,4.5vw,3.8rem);font-weight:600;">Hub Financeiro do Grupo</span>
+    </h1>
+
+    <p class="hero-sub">
+      O sistema central de controle de recebimentos, pagamentos, centro de custo e conciliação financeira de todas as empresas do Grupo Facebrasil — integrado a cada sistema FBR para visibilidade financeira total em tempo real.
+    </p>
+
+    <div class="hero-pills">
+      <div class="hpill"><span class="dot dot-g"></span>Recebimentos Centralizados</div>
+      <div class="hpill"><span class="dot dot-o"></span>Centro de Custo por Empresa</div>
+      <div class="hpill"><span class="dot dot-b"></span>Conciliação Automática</div>
+      <div class="hpill"><span class="dot dot-a"></span>Auditoria Imutável</div>
+    </div>
+  </div>
+</div>
+
+<!-- VISÃO -->
+<div class="wrapper">
+  <section id="visao" class="fade-in">
+    <div class="stag">// visão estratégica</div>
+    <h2 class="stitle">O sistema que fecha<br/>os números do grupo</h2>
+    <p class="slead">O FBR-Finance não é uma planilha sofisticada — é o backbone financeiro digital do Grupo Facebrasil, com IA para conciliar, auditar e projetar cada centavo que entra e sai de todas as empresas.</p>
+
+    <div class="vp-box" style="margin-bottom:3rem;">
+      <blockquote>
+        "O sistema que controla <em>tudo que entra e sai de dinheiro</em> no Grupo Facebrasil — da fatura do FBR-Sales até o custo de infraestrutura de cada empresa — com conciliação automática, auditoria completa e visibilidade financeira total para os gestores."
+      </blockquote>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-val">100%</div><div class="kpi-lab">dos sistemas FBR integrados ao Finance</div></div>
+      <div class="kpi-card"><div class="kpi-val">N</div><div class="kpi-lab">empresas do grupo com centro de custo isolado</div></div>
+      <div class="kpi-card"><div class="kpi-val">0</div><div class="kpi-lab">transações sem rastreabilidade ou auditoria</div></div>
+      <div class="kpi-card"><div class="kpi-val">24h</div><div class="kpi-lab">SLA para fechamento e conciliação diária</div></div>
+    </div>
+
+    <div class="prob-grid">
+      <div class="pcard">
+        <span class="picon">📊</span>
+        <h4>Visibilidade financeira fragmentada</h4>
+        <p>Receitas do FBR-Sales, custos de infraestrutura, folha de pagamento e despesas operacionais espalhadas em múltiplas fontes sem consolidação.</p>
+      </div>
+      <div class="pcard">
+        <span class="picon">🏢</span>
+        <h4>Sem centro de custo por empresa</h4>
+        <p>Impossível saber quais empresas do grupo são rentáveis e quais estão consumindo capital sem um controle granular por CNPJ e centro de custo.</p>
+      </div>
+      <div class="pcard">
+        <span class="picon">⏳</span>
+        <h4>Conciliação manual e lenta</h4>
+        <p>Cruzar extratos bancários com notas fiscais e pagamentos de parceiros como AdSense e Taboola consome dias de trabalho e gera erros.</p>
+      </div>
+      <div class="pcard">
+        <span class="picon">🔍</span>
+        <h4>Auditoria inexistente ou tardia</h4>
+        <p>Sem trilha de auditoria imutável, qualquer questionamento financeiro — interno ou externo — exige reconstrução manual de histórico.</p>
+      </div>
+      <div class="pcard wide">
+        <span class="picon">🔗</span>
+        <h4>FBR-Sales precisa de um parceiro financeiro confiável</h4>
+        <p>O FBR-Sales gera toda a receita publicitária do grupo mas não tem onde registrar, conciliar e auditar esses pagamentos de forma sistemática. O FBR-Finance fecha esse ciclo: cada pagamento recebido dos parceiros (AdSense, Taboola, Mediavine) é automaticamente registrado, conciliado e reportado.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- MÓDULOS -->
+<div class="wrapper">
+  <section id="modulos" class="fade-in">
+    <div class="stag">// módulos do sistema</div>
+    <h2 class="stitle">6 módulos · cobertura financeira total</h2>
+    <p class="slead">Cada módulo tem responsabilidade única e se integra aos demais para formar um ciclo financeiro completo — do recebimento à projeção estratégica.</p>
+
+    <div class="mod-grid">
+      <div class="modcard">
+        <div class="mnum">// módulo 01</div>
+        <div class="mname">💰 Gestão de Recebimentos</div>
+        <div class="mdesc">Controle centralizado de todos os recebimentos do grupo, com rastreabilidade completa por origem, empresa e período.</div>
+        <ul class="mfeats">
+          <li>Registro de recebimentos por parceiro (AdSense, Taboola, Mediavine, etc.)</li>
+          <li>Conciliação automática com extratos bancários via n8n</li>
+          <li>Alertas de atraso e divergência por webhook FBR-Sales</li>
+          <li>Calendário de pagamentos esperados com projeção de caixa</li>
+          <li>Dashboard de receita por empresa, produto e período</li>
+        </ul>
+      </div>
+
+      <div class="modcard">
+        <div class="mnum">// módulo 02</div>
+        <div class="mname">💳 Gestão de Pagamentos</div>
+        <div class="mdesc">Controle de todas as saídas financeiras do grupo — fornecedores, infraestrutura, folha, impostos e serviços recorrentes.</div>
+        <ul class="mfeats">
+          <li>Cadastro e aprovação de fornecedores por empresa</li>
+          <li>Fluxo de aprovação para pagamentos acima de limites definidos</li>
+          <li>Pagamentos recorrentes com automação via n8n</li>
+          <li>Integração com notas fiscais e documentos fiscais</li>
+          <li>Alertas de vencimento e cobertura de caixa</li>
+        </ul>
+      </div>
+
+      <div class="modcard">
+        <div class="mnum">// módulo 03</div>
+        <div class="mname">🏢 Centro de Custo por Empresa</div>
+        <div class="mdesc">Cada empresa do grupo opera como uma unidade financeira isolada — com P&L individual, orçamento e alocação de custos compartilhados.</div>
+        <ul class="mfeats">
+          <li>Hierarquia de empresas e centros de custo configurável</li>
+          <li>Alocação proporcional de custos compartilhados (infra, ferramentas)</li>
+          <li>P&L mensal por empresa com comparativo vs. orçamento</li>
+          <li>Budget anual com acompanhamento real vs. planejado</li>
+          <li>Relatório de rentabilidade por unidade de negócio</li>
+        </ul>
+      </div>
+
+      <div class="modcard">
+        <div class="mnum">// módulo 04</div>
+        <div class="mname">🔄 Conciliação Financeira</div>
+        <div class="mdesc">Motor de conciliação automática que cruza múltiplas fontes — extratos, faturas, relatórios de parceiros e registros internos.</div>
+        <ul class="mfeats">
+          <li>Conciliação automática extrato bancário vs. lançamentos internos</li>
+          <li>Conciliação de relatórios de parceiros (AdSense, Taboola) vs. recebimentos</li>
+          <li>Fila de pendências para revisão humana com contexto completo</li>
+          <li>Histórico completo de conciliações com quem aprovou cada item</li>
+          <li>Relatório de divergências com drill-down até a transação</li>
+        </ul>
+      </div>
+
+      <div class="modcard">
+        <div class="mnum">// módulo 05</div>
+        <div class="mname">📈 Forecasting & Analytics</div>
+        <div class="mdesc">Projeções financeiras com IA, análise de tendências e relatórios executivos para suportar decisões estratégicas do grupo.</div>
+        <ul class="mfeats">
+          <li>Projeção de caixa para 30, 60 e 90 dias por empresa e grupo</li>
+          <li>Análise de sazonalidade e tendências de receita publicitária</li>
+          <li>KPIs financeiros em tempo real no dashboard executivo</li>
+          <li>Relatório mensal automatizado para gestores via FBR-Click</li>
+          <li>Simulações de cenário (otimista, base, pessimista)</li>
+        </ul>
+      </div>
+
+      <div class="modcard">
+        <div class="mnum">// módulo 06</div>
+        <div class="mname">🔍 Auditoria & Compliance</div>
+        <div class="mdesc">Trilha de auditoria imutável de toda movimentação financeira — quem fez, quando, o quê e por quê — com acesso controlado por papel.</div>
+        <ul class="mfeats">
+          <li>Audit log imutável de toda ação humana e de agente</li>
+          <li>Controle de acesso por papel: Gestor, Financeiro, Auditor, Read-only</li>
+          <li>Exportação de relatórios para contabilidade externa</li>
+          <li>Compliance com requisitos fiscais brasileiros (DRE, DMPL)</li>
+          <li>Alertas de anomalia com notificação imediata via FBR-Click</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- INTEGRAÇÕES -->
+<div class="wrapper">
+  <section id="integracoes" class="fade-in">
+    <div class="stag">// integrações</div>
+    <h2 class="stitle">Hub financeiro de todos os sistemas FBR</h2>
+    <p class="slead">O FBR-Finance se conecta a cada sistema do ecossistema para garantir que toda movimentação financeira — direta ou indireta — seja registrada, conciliada e auditada.</p>
+
+    <div class="arch-box" style="margin-bottom:2.5rem;">
+      <div style="padding:1.5rem 2rem; border-bottom:1px solid rgba(100,130,180,0.07);">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--finance);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem;">// posição no ecossistema FBR</div>
+        <div style="font-family:'Outfit',sans-serif;font-weight:600;font-size:1rem;color:var(--white);">FBR-Finance é o destino de toda informação financeira — receptor passivo e fornecedor ativo de dados para cada sistema.</div>
+      </div>
+      <div style="padding:1.5rem 2rem;">
+        <table class="int-table">
+          <thead>
+            <tr>
+              <th>Sistema</th>
+              <th>Direção</th>
+              <th>Protocolo</th>
+              <th>Dados Trafegados</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>FBR-Sales</td>
+              <td><span class="badge-bi">bidirecional</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">REST API + JWT</td>
+              <td>Pagamentos de parceiros recebidos, projeções de receita, faturas pendentes, dados de auditoria</td>
+            </tr>
+            <tr>
+              <td>FBR-Click</td>
+              <td><span class="badge-out">saída</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">FBR-Click API</td>
+              <td>Alertas financeiros críticos, relatórios periódicos, solicitações de aprovação de pagamentos</td>
+            </tr>
+            <tr>
+              <td>FBR-Dev</td>
+              <td><span class="badge-in">entrada</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">REST API + JWT</td>
+              <td>Custos de desenvolvimento, licenças, ferramentas e infraestrutura por projeto</td>
+            </tr>
+            <tr>
+              <td>FBR-Suporte</td>
+              <td><span class="badge-in">entrada</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">REST API + JWT</td>
+              <td>Custos operacionais de suporte, SLA e ferramentas de atendimento</td>
+            </tr>
+            <tr>
+              <td>FBR-Leads</td>
+              <td><span class="badge-in">entrada</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">REST API + JWT</td>
+              <td>Custo de aquisição por lead, ferramentas de prospecção, custo por campanha</td>
+            </tr>
+            <tr>
+              <td>Players Externos</td>
+              <td><span class="badge-in">entrada</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">API por parceiro</td>
+              <td>Relatórios financeiros AdSense, Taboola, Mediavine, YouTube — via FBR-Sales</td>
+            </tr>
+            <tr>
+              <td>Bancos / Fintechs</td>
+              <td><span class="badge-bi">bidirecional</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--slate);">Open Banking API</td>
+              <td>Extratos bancários para conciliação automática, saldo em tempo real</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- AGENTES -->
+<div class="wrapper">
+  <section id="agentes" class="fade-in">
+    <div class="stag">// time de agentes</div>
+    <h2 class="stitle">Vault — Agente Chefe + 6 Sub-Agentes</h2>
+    <p class="slead">O time de agentes FBR-Finance opera sobre OpenClaw Gateway. Cada agente é definido pelos 7 Markdowns canônicos. Vault é o agente orquestrador — os sub-agentes são especialistas em domínios financeiros específicos.</p>
+
+    <div class="ag-grid" style="margin-bottom:2rem;">
+      <div class="agcard" style="grid-column:span 3;border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.07);">
+        <span class="agem">🏦</span>
+        <div class="agname">Vault</div>
+        <div class="agspace">// agente chefe · CFO Digital</div>
+        <div class="agdesc">Orquestrador financeiro do grupo. Coordena o time, gera os relatórios consolidados, monitora a saúde financeira global e é a interface principal com os gestores humanos via FBR-Click. Vault nunca executa transações sem aprovação humana.</div>
+        <div class="aghb">SOUL.md · IDENTITY.md · TASKS.md · AGENTS.md · MEMORY.md · TOOLS.md · USER.md</div>
+      </div>
+    </div>
+
+    <div class="ag-grid">
+      <div class="agcard">
+        <span class="agem">📥</span>
+        <div class="agname">Intake</div>
+        <div class="agspace">// especialista em recebimentos</div>
+        <div class="agdesc">Monitora e registra todos os recebimentos. Concilia relatórios de parceiros com lançamentos internos. Dispara alertas de atrasos.</div>
+        <div class="aghb">owner: FBR-Sales · módulo 01</div>
+      </div>
+
+      <div class="agcard">
+        <span class="agem">📤</span>
+        <div class="agname">Payout</div>
+        <div class="agspace">// controlador de pagamentos</div>
+        <div class="agdesc">Gerencia o fluxo de aprovação de pagamentos. Monitora vencimentos. Prepara ordens de pagamento para aprovação humana obrigatória.</div>
+        <div class="aghb">aprovação humana obrigatória · módulo 02</div>
+      </div>
+
+      <div class="agcard">
+        <span class="agem">🏗️</span>
+        <div class="agname">Ledger</div>
+        <div class="agspace">// gestor de centro de custo</div>
+        <div class="agdesc">Mantém os lançamentos contábeis por empresa e centro de custo. Aloca custos compartilhados. Produz P&L mensal por unidade.</div>
+        <div class="aghb">todas as empresas do grupo · módulo 03</div>
+      </div>
+
+      <div class="agcard">
+        <span class="agem">🔄</span>
+        <div class="agname">Reconcile</div>
+        <div class="agspace">// motor de conciliação</div>
+        <div class="agdesc">Executa conciliação automática diária entre extratos bancários e lançamentos. Classifica divergências e encaminha para revisão humana.</div>
+        <div class="aghb">roda diário · 23h · módulo 04</div>
+      </div>
+
+      <div class="agcard">
+        <span class="agem">🔮</span>
+        <div class="agname">Oracle</div>
+        <div class="agspace">// analista de forecasting</div>
+        <div class="agdesc">Produz projeções de caixa, analisa tendências e gera relatórios executivos mensais para os gestores do grupo via FBR-Click.</div>
+        <div class="aghb">relatório mensal automático · módulo 05</div>
+      </div>
+
+      <div class="agcard">
+        <span class="agem">🛡️</span>
+        <div class="agname">Sentinel</div>
+        <div class="agspace">// auditor financeiro</div>
+        <div class="agdesc">Monitora o audit log em tempo real. Detecta anomalias, acessos indevidos e padrões suspeitos. Gera relatório mensal de compliance.</div>
+        <div class="aghb">monitoramento contínuo · módulo 06</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ARQUITETURA -->
+<div class="wrapper">
+  <section id="arquitetura" class="fade-in">
+    <div class="stag">// arquitetura técnica</div>
+    <h2 class="stitle">Stack canônica FBR</h2>
+    <p class="slead">FBR-Finance segue integralmente a arquitetura canônica definida na Bíblia FBR. VPS Hetzner isolada, Docker Compose, instância n8n dedicada e OpenClaw Gateway para todos os agentes.</p>
+
+    <div class="arch-box" style="margin-bottom:2.5rem;">
+      <div class="arch-inner">
+        <div class="arch-layer-group">
+          <div class="arch-lbl">interface</div>
+          <div class="arch-nodes">
+            <div class="anode n-f"><div class="an">FBR-Click</div><div class="ad">Canal #finance-alertas · Vault posta relatórios e alertas críticos</div></div>
+            <div class="anode n-f"><div class="an">Dashboard Web</div><div class="ad">Next.js 15 · TypeScript strict · Tailwind v4 · shadcn/ui</div></div>
+          </div>
+        </div>
+        <div class="arch-sep">↓ autenticação iron-session httpOnly cookie</div>
+        <div class="arch-layer-group">
+          <div class="arch-lbl">orquestração</div>
+          <div class="arch-nodes">
+            <div class="anode n-o"><div class="an">n8n (dedicado)</div><div class="ad">Fluxos de conciliação, alertas de vencimento, sincronização com bancos</div></div>
+            <div class="anode n-o"><div class="an">OpenClaw Gateway</div><div class="ad">Node.js · MIT · time Vault com 6 sub-agentes · 7 Markdowns cada</div></div>
+          </div>
+        </div>
+        <div class="arch-sep">↓ FastAPI + Python 3.11+</div>
+        <div class="arch-layer-group">
+          <div class="arch-lbl">persistência</div>
+          <div class="arch-nodes">
+            <div class="anode n-s"><div class="an">PostgreSQL 16</div><div class="ad">RLS em todas as tabelas · isolamento por empresa via row level security</div></div>
+            <div class="anode n-s"><div class="an">Redis 7</div><div class="ad">Cache de totais, filas de conciliação, status de LLM layers</div></div>
+          </div>
+        </div>
+        <div class="arch-sep">↓ OpenClaw llm.py lê status do Redis</div>
+        <div class="arch-layer-group">
+          <div class="arch-lbl">LLM</div>
+          <div class="arch-nodes">
+            <div class="anode n-o"><div class="an">Ollama (Camada 1)</div><div class="ad">Classificação de transações · categorização · scoring de anomalias · timeout 15s</div></div>
+            <div class="anode n-f"><div class="an">Claude API (Camada 2)</div><div class="ad">Relatórios executivos · análise de tendências · projeções · timeout 30s</div></div>
+            <div class="anode n-s"><div class="an">GPT-4o (Camada 3)</div><div class="ad">Contingência total · nunca primária · alerta crítico ao owner em falha</div></div>
+          </div>
+        </div>
+        <div class="arch-sep">↓ VPS Hetzner · Docker Compose · Tailscale · Nginx + Certbot</div>
+        <div class="arch-layer-group">
+          <div class="arch-lbl">ops</div>
+          <div class="arch-nodes">
+            <div class="anode n-g"><div class="an">Grafana + Prometheus</div><div class="ad">Monitoramento · dashboards de saúde · alertas de infra</div></div>
+            <div class="anode n-g"><div class="an">Audit Log imutável</div><div class="ad">Toda ação humana e de agente registrada com timestamp + responsável</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LLM LAYERS -->
+    <div class="llm-stack">
+      <div class="llmlayer ll1">
+        <div class="llnum">1</div>
+        <div class="llinfo">
+          <div class="lln">Ollama — Mac Mini M4 via Tailscale</div>
+          <div class="lld">Classificação de transações · scoring de anomalias · categorização automática · timeout 15s · fallback automático se offline &gt; 30s</div>
+        </div>
+        <div class="llbadge">primária</div>
+      </div>
+      <div class="llsep">↓ fallback automático</div>
+      <div class="llmlayer ll2">
+        <div class="llnum">2</div>
+        <div class="llinfo">
+          <div class="lln">Claude API — claude-sonnet-4-6</div>
+          <div class="lld">Geração de relatórios executivos · análise de tendências · projeções de caixa · insights financeiros · timeout 30s</div>
+        </div>
+        <div class="llbadge">secundária</div>
+      </div>
+      <div class="llsep">↓ fallback automático</div>
+      <div class="llmlayer ll3">
+        <div class="llnum">3</div>
+        <div class="llinfo">
+          <div class="lln">GPT-4o API</div>
+          <div class="lld">Contingência total · nunca primária · alerta crítico ao owner em falha de camadas 1 e 2</div>
+        </div>
+        <div class="llbadge">reserva</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- DATABASE -->
+<div class="wrapper">
+  <section id="database" class="fade-in">
+    <div class="stag">// modelo de dados</div>
+    <h2 class="stitle">Schema · 14 tabelas principais</h2>
+    <p class="slead">Todas as tabelas com RLS habilitado e isolamento por empresa. Nenhuma tabela sem política de acesso explícita. Dados financeiros isolados por <code style="font-family:'JetBrains Mono',monospace;color:var(--finance);font-size:.88em;">company_id</code> em nível de row.</p>
+
+    <div class="db-grid">
+      <div class="dbt"><div class="tn">companies</div><div class="td">Empresas do grupo com CNPJ, razão social, tipo e status operacional</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">cost_centers</div><div class="td">Centros de custo hierárquicos por empresa, com orçamento anual e alertas</div><span class="tflag tf-rls">RLS</span><span class="tflag tf-cc">centro custo</span></div>
+      <div class="dbt"><div class="tn">transactions</div><div class="td">Tabela principal: toda movimentação financeira com tipo, valor, empresa, CC e status</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">receivables</div><div class="td">Contas a receber por parceiro, data esperada, status e referência ao pagamento</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">payables</div><div class="td">Contas a pagar por fornecedor com workflow de aprovação e limites por papel</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">bank_accounts</div><div class="td">Contas bancárias por empresa com credenciais de open banking criptografadas</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">bank_statements</div><div class="td">Extratos importados com status de conciliação linha a linha</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">reconciliation_items</div><div class="td">Itens de conciliação: matched, pending, divergent — com quem resolveu cada pendência</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">budgets</div><div class="td">Orçamentos anuais e mensais por empresa e centro de custo com variação real vs. planejado</div><span class="tflag tf-rls">RLS</span><span class="tflag tf-cc">centro custo</span></div>
+      <div class="dbt"><div class="tn">suppliers</div><div class="td">Cadastro de fornecedores por empresa com status de aprovação e histórico de pagamentos</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">approval_flows</div><div class="td">Fluxos de aprovação para pagamentos — quem aprovou, quando, limites por papel</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">forecasts</div><div class="td">Projeções de caixa geradas pelo agente Oracle com metodologia e confiança</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">audit_log</div><div class="td">Trilha imutável de toda ação — inserção permitida, UPDATE/DELETE proibidos via trigger</div><span class="tflag tf-rls">RLS</span></div>
+      <div class="dbt"><div class="tn">agent_actions</div><div class="td">Ações dos agentes com resultado, confiança, aprovação humana e referência ao audit_log</div><span class="tflag tf-rls">RLS</span></div>
+    </div>
+  </section>
+</div>
+
+<!-- SEGURANÇA -->
+<div class="wrapper">
+  <section id="seguranca" class="fade-in">
+    <div class="stag">// segurança</div>
+    <h2 class="stitle">Controles de segurança financeira</h2>
+    <p class="slead">Dados financeiros exigem o mais alto nível de controle. Além das regras canônicas do securitycoderules.md, o FBR-Finance implementa controles adicionais específicos para dados financeiros.</p>
+
+    <div class="sec-grid">
+      <div class="secitem">
+        <div class="secico">🔐</div>
+        <div class="sect">
+          <div class="sn">iron-session + httpOnly</div>
+          <div class="sd">Autenticação exclusiva via cookie httpOnly, secure, sameSite=lax. SESSION_SECRET 32+ chars em variável de ambiente.</div>
+        </div>
+      </div>
+      <div class="secitem">
+        <div class="secico">🛡️</div>
+        <div class="sect">
+          <div class="sn">RLS em 100% das tabelas</div>
+          <div class="sd">Row Level Security obrigatório. Empresa A nunca acessa dados financeiros da Empresa B. Isolamento garantido a nível de banco.</div>
+        </div>
+      </div>
+      <div class="secitem">
+        <div class="secico">🔑</div>
+        <div class="sect">
+          <div class="sn">Credenciais bancárias criptografadas</div>
+          <div class="sd">Tokens de open banking e credenciais de APIs bancárias armazenados com AES-256. Nunca expostos no frontend.</div>
+        </div>
+      </div>
+      <div class="secitem">
+        <div class="secico">✅</div>
+        <div class="sect">
+          <div class="sn">Aprovação humana obrigatória</div>
+          <div class="sd">Nenhum pagamento executado sem aprovação humana explícita. Fluxo de aprovação com limite por papel e valor.</div>
+        </div>
+      </div>
+      <div class="secitem">
+        <div class="secico">📋</div>
+        <div class="sect">
+          <div class="sn">Audit log imutável</div>
+          <div class="sd">Trigger PostgreSQL bloqueia UPDATE/DELETE na tabela audit_log. Toda ação tem timestamp, user_id e hash da sessão.</div>
+        </div>
+      </div>
+      <div class="secitem">
+        <div class="secico">🚦</div>
+        <div class="sect">
+          <div class="sn">Rate limiting por papel</div>
+          <div class="sd">Rate limiting diferenciado em rotas de pagamento, aprovação e exportação. Proteção contra automação maliciosa.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- GOVERNANÇA -->
+<div class="wrapper">
+  <section id="governanca" class="fade-in">
+    <div class="stag">// governança</div>
+    <h2 class="stitle">Aprovações obrigatórias · papéis</h2>
+    <p class="slead">Todo agente do time Vault opera dentro dos limites definidos nos AGENTS.md. Ações irreversíveis — especialmente pagamentos — exigem aprovação humana explícita via FBR-Click.</p>
+
+    <div class="gov-grid" style="margin-bottom:2rem;">
+      <div class="govcard">
+        <div class="gtag">⚠ aprovação obrigatória — sempre</div>
+        <h4>Ações que SEMPRE precisam de aprovação</h4>
+        <ul>
+          <li>Qualquer pagamento a fornecedor, independente do valor</li>
+          <li>Alteração de limites orçamentários por empresa ou CC</li>
+          <li>Criação ou modificação de contas bancárias cadastradas</li>
+          <li>Exportação de dados financeiros para sistemas externos</li>
+          <li>Comunicação financeira formal para parceiros externos</li>
+          <li>Fechamento de período contábil (mensal, trimestral, anual)</li>
+        </ul>
+      </div>
+      <div class="govcard">
+        <div class="gtag">⚠ aprovação por limite de valor</div>
+        <h4>Ações com limites por papel</h4>
+        <ul>
+          <li>Pagamentos até R$500: aprovação Gestor Financeiro</li>
+          <li>Pagamentos R$500–R$5.000: aprovação Diretor Financeiro</li>
+          <li>Pagamentos acima de R$5.000: aprovação C-level</li>
+          <li>Novos fornecedores acima de R$1.000/mês: aprovação Diretoria</li>
+          <li>Ajustes de conciliação acima de R$100: aprovação Gestor</li>
+          <li>Cancelamento de recebível esperado: aprovação Diretoria</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="border:1px solid rgba(249,115,22,0.2);background:rgba(249,115,22,0.04);border-radius:14px;padding:1.8rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--brand);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.6rem;">// papéis e responsabilidades</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
+        <div><div style="font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.25rem;">CFO / Diretoria</div><div style="font-size:.78rem;color:var(--slate);">Aprovação de pagamentos altos, fechamento de período, acesso total</div></div>
+        <div><div style="font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.25rem;">Gestor Financeiro</div><div style="font-size:.78rem;color:var(--slate);">Aprovação de pagamentos médios, gestão de fornecedores, conciliação</div></div>
+        <div><div style="font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.25rem;">Analista Financeiro</div><div style="font-size:.78rem;color:var(--slate);">Lançamentos, revisão de conciliação, geração de relatórios</div></div>
+        <div><div style="font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.25rem;">Auditor</div><div style="font-size:.78rem;color:var(--slate);">Acesso read-only completo, revisão mensal do audit log</div></div>
+        <div><div style="font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.25rem;">Owner de Sistema</div><div style="font-size:.78rem;color:var(--slate);">Kill switch dos agentes, aprovação de novos agentes, config de limites</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- DESIGN SYSTEM -->
+<div class="wrapper">
+  <section id="design" class="fade-in">
+    <div class="stag">// design system</div>
+    <h2 class="stitle">Identidade visual FBR-Finance</h2>
+    <p class="slead">Outfit para títulos, Inter para corpo de texto. Emerald 500 (#10B981) como cor primária do Finance — distinção clara do Orange 500 da marca principal. Dark mode obrigatório em todos os componentes.</p>
+
+    <div class="ds-grid">
+      <div class="dsblock">
+        <h5>// tipografia</h5>
+        <div class="fsample"><div class="fsn">Outfit ExtraBold — logo / identidade</div><div class="ft-heading">FBR·Finance</div></div>
+        <div class="fsample"><div class="fsn">Outfit Bold — títulos H1</div><div class="ft-h2">Controle Financeiro Total</div></div>
+        <div class="fsample"><div class="fsn">Inter Regular — corpo de texto</div><div class="ft-body">Cada centavo do grupo, rastreado e auditado.</div></div>
+        <div class="fsample"><div class="fsn">JetBrains Mono — valores / códigos</div><div class="ft-mono">R$ 1.482.750,00</div></div>
+      </div>
+
+      <div class="dsblock">
+        <h5>// paleta de cores</h5>
+        <div style="margin-bottom:.9rem">
+          <div class="fsn" style="margin-bottom:.4rem">Finance Primary</div>
+          <div class="swatch-row">
+            <div class="sw" style="background:#10B981" title="#10B981 finance primary"></div>
+            <div class="sw" style="background:#059669" title="#059669 finance dark"></div>
+            <div class="sw" style="background:#F97316" title="#F97316 brand orange"></div>
+            <div class="sw" style="background:#101622" title="#101622 dark bg"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:.9rem">
+          <div class="fsn" style="margin-bottom:.4rem">Status Financeiro</div>
+          <div class="swatch-row">
+            <div class="sw" style="background:#22C55E" title="#22C55E receita / positivo"></div>
+            <div class="sw" style="background:#EF4444" title="#EF4444 despesa / negativo"></div>
+            <div class="sw" style="background:#F59E0B" title="#F59E0B pendente / alerta"></div>
+            <div class="sw" style="background:#3B82F6" title="#3B82F6 projeção / neutro"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dsblock">
+        <h5>// stack técnica</h5>
+        <div class="stack-tags">
+          <div class="stag-pill"><span class="pc">BE</span>FastAPI</div>
+          <div class="stag-pill"><span class="pc">BE</span>PostgreSQL 16</div>
+          <div class="stag-pill"><span class="pc">BE</span>Redis 7</div>
+          <div class="stag-pill"><span class="pc">FE</span>Next.js 15</div>
+          <div class="stag-pill"><span class="pc">FE</span>TypeScript strict</div>
+          <div class="stag-pill"><span class="pc">FE</span>Tailwind v4</div>
+          <div class="stag-pill"><span class="pc">AI</span>OpenClaw</div>
+          <div class="stag-pill"><span class="pc">AI</span>Claude API</div>
+          <div class="stag-pill"><span class="pc">OPS</span>Docker Compose</div>
+          <div class="stag-pill"><span class="pc">OPS</span>Nginx + Certbot</div>
+          <div class="stag-pill"><span class="pc">OPS</span>Grafana</div>
+        </div>
+      </div>
+
+      <div class="dsblock">
+        <h5>// posição no ecossistema</div>
+        <div style="font-size:.82rem;color:var(--slate);line-height:1.7;">
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--grid-line);"><span>FBR-Click</span><span style="color:var(--white);">Canal #finance-alertas</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--grid-line);"><span>FBR-Sales</span><span style="color:var(--finance);">integração bidirecional</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--grid-line);"><span>FBR-Dev</span><span style="color:var(--blue);">custos de infra e dev</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--grid-line);"><span>FBR-Suporte</span><span style="color:var(--blue);">custos operacionais</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.4rem 0;"><span>FBR-Leads</span><span style="color:var(--blue);">custo de aquisição</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PLANO -->
+<div class="wrapper">
+  <section id="plano" class="fade-in">
+    <div class="stag">// plano de implementação</div>
+    <h2 class="stitle">45 dias · 8 batches</h2>
+    <p class="slead">Prioridade absoluta na integração com FBR-Sales (Batch 2) para garantir rastreabilidade financeira imediata da receita publicitária. Os agentes entram no Batch 6, após a base de dados e backend estarem estáveis.</p>
+
+    <div class="tl">
+      <div class="tlitem">
+        <div class="tlb">Batch 1</div>
+        <div class="tlt">Fundação de Infraestrutura</div>
+        <div class="tld">VPS Hetzner isolada, Docker Compose, PostgreSQL 16, Redis 7, Nginx + SSL, OpenClaw Gateway. Estrutura de empresas e centros de custo.</div>
+        <div class="tld2">Dias 1–5</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 2</div>
+        <div class="tlt">Database Schema + RLS</div>
+        <div class="tld">14 tabelas com RLS em todas, triggers de audit_log, isolamento por company_id, índices de performance, seed com empresas do grupo.</div>
+        <div class="tld2">Dias 5–10</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 3</div>
+        <div class="tlt">Backend Core — Recebimentos e Pagamentos</div>
+        <div class="tld">FastAPI com auth iron-session, módulos de recebimentos e pagamentos, fluxo de aprovação, integração FBR-Sales e FBR-Click.</div>
+        <div class="tld2">Dias 10–18</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 4</div>
+        <div class="tlt">Centro de Custo + Conciliação</div>
+        <div class="tld">Módulo de centros de custo, P&L por empresa, motor de conciliação automática, fila de pendências para revisão humana.</div>
+        <div class="tld2">Dias 18–26</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 5</div>
+        <div class="tlt">Frontend Dashboard</div>
+        <div class="tld">Next.js 15, dashboards financeiros com gráficos, fluxo de aprovação UI, gestão de fornecedores, relatórios exportáveis.</div>
+        <div class="tld2">Dias 22–32 ‖ paralelo com Batch 4</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 6</div>
+        <div class="tlt">Time de Agentes Vault</div>
+        <div class="tld">7 agentes com repositórios Git, 7 Markdowns cada. Vault + 6 sub-agentes. Período de observação de 7 dias ativo. Kill switches prontos.</div>
+        <div class="tld2">Dias 30–40</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 7</div>
+        <div class="tlt">Forecasting + Integrações Completas</div>
+        <div class="tld">Módulo de forecasting com Oracle, integração FBR-Dev, FBR-Suporte, FBR-Leads. Open Banking para conciliação automática bancária.</div>
+        <div class="tld2">Dias 38–43</div>
+      </div>
+      <div class="tlitem">
+        <div class="tlb">Batch 8</div>
+        <div class="tlt">Produção e Entrega</div>
+        <div class="tld">Grafana + Prometheus, backups, testes de carga, auditoria de segurança financeira, treinamento da equipe, go-live.</div>
+        <div class="tld2">Dias 43–45</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<div class="wrapper">
+  <footer>
+    <div class="ft-inner">
+      <div>
+        <div class="ft-brand">FBR<span>·</span>Finance</div>
+        <div style="font-size:.78rem;color:var(--slate);margin-top:.3rem;font-family:'Inter',sans-serif;font-weight:300;">Hub Financeiro do Grupo Facebrasil</div>
+      </div>
+      <div class="ft-meta">
+        <div>Conceito Geral do Projeto v1.0</div>
+        <div>Next.js 15 · FastAPI · PostgreSQL 16 · OpenClaw</div>
+        <div style="opacity:.45;margin-top:.3rem">Facebrasil · Confidencial · Março 2026</div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
