@@ -10,6 +10,11 @@ function getOpenAI() {
 
 import { AVAILABLE_MODELS } from '@/lib/ai-models';
 
+function isOpenRouterModel(modelId: string): boolean {
+    const model = AVAILABLE_MODELS.find(m => m.id === modelId);
+    return model?.provider === 'openrouter';
+}
+
 function getAiClient(modelId: string) {
     const model = AVAILABLE_MODELS.find(m => m.id === modelId);
     
@@ -27,6 +32,31 @@ function getAiClient(modelId: string) {
     return new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
+}
+
+/**
+ * Extrai JSON de uma string, com fallback para regex caso o modelo
+ * não retorne JSON puro (comum em modelos do OpenRouter)
+ */
+function extractJSON(text: string): any {
+    // Tenta parse direto
+    try {
+        return JSON.parse(text);
+    } catch (_) {}
+    
+    // Tenta extrair bloco ```json ... ```
+    const codeBlock = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlock) {
+        try { return JSON.parse(codeBlock[1].trim()); } catch (_) {}
+    }
+    
+    // Tenta extrair o primeiro objeto JSON {...}
+    const objMatch = text.match(/\{[\s\S]*\}/);
+    if (objMatch) {
+        try { return JSON.parse(objMatch[0]); } catch (_) {}
+    }
+    
+    throw new Error('Não foi possível extrair JSON da resposta da IA: ' + text.substring(0, 200));
 }
 
 export interface GenerateArticleOptions {
@@ -59,21 +89,28 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
         Retorne no formato JSON com as chaves "title" e "content" (em HTML semântico).`;
 
         const client = getAiClient(selectedModel);
+        const useOpenRouter = isOpenRouterModel(selectedModel);
 
-        const completion = await client.chat.completions.create({
+        const completionParams: any = {
             model: selectedModel,
             messages: [
-                { role: 'system', content: 'Você é um assistente especializado em criar artigos de alta qualidade para blogs. Sempre retorne JSON válido.' },
+                { role: 'system', content: 'Você é um assistente especializado em criar artigos de alta qualidade para blogs. Sempre retorne JSON válido com as chaves "title" e "content".' },
                 { role: 'user', content: prompt }
             ],
-            response_format: { type: 'json_object' },
             temperature: 0.7,
-        });
+        };
+
+        // response_format json_object só é suportado pela OpenAI
+        if (!useOpenRouter) {
+            completionParams.response_format = { type: 'json_object' };
+        }
+
+        const completion = await client.chat.completions.create(completionParams);
 
         const responseText = completion.choices[0]?.message?.content;
         if (!responseText) throw new Error('Empty response from AI');
 
-        const parsed = JSON.parse(responseText);
+        const parsed = extractJSON(responseText);
         return {
             success: true,
             title: parsed.title,
@@ -99,8 +136,9 @@ export async function generateKeywords(topic: string): Promise<{ success: boolea
         const responseText = completion.choices[0]?.message?.content;
         if (!responseText) throw new Error('Empty response');
 
-        const parsed = JSON.parse(responseText);
-        return { success: true, keywords: parsed.keywords || parsed };
+        const parsed = extractJSON(responseText);
+        const keywords = Array.isArray(parsed) ? parsed : (parsed.keywords || Object.values(parsed)[0]);
+        return { success: true, keywords: Array.isArray(keywords) ? keywords : [] };
     } catch (error: any) {
         return { success: false, error: error.message };
     }
@@ -141,7 +179,7 @@ export async function generateSEOStrategy(socialSummary: string): Promise<{ succ
         const responseText = completion.choices[0]?.message?.content;
         if (!responseText) throw new Error('Empty response');
 
-        const parsed = JSON.parse(responseText);
+        const parsed = extractJSON(responseText);
         // Sometimes the AI wraps it in a "keywords" key, sometimes it's just the array
         const keywords = Array.isArray(parsed) ? parsed : (parsed.keywords || Object.values(parsed)[0]);
         
@@ -175,7 +213,7 @@ export async function generateSEOTitle(content: string, keywords: string[]): Pro
         const responseText = completion.choices[0]?.message?.content;
         if (!responseText) throw new Error('Empty response');
 
-        const parsed = JSON.parse(responseText);
+        const parsed = extractJSON(responseText);
         return { success: true, title: parsed.title };
     } catch (error: any) {
         console.error('SEO Title Error:', error);
@@ -206,7 +244,7 @@ export async function applySEOStrategy(content: string, keywords: string[]): Pro
         const responseText = completion.choices[0]?.message?.content;
         if (!responseText) throw new Error('Empty response');
 
-        const parsed = JSON.parse(responseText);
+        const parsed = extractJSON(responseText);
         return { success: true, content: parsed.content };
     } catch (error: any) {
         console.error('Apply SEO Strategy Error:', error);
