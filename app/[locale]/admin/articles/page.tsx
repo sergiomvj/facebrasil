@@ -7,7 +7,7 @@ import { Link, useRouter } from '@/i18n/routing';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { deleteArticle, upsertArticle, updateArticleScheduleDate } from '@/app/actions/article-actions';
-import { generateArticle, generateKeywords } from '@/app/actions/ai-actions';
+import { generateArticle, generateKeywords, generateScopeDescription } from '@/app/actions/ai-actions';
 import { AVAILABLE_MODELS } from '@/lib/ai-models';
 import { routing } from '@/i18n/routing';
 import { buildCategoryTree, flattenCategoryTree, Category } from '@/lib/category-utils';
@@ -64,8 +64,10 @@ export default function ArticlesListPage() {
     const [aiSize, setAiSize] = useState<'small' | 'medium' | 'large'>('medium');
     const [aiCategory, setAiCategory] = useState('');
     const [aiScope, setAiScope] = useState('');
+    const [aiScopeDescription, setAiScopeDescription] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [isSuggestingKeywords, setIsSuggestingKeywords] = useState(false);
+    const [isGeneratingScopeDesc, setIsGeneratingScopeDesc] = useState(false);
 
     // Scheduling Modal State
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -106,6 +108,18 @@ export default function ArticlesListPage() {
         }
     };
 
+    const handleGenerateScopeDescription = async () => {
+        if (!aiTopic) return alert('Digite um tema primeiro');
+        setIsGeneratingScopeDesc(true);
+        try {
+            const res = await generateScopeDescription(aiTopic, aiScope || undefined);
+            if (res.success && res.description) setAiScopeDescription(res.description);
+            else alert('Erro ao gerar briefing: ' + res.error);
+        } finally {
+            setIsGeneratingScopeDesc(false);
+        }
+    };
+
     const handleGenerateArticle = async () => {
         if (!aiTopic) return alert('Digite um tema');
         setIsGenerating(true);
@@ -117,16 +131,19 @@ export default function ArticlesListPage() {
                 size: aiSize,
                 language: selectedLanguage === 'all' ? 'pt' : selectedLanguage,
                 scope: aiScope,
+                scopeDescription: aiScopeDescription || undefined,
                 model: aiModel
             });
 
             if (result.success && result.title && result.content) {
-                // Criar Draft e redirecionar
-                const slug = result.title.toLowerCase()
+                // Slug único: base do título + sufixo timestamp para evitar conflito de unique constraint
+                const baseSlug = result.title.toLowerCase()
                     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                     .replace(/[^\w\s-]/g, '')
                     .replace(/[\s_-]+/g, '-')
                     .replace(/^-+|-+$/g, '');
+                const uniqueSuffix = Date.now().toString(36); // ex: "lp3k2f"
+                const slug = `${baseSlug}-${uniqueSuffix}`;
 
                 const payload = {
                     title: result.title,
@@ -394,6 +411,33 @@ export default function ArticlesListPage() {
                                 </div>
                             </div>
 
+                            {/* Descrição do Escopo */}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                        <FileText className="w-3 h-3 text-purple-400" /> Descrição do Escopo do Artigo
+                                    </label>
+                                    <button
+                                        onClick={handleGenerateScopeDescription}
+                                        disabled={isGeneratingScopeDesc || !aiTopic}
+                                        className="text-[10px] font-black text-purple-400 uppercase tracking-widest hover:text-purple-300 transition-colors disabled:opacity-50 flex items-center gap-1"
+                                    >
+                                        <Sparkles className="w-2.5 h-2.5" />
+                                        {isGeneratingScopeDesc ? 'Gerando...' : 'Gerar com IA'}
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={aiScopeDescription}
+                                    onChange={(e) => setAiScopeDescription(e.target.value)}
+                                    rows={4}
+                                    placeholder={`Descreva aqui o briefing editorial do artigo — quanto mais detalhado, melhor o resultado da IA.\n\nExemplo: \u201cO artigo deve abordar os desafios burocráticos que brasileiros enfrentam ao abrir uma empresa nos EUA, com foco nos estados da Flórida e Texas. O tom deve ser prático e empoderador, evitando jargões jurídicos. Incluir pelo menos 2 exemplos reais e terminar com um call-to-action para consultar um especialista.\u201d`}
+                                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-4 text-white text-sm placeholder:text-slate-700 focus:ring-1 focus:ring-purple-500/50 outline-none transition-all resize-none leading-relaxed"
+                                />
+                                <p className="text-[10px] text-slate-600 leading-relaxed">
+                                    💡 <span className="text-slate-500">Este campo orienta a IA sobre ângulo, público-alvo, pontos obrigatórios e o que evitar. Pode ser preenchido manualmente, editado após gerado pela IA ou deixado em branco.</span>
+                                </p>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Estilo de Escrita</label>
@@ -428,6 +472,7 @@ export default function ArticlesListPage() {
                                 </div>
                             </div>
                         </div>
+
 
                         <div className="p-6 bg-slate-950/50 border-t border-white/5 flex gap-3">
                             <button

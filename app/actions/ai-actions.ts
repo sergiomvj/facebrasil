@@ -66,6 +66,7 @@ export interface GenerateArticleOptions {
     size: 'small' | 'medium' | 'large';
     language: string;
     scope?: string;
+    scopeDescription?: string;
     model?: string;
 }
 
@@ -83,10 +84,11 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
 
         const prompt = `Crie um artigo de alta qualidade em ${options.language === 'en' ? 'Inglês' : options.language === 'es' ? 'Espanhol' : 'Português Brasileiro'} sobre o tema: "${options.topic}".
         ${options.scope ? `O artigo deve focar especificamente no seguinte escopo/tópico: "${options.scope}".` : ''}
-        Use as seguintes palavras-chave: ${options.keywords.join(', ')}.
+        ${options.scopeDescription ? `\n\nBriefing editorial e diretrizes de conteúdo (siga RIGOROSAMENTE):\n"${options.scopeDescription}"` : ''}
+        ${options.keywords.length > 0 ? `Use as seguintes palavras-chave de forma natural: ${options.keywords.join(', ')}.` : ''}
         O estilo deve ser ${options.style}.
         O tamanho aproximado deve ser de ${wordCount} palavras.
-        Retorne no formato JSON com as chaves "title" e "content" (em HTML semântico).`;
+        Retorne no formato JSON com as chaves "title" e "content" (em HTML semântico com parágrafos <p>, subtítulos <h2>, listas <ul> quando apropriado).`;
 
         const client = getAiClient(selectedModel);
         const useOpenRouter = isOpenRouterModel(selectedModel);
@@ -122,6 +124,40 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
     }
 }
 
+
+export async function generateScopeDescription(topic: string, scope?: string): Promise<{ success: boolean; description?: string; error?: string }> {
+    try {
+        const prompt = `Você é um editor-chefe de um portal de notícias brasileiro voltado para brasileiros nos EUA.
+        Crie um briefing editorial detalhado para orientar um redator a escrever um artigo sobre: "${topic}"${scope ? ` com foco em "${scope}"` : ''}.
+        
+        O briefing deve incluir:
+        - Ângulo principal e gancho jornalístico
+        - Público-alvo e tom de comunicação
+        - Pontos essenciais que o artigo deve abordar (3 a 5 tópicos)
+        - O que NÃO deve ser incluído ou abordado
+        - Chamada para ação ou conclusão esperada
+        
+        Escreva de forma direta, clara e em português brasileiro. Máximo 200 palavras. Não use bullets nem markdown, apenas texto corrido por parágrafo.`;
+
+        const completion = await getOpenAI().chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: 'Você é um editor-chefe experiente. Retorne apenas o texto do briefing, sem formatação markdown.' },
+                { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 400,
+        });
+
+        const description = completion.choices[0]?.message?.content?.trim();
+        if (!description) throw new Error('Empty response');
+
+        return { success: true, description };
+    } catch (error: any) {
+        console.error('Scope Description Error:', error);
+        return { success: false, error: error.message };
+    }
+}
 
 export async function generateKeywords(topic: string): Promise<{ success: boolean; keywords?: string[]; error?: string }> {
     try {
