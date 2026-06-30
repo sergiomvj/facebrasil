@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import FirecrawlApp from '@mendable/firecrawl-js';
+import OpenAI from 'openai';
 
 const QUERIES = [
   '"Brazilians abroad" OR "Brazilians in USA" OR "Brazilian community"',
