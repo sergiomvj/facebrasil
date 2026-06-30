@@ -17,6 +17,14 @@ export default function VirtualJournalistDashboard() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [sourceQuery, setSourceQuery] = useState<string>('');
 
+    // Rewrite Modal States
+    const [rewriteModalOpen, setRewriteModalOpen] = useState(false);
+    const [rewriteSize, setRewriteSize] = useState('medium');
+    const [rewriteDraftTitle, setRewriteDraftTitle] = useState('');
+    const [rewriteDraftContent, setRewriteDraftContent] = useState('');
+    const [isSavingDraft, setIsSavingDraft] = useState(false);
+    const [activeNews, setActiveNews] = useState<any>(null);
+
     const fetchAgents = async () => {
         const { data } = await supabase.from('virtual_agents').select('*');
         if (data) {
@@ -122,31 +130,33 @@ export default function VirtualJournalistDashboard() {
         setDeletingId(null);
     };
 
-    const handleRewrite = async (newsId: string) => {
+    const openRewriteModal = (news: any) => {
         if (!selectedAgent || selectedAgent === 'generic' || selectedAgent === 'all') {
             alert('Selecione um jornalista virtual específico para reescrever a notícia.');
             return;
         }
 
-        setRewritingId(newsId);
+        setActiveNews(news);
+        setRewriteDraftTitle('');
+        setRewriteDraftContent('');
+        setRewriteSize('medium');
+        setRewriteModalOpen(true);
+    };
+
+    const generateRewrite = async () => {
+        if (!activeNews) return;
+        setRewritingId(activeNews.id);
         try {
             const res = await fetch('/api/virtual-journalist/rewrite', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ newsId, agentId: selectedAgent })
+                body: JSON.stringify({ newsId: activeNews.id, agentId: selectedAgent, size: rewriteSize })
             });
 
             if (res.ok) {
                 const data = await res.json();
-                
-                // Save to local storage for the new article page to pick up
-                localStorage.setItem('virtual_journalist_draft', JSON.stringify({
-                    title: data.title,
-                    content: data.content,
-                    original_url: data.original_url
-                }));
-
-                router.push('/pt/admin/articles'); // Ou a URL real de criação dependendo de como é o router do projeto
+                setRewriteDraftTitle(data.title);
+                setRewriteDraftContent(data.content);
             } else {
                 alert('Erro ao reescrever notícia.');
             }
@@ -155,6 +165,40 @@ export default function VirtualJournalistDashboard() {
             alert('Erro de conexão ao tentar reescrever.');
         }
         setRewritingId(null);
+    };
+
+    const saveDraft = async () => {
+        if (!rewriteDraftTitle || !rewriteDraftContent) {
+            alert('O título e o conteúdo não podem estar vazios.');
+            return;
+        }
+
+        setIsSavingDraft(true);
+        try {
+            const res = await fetch('/api/virtual-journalist/save-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    newsId: activeNews.id, 
+                    agentId: selectedAgent, 
+                    title: rewriteDraftTitle, 
+                    content: rewriteDraftContent 
+                })
+            });
+
+            if (res.ok) {
+                alert('Draft salvo com sucesso na lista de artigos!');
+                setRewriteModalOpen(false);
+                await fetchNews(); // Atualiza a lista
+            } else {
+                const err = await res.json();
+                alert(`Erro ao salvar draft: ${err.error || 'Desconhecido'}`);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erro de conexão ao tentar salvar draft.');
+        }
+        setIsSavingDraft(false);
     };
 
     return (
@@ -273,7 +317,7 @@ export default function VirtualJournalistDashboard() {
                                         </div>
                                     ) : (
                                         <button 
-                                            onClick={() => handleRewrite(news.id)}
+                                            onClick={() => openRewriteModal(news)}
                                             disabled={!isProcessed || rewritingId === news.id || deletingId === news.id}
                                             className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
@@ -299,6 +343,101 @@ export default function VirtualJournalistDashboard() {
                             Nenhuma notícia capturada ainda. Clique em "Buscar Novas".
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Modal de Reescrita */}
+            {rewriteModalOpen && activeNews && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh]">
+                        <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center shrink-0">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Gerar Artigo com IA</h2>
+                            <button onClick={() => setRewriteModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition">
+                                <Trash2 className="w-5 h-5 hidden" /> {/* spacer */}
+                                ✕
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-6">
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                                <h3 className="font-semibold text-indigo-900 dark:text-indigo-300 mb-2">Opções do Autor</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Jornalista</label>
+                                        <div className="font-medium text-gray-900 dark:text-white">{agents.find(a => a.id === selectedAgent)?.name}</div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Tamanho do Artigo</label>
+                                        <select 
+                                            value={rewriteSize} 
+                                            onChange={e => setRewriteSize(e.target.value)}
+                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg text-sm"
+                                        >
+                                            <option value="small">Curto (2 a 3 parágrafos)</option>
+                                            <option value="medium">Médio (4 a 6 parágrafos)</option>
+                                            <option value="large">Longo (8 a 10 parágrafos)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={generateRewrite}
+                                    disabled={rewritingId === activeNews.id}
+                                    className="mt-4 w-full py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {rewritingId === activeNews.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Cpu className="w-5 h-5" />}
+                                    Gerar / Refazer Artigo
+                                </button>
+                            </div>
+
+                            {rewriteDraftTitle || rewritingId === activeNews.id ? (
+                                <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título Gerado</label>
+                                        <input 
+                                            type="text" 
+                                            value={rewriteDraftTitle}
+                                            onChange={e => setRewriteDraftTitle(e.target.value)}
+                                            placeholder="Aguardando geração..."
+                                            disabled={rewritingId === activeNews.id}
+                                            className="w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg font-bold text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Conteúdo (HTML)</label>
+                                        <textarea 
+                                            value={rewriteDraftContent}
+                                            onChange={e => setRewriteDraftContent(e.target.value)}
+                                            placeholder="O conteúdo gerado aparecerá aqui..."
+                                            disabled={rewritingId === activeNews.id}
+                                            rows={12}
+                                            className="w-full p-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg font-mono text-sm text-gray-900 dark:text-gray-300"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex items-center justify-center text-gray-400 py-12">
+                                    Clique em "Gerar Artigo" para visualizar o resultado aqui.
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3 shrink-0 bg-gray-50 dark:bg-slate-800/50 rounded-b-2xl">
+                            <button 
+                                onClick={() => setRewriteModalOpen(false)}
+                                className="px-6 py-2 text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                onClick={saveDraft}
+                                disabled={!rewriteDraftTitle || isSavingDraft || rewritingId === activeNews.id}
+                                className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {isSavingDraft ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                                Enviar para Draft de Produção
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
