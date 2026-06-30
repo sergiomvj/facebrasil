@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import FirecrawlApp from '@mendable/firecrawl-js';
 
-const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
-
 const QUERIES = [
   '"Brazilians in USA" OR "Brazilian immigrants"',
   '"ICE arrests Brazilian" OR "Brazilian deported"',
@@ -25,6 +23,8 @@ export async function POST(req: Request) {
     if (!process.env.FIRECRAWL_API_KEY) {
       return NextResponse.json({ error: 'FIRECRAWL_API_KEY is missing' }, { status: 500 });
     }
+    
+    const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
 
     const capturedResults: any[] = [];
 
