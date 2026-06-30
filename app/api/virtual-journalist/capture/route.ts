@@ -67,7 +67,7 @@ Assunto Específico Solicitado pelo Usuário: ${sourceQuery && sourceQuery.trim(
 
 Instruções cruciais:
 1. Se houver um "Assunto Específico Solicitado" (ex: "Padarias"), a busca DEVE focar nesse assunto, MAS sempre dentro do contexto de brasileiros no exterior, imigrantes brasileiros, ou empresas brasileiras na região do agente. Exemplo gerado: "Brazilian bakeries in USA" ou "Brazilian bakeries in ${agentLocation}".
-2. Se o assunto específico for "NENHUM", gere uma busca genérica sobre fatos, notícias, pessoas ou empresas brasileiras no exterior (ex: "Brazilian businesses abroad", "Brazilian immigrants", etc), priorizando a Especialidade e o Local base do jornalista.
+2. Se o assunto específico for "NENHUM", a busca deve ser estritamente baseada neste foco padrão: qualquer menção sobre brasileiros no exterior, negócios de empresas brasileiras no exterior, notícias sobre brasileiro no exterior ou notícias e fatos relevantes sobre as regiões mais densamente ocupadas por brasileiros.
 3. Retorne APENAS a string de busca final, sem aspas, sem pontuação, sem explicações.`;
 
         const completion = await openai.chat.completions.create({
@@ -128,15 +128,43 @@ Instruções cruciais:
         items = response;
     }
 
+    // Tradução em massa dos títulos
+    let translatedTitles: Record<string, string> = {};
+    if (Array.isArray(items) && items.length > 0) {
+      try {
+        const titlesToTranslate = items
+          .map(item => item.title || (item.metadata && item.metadata.title) || '')
+          .filter(t => t.trim().length > 0);
+          
+        if (titlesToTranslate.length > 0) {
+          const translationPrompt = `Traduza os seguintes títulos de notícias para o português do Brasil. Retorne os resultados no formato JSON, onde a chave é o título original (exatamente como foi enviado) e o valor é a tradução em português. Não adicione mais nenhum texto.\n\nTítulos:\n${titlesToTranslate.join('\n')}`;
+          
+          const translationCompletion = await openai.chat.completions.create({
+            messages: [{ role: "user", content: translationPrompt }],
+            model: "gpt-4o-mini",
+            response_format: { type: "json_object" }
+          });
+          
+          translatedTitles = JSON.parse(translationCompletion.choices[0]?.message?.content || '{}');
+        }
+      } catch (e) {
+        console.error('Error translating titles:', e);
+      }
+    }
+
     if (Array.isArray(items)) {
       for (const item of items) {
         // Extrai URL e Título com mais segurança
         const itemUrl = item.url || (item.metadata && item.metadata.sourceURL) || '';
         if (!itemUrl) continue; // Pula se não houver URL
         
+        const originalTitle = item.title || (item.metadata && item.metadata.title) || 'Sem título';
+        const translatedTitle = translatedTitles[originalTitle] || null;
+
         // Prepare data for DB
         const newsData = {
-          original_title: item.title || (item.metadata && item.metadata.title) || 'Sem título',
+          original_title: originalTitle,
+          translated_title: translatedTitle,
           url: itemUrl,
           source_vehicle: new URL(itemUrl).hostname,
           published_at: new Date().toISOString(), // Mock as Firecrawl may not return date directly
