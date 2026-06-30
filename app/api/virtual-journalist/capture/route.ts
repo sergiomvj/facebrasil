@@ -94,7 +94,7 @@ Instruções cruciais:
 
     console.log('🔥 Firecrawl search query:', finalQuery);
 
-    let response;
+    let response: any;
     try {
       response = await firecrawl.search(finalQuery, {
         limit: 5,
@@ -108,21 +108,37 @@ Instruções cruciais:
       return NextResponse.json({ error: `Erro no Firecrawl: ${firecrawlError.message || JSON.stringify(firecrawlError)}` }, { status: 500 });
     }
 
-    const responseData: any = response;
-    
-    if (responseData && responseData.success === false) {
-      return NextResponse.json({ error: `Firecrawl API: ${responseData.error || 'Falha na busca'}` }, { status: 500 });
+    if (response && response.success === false) {
+      return NextResponse.json({ error: `Firecrawl API: ${response.error || 'Falha na busca'}` }, { status: 500 });
     }
 
-    const items = responseData.data || responseData;
+    let items: any[] = [];
+    if (response && typeof response === 'object') {
+        if ('web' in response && Array.isArray(response.web)) {
+            items = response.web;
+        } else {
+            try {
+                // Tenta acessar .data (pode lançar erro no getter em novas versões do SDK)
+                items = response.data || response;
+            } catch (e) {
+                items = response;
+            }
+        }
+    } else {
+        items = response;
+    }
 
     if (Array.isArray(items)) {
       for (const item of items) {
+        // Extrai URL e Título com mais segurança
+        const itemUrl = item.url || (item.metadata && item.metadata.sourceURL) || '';
+        if (!itemUrl) continue; // Pula se não houver URL
+        
         // Prepare data for DB
         const newsData = {
-          original_title: item.title || 'Sem título',
-          url: item.url,
-          source_vehicle: new URL(item.url || 'https://unknown.com').hostname,
+          original_title: item.title || (item.metadata && item.metadata.title) || 'Sem título',
+          url: itemUrl,
+          source_vehicle: new URL(itemUrl).hostname,
           published_at: new Date().toISOString(), // Mock as Firecrawl may not return date directly
           category: 'geral'
         };
@@ -132,7 +148,7 @@ Instruções cruciais:
           .from('captured_news')
           .select('id')
           .eq('url', newsData.url)
-          .single();
+          .maybeSingle(); // Usa maybeSingle para não logar erro se não existir
 
         if (!existing) {
           const { data: inserted, error: insertError } = await supabase
