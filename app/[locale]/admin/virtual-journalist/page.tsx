@@ -45,8 +45,8 @@ export default function VirtualJournalistDashboard() {
     }, []);
 
     const handleCapture = async () => {
-        if (!selectedAgent) {
-            alert('Selecione um Agente Virtual para direcionar a captura.');
+        if (!selectedAgent || selectedAgent === 'all') {
+            alert('Selecione um Agente Virtual ou a Busca Genérica Aberta para direcionar a captura.');
             return;
         }
         
@@ -76,8 +76,8 @@ export default function VirtualJournalistDashboard() {
     };
 
     const handleProcess = async () => {
-        if (!selectedAgent) {
-            alert('Selecione um Agente Virtual para direcionar o processamento.');
+        if (!selectedAgent || selectedAgent === 'generic' || selectedAgent === 'all') {
+            alert('Selecione um jornalista virtual específico para direcionar o processamento.');
             return;
         }
 
@@ -123,8 +123,8 @@ export default function VirtualJournalistDashboard() {
     };
 
     const handleRewrite = async (newsId: string) => {
-        if (!selectedAgent) {
-            alert('Selecione um agente virtual primeiro.');
+        if (!selectedAgent || selectedAgent === 'generic' || selectedAgent === 'all') {
+            alert('Selecione um jornalista virtual específico para reescrever a notícia.');
             return;
         }
 
