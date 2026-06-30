@@ -17,7 +17,27 @@ Deno.serve(async (req) => {
 
     const now = new Date();
     const currentMinute = now.getMinutes();
+    const currentHour = now.getHours();
     let updatedCount = 0;
+
+    // Fases de decaimento
+    const phase2Date = new Date('2026-07-05T00:00:00-03:00');
+    const phase3Date = new Date('2026-07-12T00:00:00-03:00');
+    const phase4Date = new Date('2026-07-19T00:00:00-03:00');
+
+    let articleIntervalHours = 1; // Atual: ~60 mins
+    let adsIntervalHours = 2;     // Atual: ~120 mins
+
+    if (now >= phase4Date) {
+      articleIntervalHours = 6;  // ~360 mins
+      adsIntervalHours = 10;     // ~600 mins
+    } else if (now >= phase3Date) {
+      articleIntervalHours = 4;  // ~240 mins
+      adsIntervalHours = 8;      // ~480 mins
+    } else if (now >= phase2Date) {
+      articleIntervalHours = 2;  // ~120 mins
+      adsIntervalHours = 4;      // ~240 mins
+    }
 
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     
@@ -35,9 +55,8 @@ Deno.serve(async (req) => {
         const ageInHours = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
         let shouldIncrement = false;
 
-        if (ageInHours < 24) {
-          shouldIncrement = true;
-        } else if (currentMinute % 15 >= 0 && currentMinute % 15 <= 2) {
+        // Artigos de 0 a 7 dias (frequência dinâmica baseada na data)
+        if (currentHour % articleIntervalHours === 0 && currentMinute >= 0 && currentMinute <= 2) {
           shouldIncrement = true;
         }
 
@@ -51,7 +70,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (currentMinute % 15 >= 0 && currentMinute % 15 <= 2) {
+    // Anúncios (frequência dinâmica baseada na data)
+    if (currentHour % adsIntervalHours === 0 && currentMinute >= 0 && currentMinute <= 2) {
       const { data: ads, error: adsError } = await supabase
           .from('ads')
           .select('id, views')

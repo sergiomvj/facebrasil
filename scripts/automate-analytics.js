@@ -7,15 +7,9 @@ const path = require('path');
  * Script de Automação de Analytics - Facebrasil
  * Regras Atualizadas:
  * - Artigos (< 7 dias): 
- *    - < 24h: Toda execução (+1 view a cada 3-5 min)
- *    - Dia 2: +1 view a cada 15 min
- *    - Dia 3: +1 view a cada 20 min
- *    - Dia 4: +1 view a cada 25 min
- *    - Dia 5: +1 view a cada 30 min
- *    - Dia 6: +1 view a cada 35 min
- *    - Dia 7: +1 view a cada 40 min
+ *    - +1 view a cada 60 min (início da hora)
  * - Anúncios (Ativos): 
- *    - +1 view a cada 15 min
+ *    - +1 view a cada 120 min (horas pares)
  */
 
 async function runAutomation() {
@@ -43,8 +37,27 @@ async function runAutomation() {
 
     const now = new Date();
     const currentMinute = now.getMinutes();
-    const totalDailyMinutes = now.getHours() * 60 + now.getMinutes();
+    const currentHour = now.getHours();
     let updatedCount = 0;
+
+    // Fases de decaimento
+    const phase2Date = new Date('2026-07-05T00:00:00-03:00');
+    const phase3Date = new Date('2026-07-12T00:00:00-03:00');
+    const phase4Date = new Date('2026-07-19T00:00:00-03:00');
+
+    let articleIntervalHours = 1; // Atual: ~60 mins
+    let adsIntervalHours = 2;     // Atual: ~120 mins
+
+    if (now >= phase4Date) {
+      articleIntervalHours = 6;  // ~360 mins
+      adsIntervalHours = 10;     // ~600 mins
+    } else if (now >= phase3Date) {
+      articleIntervalHours = 4;  // ~240 mins
+      adsIntervalHours = 8;      // ~480 mins
+    } else if (now >= phase2Date) {
+      articleIntervalHours = 2;  // ~120 mins
+      adsIntervalHours = 4;      // ~240 mins
+    }
 
     // 1. Processar Artigos
     // Filtramos artigos publicados nos últimos 7 dias que estejam 'PUBLISHED'
@@ -65,31 +78,10 @@ async function runAutomation() {
             const ageInDays = Math.floor(ageInHours / 24);
             
             let shouldIncrement = false;
-            let intervalMinutes = 0;
 
-            if (ageInDays === 0) {
-                // Dia 1 (< 24h) -> Incrementa a cada execução (assumindo script rodando frequente)
+            // Artigos de 0 a 7 dias (frequência dinâmica)
+            if (currentHour % articleIntervalHours === 0 && currentMinute >= 0 && currentMinute <= 2) {
                 shouldIncrement = true;
-            } else if (ageInDays === 1) {
-                intervalMinutes = 15; // Dia 2
-            } else if (ageInDays === 2) {
-                intervalMinutes = 20; // Dia 3
-            } else if (ageInDays === 3) {
-                intervalMinutes = 25; // Dia 4
-            } else if (ageInDays === 4) {
-                intervalMinutes = 30; // Dia 5
-            } else if (ageInDays === 5) {
-                intervalMinutes = 35; // Dia 6
-            } else if (ageInDays === 6) {
-                intervalMinutes = 40; // Dia 7
-            }
-
-            // Para idades > 24h, checamos o gatilho de tempo
-            if (intervalMinutes > 0) {
-                // Usamos um range de 3 min para garantir o gatilho se o script rodar por ex. a cada 3 ou 5 min
-                if (totalDailyMinutes % intervalMinutes < 3) {
-                    shouldIncrement = true;
-                }
             }
 
             if (shouldIncrement) {
@@ -103,7 +95,7 @@ async function runAutomation() {
         }
     }
 
-    // 2. Processar Anúncios (Mantendo a regra de 1 view a cada 15 min para ativos)
+    // 2. Processar Anúncios (frequência dinâmica)
     const { data: ads, error: adsError } = await supabase
         .from('ads')
         .select('id, views')
@@ -111,7 +103,7 @@ async function runAutomation() {
 
     if (adsError) {
         console.error('Erro ao buscar anúncios:', adsError);
-    } else if (ads && currentMinute % 15 === 0) {
+    } else if (ads && currentHour % adsIntervalHours === 0 && currentMinute >= 0 && currentMinute <= 2) {
         console.log(`Incrementando views para ${ads.length} anúncios ativos...`);
         for (const ad of ads) {
             await supabase.from('ads').update({ views: (ad.views || 0) + 1 }).eq('id', ad.id);
