@@ -32,34 +32,63 @@ export async function POST(req: Request) {
 
     let agentLocation = '';
     let agentName = '';
+    let agentProfileDescription = '';
 
     if (agentId) {
       const { data: agentData } = await supabase
         .from('virtual_agents')
-        .select('name, location')
+        .select('name, location, profile_description')
         .eq('id', agentId)
         .single();
       if (agentData) {
         agentLocation = agentData.location || '';
         agentName = agentData.name || '';
+        agentProfileDescription = agentData.profile_description || '';
       }
     }
 
     const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
     const capturedResults: any[] = [];
 
-    // Construct query
     let finalQuery = '';
+    
+    // We will need OpenAI to generate a custom query if sourceQuery is empty
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
     if (sourceQuery && sourceQuery.trim().length > 0) {
         finalQuery = sourceQuery.trim();
-        // optionally append location if we want to force it
-        if (agentLocation) {
-            finalQuery += ` ${agentLocation}`;
+    } else if (agentId && agentProfileDescription) {
+        try {
+            const prompt = `Gere uma única string de busca (search query) em inglês, curta e otimizada (máximo 6 palavras), para encontrar notícias recentes no Google/Bing que interessem ao seguinte jornalista virtual.
+Nome: ${agentName}
+Local base: ${agentLocation}
+Especialidade: ${agentProfileDescription}
+
+Instruções:
+- Se a especialidade for muito focada no local (ex: notícias locais de Miami), inclua o local e termos sobre brasileiros.
+- Se a especialidade for global/negócios (ex: empresas brasileiras no exterior), ignore o local base e foque no tema (ex: "Brazilian businesses abroad").
+- Retorne APENAS a string de busca, sem aspas, sem explicações.`;
+
+            const completion = await openai.chat.completions.create({
+                messages: [{ role: "user", content: prompt }],
+                model: "gpt-4o-mini",
+            });
+            
+            finalQuery = completion.choices[0]?.message?.content?.trim() || '';
+            // Remove aspas se o modelo adicionar
+            finalQuery = finalQuery.replace(/^["']|["']$/g, '');
+        } catch (error) {
+            console.error('Error generating query with OpenAI, falling back...', error);
         }
-    } else {
-        const randomBase = QUERIES[Math.floor(Math.random() * QUERIES.length)];
-        finalQuery = agentLocation ? `${randomBase} AND ${agentLocation}` : randomBase;
     }
+    
+    // Fallback absoluto se tudo falhar
+    if (!finalQuery) {
+        const QUERIES = ['"Brazilians abroad"', '"Brazilian immigrants"', '"Brazilian community"'];
+        finalQuery = QUERIES[Math.floor(Math.random() * QUERIES.length)];
+    }
+
+    console.log('🔥 Firecrawl search query:', finalQuery);
 
     let response;
     try {
