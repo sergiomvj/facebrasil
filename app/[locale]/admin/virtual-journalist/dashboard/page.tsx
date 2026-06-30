@@ -126,18 +126,28 @@ export default function VirtualJournalistDashboard() {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/10 mb-8">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agente Virtual Ativo</label>
-                <select 
-                    value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)}
-                    className="w-full md:w-1/3 px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
-                >
-                    <option value="" disabled>Selecione um jornalista virtual...</option>
-                    {agents.map(a => (
-                        <option key={a.id} value={a.id}>{a.name} ({a.location})</option>
-                    ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-2">O agente selecionado vai definir o estilo de escrita e o foco da notícia gerada.</p>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/10 mb-8 flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 w-full">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agente Virtual Ativo</label>
+                    <div className="flex gap-2">
+                        <select 
+                            value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)}
+                            className="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
+                        >
+                            <option value="" disabled>Selecione um jornalista virtual...</option>
+                            {agents.map(a => (
+                                <option key={a.id} value={a.id}>{a.name} ({a.location})</option>
+                            ))}
+                        </select>
+                        <button 
+                            onClick={() => router.push('/pt/admin/virtual-journalist/agents')}
+                            className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition text-sm font-medium whitespace-nowrap"
+                        >
+                            Criar / Gerenciar Agentes
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">O agente selecionado vai definir o estilo de escrita e o foco da notícia gerada.</p>
+                </div>
             </div>
 
             <h2 className="text-xl font-bold mb-4 dark:text-white text-gray-900">Notícias Capturadas</h2>
