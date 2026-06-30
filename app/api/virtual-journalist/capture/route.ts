@@ -52,40 +52,43 @@ export async function POST(req: Request) {
 
     let finalQuery = '';
     
-    // We will need OpenAI to generate a custom query if sourceQuery is empty
+    // We will use OpenAI to generate a custom query
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    if (sourceQuery && sourceQuery.trim().length > 0) {
-        finalQuery = sourceQuery.trim();
-    } else if (agentId && agentProfileDescription) {
-        try {
-            const prompt = `Gere uma única string de busca (search query) em inglês, curta e otimizada (máximo 6 palavras), para encontrar notícias recentes no Google/Bing que interessem ao seguinte jornalista virtual.
-Nome: ${agentName}
-Local base: ${agentLocation}
-Especialidade: ${agentProfileDescription}
+    try {
+        const prompt = `Você deve gerar uma única string de busca (search query) em inglês, curta e otimizada (máximo 6 palavras), para ser usada no Google/Firecrawl.
+O objetivo é encontrar notícias recentes que interessem ao seguinte jornalista virtual:
+Nome: ${agentName || 'Não especificado'}
+Local base: ${agentLocation || 'Exterior'}
+Especialidade: ${agentProfileDescription || 'Fatos e notícias sobre brasileiros, comunidade e empresas brasileiras no exterior'}
 
-Instruções:
-- Se a especialidade for muito focada no local (ex: notícias locais de Miami), inclua o local e termos sobre brasileiros.
-- Se a especialidade for global/negócios (ex: empresas brasileiras no exterior), ignore o local base e foque no tema (ex: "Brazilian businesses abroad").
-- Retorne APENAS a string de busca, sem aspas, sem explicações.`;
+Assunto Específico Solicitado pelo Usuário: ${sourceQuery && sourceQuery.trim().length > 0 ? `"${sourceQuery}"` : 'NENHUM'}
 
-            const completion = await openai.chat.completions.create({
-                messages: [{ role: "user", content: prompt }],
-                model: "gpt-4o-mini",
-            });
-            
-            finalQuery = completion.choices[0]?.message?.content?.trim() || '';
-            // Remove aspas se o modelo adicionar
-            finalQuery = finalQuery.replace(/^["']|["']$/g, '');
-        } catch (error) {
-            console.error('Error generating query with OpenAI, falling back...', error);
-        }
+Instruções cruciais:
+1. Se houver um "Assunto Específico Solicitado" (ex: "Padarias"), a busca DEVE focar nesse assunto, MAS sempre dentro do contexto de brasileiros no exterior, imigrantes brasileiros, ou empresas brasileiras na região do agente. Exemplo gerado: "Brazilian bakeries in USA" ou "Brazilian bakeries in ${agentLocation}".
+2. Se o assunto específico for "NENHUM", gere uma busca genérica sobre fatos, notícias, pessoas ou empresas brasileiras no exterior (ex: "Brazilian businesses abroad", "Brazilian immigrants", etc), priorizando a Especialidade e o Local base do jornalista.
+3. Retorne APENAS a string de busca final, sem aspas, sem pontuação, sem explicações.`;
+
+        const completion = await openai.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "gpt-4o-mini",
+        });
+        
+        finalQuery = completion.choices[0]?.message?.content?.trim() || '';
+        // Remove aspas se o modelo adicionar
+        finalQuery = finalQuery.replace(/^["']|["']$/g, '');
+    } catch (error) {
+        console.error('Error generating query with OpenAI, falling back...', error);
     }
     
     // Fallback absoluto se tudo falhar
     if (!finalQuery) {
-        const QUERIES = ['"Brazilians abroad"', '"Brazilian immigrants"', '"Brazilian community"'];
-        finalQuery = QUERIES[Math.floor(Math.random() * QUERIES.length)];
+        if (sourceQuery && sourceQuery.trim().length > 0) {
+            finalQuery = `Brazilian ${sourceQuery} abroad`;
+        } else {
+            const QUERIES = ['"Brazilians abroad"', '"Brazilian immigrants"', '"Brazilian community"'];
+            finalQuery = QUERIES[Math.floor(Math.random() * QUERIES.length)];
+        }
     }
 
     console.log('🔥 Firecrawl search query:', finalQuery);

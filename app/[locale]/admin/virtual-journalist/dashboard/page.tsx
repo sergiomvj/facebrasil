@@ -59,7 +59,11 @@ export default function VirtualJournalistDashboard() {
             const data = await res.json();
             
             if (res.ok) {
-                await fetchNews();
+                if (data.capturedCount === 0) {
+                    alert('Nenhuma notícia nova encontrada para esse assunto ou perfil no momento. Tente outro assunto!');
+                } else {
+                    await fetchNews();
+                }
             } else {
                 alert(`Erro ao capturar notícias: ${data.error || 'Erro desconhecido'}`);
             }
