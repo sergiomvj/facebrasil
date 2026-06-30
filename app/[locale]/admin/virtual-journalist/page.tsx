@@ -186,7 +186,8 @@ export default function VirtualJournalistDashboard() {
                                 className="p-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg outline-none focus:border-blue-500 w-full"
                             >
                                 <option value="">Selecione o Agente Virtual...</option>
-                                <option value="generic">🌍 Busca Genérica Aberta (Sem Filtro de Perfil)</option>
+                                <option value="generic">🌍 Busca Genérica Aberta (Captura sem Filtro)</option>
+                                <option value="all">👁️ Visualizar Todas as Fontes (Apenas Leitura)</option>
                                 {agents.map((a: any) => (
                                     <option key={a.id} value={a.id}>{a.name} ({a.location})</option>
                                 ))}
