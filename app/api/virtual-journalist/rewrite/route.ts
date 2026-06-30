@@ -55,9 +55,11 @@ export async function POST(req: Request) {
     let scrapedContent = '';
     try {
       if (news.url) {
-        const scrapeResult = await firecrawl.scrapeUrl(news.url, { formats: ['markdown'] });
-        if (scrapeResult && scrapeResult.success && scrapeResult.markdown) {
+        const scrapeResult = await firecrawl.scrapeUrl(news.url, { formats: ['markdown'] }) as any;
+        if (scrapeResult && (scrapeResult.success === undefined || scrapeResult.success) && scrapeResult.markdown) {
           scrapedContent = scrapeResult.markdown;
+        } else if (scrapeResult && scrapeResult.data && scrapeResult.data.markdown) {
+          scrapedContent = scrapeResult.data.markdown;
         }
       }
     } catch (err) {
