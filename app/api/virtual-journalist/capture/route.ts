@@ -3,11 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import FirecrawlApp from '@mendable/firecrawl-js';
 
 const QUERIES = [
-  '"Brazilians in USA" OR "Brazilian immigrants"',
-  '"ICE arrests Brazilian" OR "Brazilian deported"',
-  '"Brazilian detained" OR "Brazilian missing USA"',
-  '"Brazilian arrested USA" OR "Brazilian crime"',
-  '"Brazilian community USA" OR "Brazilian diaspora"',
+  '"Brazilians abroad" OR "Brazilians in USA" OR "Brazilian community"',
+  '"Brazilian businesses abroad" OR "Brazilian companies in USA" OR "Brazilian entrepreneurs international"',
+  '"Brazilian immigrants" OR "Brazilian diaspora"',
+  '"Brazilians in Florida" OR "Brazilians in Orlando" OR "Brazilians in Miami"',
+  '"Brazilians in Massachusetts" OR "Brazilians in Boston"',
+  '"Brazilians in New York" OR "Brazilians in New Jersey"',
+  '"Brazilians in California" OR "Brazilians in Los Angeles"',
+  '"notícias brasileiros no exterior" OR "comunidade brasileira nos EUA"',
 ];
 
 export async function POST(req: Request) {
