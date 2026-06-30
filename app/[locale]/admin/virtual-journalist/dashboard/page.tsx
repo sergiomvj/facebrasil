@@ -14,6 +14,7 @@ export default function VirtualJournalistDashboard() {
     const [capturing, setCapturing] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [rewritingId, setRewritingId] = useState<string | null>(null);
+    const [sourceQuery, setSourceQuery] = useState<string>('');
 
     const fetchAgents = async () => {
         const { data } = await supabase.from('virtual_agents').select('*');
@@ -43,25 +44,54 @@ export default function VirtualJournalistDashboard() {
     }, []);
 
     const handleCapture = async () => {
+        if (!selectedAgent) {
+            alert('Selecione um Agente Virtual para direcionar a captura.');
+            return;
+        }
+        
         setCapturing(true);
         try {
-            const res = await fetch('/api/virtual-journalist/capture', { method: 'POST' });
-            if (res.ok) await fetchNews();
-            else alert('Erro ao capturar notícias.');
+            const res = await fetch('/api/virtual-journalist/capture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ agentId: selectedAgent, sourceQuery })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                await fetchNews();
+            } else {
+                alert(`Erro ao capturar notícias: ${data.error || 'Erro desconhecido'}`);
+            }
         } catch (e) {
             console.error(e);
+            alert('Falha na comunicação com a API de captura.');
         }
         setCapturing(false);
     };
 
     const handleProcess = async () => {
+        if (!selectedAgent) {
+            alert('Selecione um Agente Virtual para direcionar o processamento.');
+            return;
+        }
+
         setProcessing(true);
         try {
-            const res = await fetch('/api/virtual-journalist/process', { method: 'POST' });
-            if (res.ok) await fetchNews();
-            else alert('Erro ao processar lote.');
+            const res = await fetch('/api/virtual-journalist/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ agentId: selectedAgent })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                await fetchNews();
+            } else {
+                alert(`Erro ao processar lote: ${data.error || 'Erro desconhecido'}`);
+            }
         } catch (e) {
             console.error(e);
+            alert('Falha na comunicação com a API de processamento.');
         }
         setProcessing(false);
     };
@@ -110,13 +140,6 @@ export default function VirtualJournalistDashboard() {
                 </div>
                 <div className="flex gap-2">
                     <button 
-                        onClick={handleCapture} disabled={capturing}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-lg transition"
-                    >
-                        {capturing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
-                        Buscar Novas
-                    </button>
-                    <button 
                         onClick={handleProcess} disabled={processing}
                         className="flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 rounded-lg transition"
                     >
@@ -126,27 +149,50 @@ export default function VirtualJournalistDashboard() {
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/10 mb-8 flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1 w-full">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agente Virtual Ativo</label>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/10 mb-8 flex flex-col gap-6">
+                <div className="flex flex-col md:flex-row gap-4 items-end w-full">
+                    <div className="flex-1 w-full">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Agente Virtual Ativo</label>
+                        <div className="flex gap-2">
+                            <select 
+                                value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)}
+                                className="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
+                            >
+                                <option value="" disabled>Selecione um jornalista virtual...</option>
+                                {agents.map(a => (
+                                    <option key={a.id} value={a.id}>{a.name} ({a.location})</option>
+                                ))}
+                            </select>
+                            <button 
+                                onClick={() => router.push('/pt/admin/virtual-journalist/agents')}
+                                className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition text-sm font-medium whitespace-nowrap"
+                            >
+                                Criar / Gerenciar Agentes
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">O agente selecionado vai definir o estilo de escrita e o foco da notícia gerada.</p>
+                    </div>
+                </div>
+
+                <div className="flex-1 w-full border-t border-gray-200 dark:border-white/10 pt-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fonte / Assunto para Captura</label>
                     <div className="flex gap-2">
-                        <select 
-                            value={selectedAgent} onChange={(e) => setSelectedAgent(e.target.value)}
+                        <input 
+                            type="text"
+                            placeholder="Ex: 'Imigração Flórida', 'Brazilians in USA' ou cole uma URL..."
+                            value={sourceQuery}
+                            onChange={(e) => setSourceQuery(e.target.value)}
                             className="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 dark:text-white"
-                        >
-                            <option value="" disabled>Selecione um jornalista virtual...</option>
-                            {agents.map(a => (
-                                <option key={a.id} value={a.id}>{a.name} ({a.location})</option>
-                            ))}
-                        </select>
+                        />
                         <button 
-                            onClick={() => router.push('/pt/admin/virtual-journalist/agents')}
-                            className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition text-sm font-medium whitespace-nowrap"
+                            onClick={handleCapture} disabled={capturing}
+                            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium flex items-center gap-2"
                         >
-                            Criar / Gerenciar Agentes
+                            {capturing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                            Capturar Notícias
                         </button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">O agente selecionado vai definir o estilo de escrita e o foco da notícia gerada.</p>
+                    <p className="text-xs text-gray-500 mt-2">Digite um assunto ou site específico. Deixe em branco para usar a busca padrão cruzada com o perfil do Agente.</p>
                 </div>
             </div>
 

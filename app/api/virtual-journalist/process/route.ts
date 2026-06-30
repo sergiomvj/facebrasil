@@ -20,6 +20,21 @@ export async function POST(req: Request) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
+    const body = await req.json().catch(() => ({}));
+    const { agentId } = body;
+
+    let agentProfile = '';
+    if (agentId) {
+      const { data: agentData } = await supabase
+        .from('virtual_agents')
+        .select('name, profile_description, location')
+        .eq('id', agentId)
+        .single();
+      if (agentData) {
+        agentProfile = `O jornalista virtual atual é ${agentData.name} da região de ${agentData.location}. Especialidade: ${agentData.profile_description}. O título traduzido deve usar um tom que combine com o interesse deste jornalista.`;
+      }
+    }
+
     // Fetch un-processed news
     const { data: unProcessedNews, error } = await supabase
       .from('captured_news')
@@ -35,12 +50,14 @@ export async function POST(req: Request) {
     const processedIds = [];
 
     for (const news of unProcessedNews) {
-      const prompt = `Analise a seguinte manchete de notícia sobre brasileiros nos EUA:
+      const prompt = `Analise a seguinte manchete de notícia:
 "${news.original_title}"
+
+${agentProfile}
 
 Forneça um JSON válido com:
 {
-  "translated_title": "A tradução fiel da manchete para Português do Brasil",
+  "translated_title": "A tradução fiel da manchete para Português do Brasil, adaptada para o público alvo do jornalista se aplicável",
   "sentiment": "positive, negative, ou neutral",
   "category": "imigração, policial, comunidade, política, esportes, economia, ou cultura"
 }`;
