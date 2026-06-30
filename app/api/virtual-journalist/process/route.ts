@@ -27,11 +27,11 @@ export async function POST(req: Request) {
     if (agentId) {
       const { data: agentData } = await supabase
         .from('virtual_agents')
-        .select('name, profile_description, location')
+        .select('name, profile_description, location, writing_style')
         .eq('id', agentId)
         .single();
       if (agentData) {
-        agentProfile = `O jornalista virtual atual é ${agentData.name} da região de ${agentData.location}. Especialidade: ${agentData.profile_description}. O título traduzido deve usar um tom que combine com o interesse deste jornalista.`;
+        agentProfile = `O jornalista virtual atual é ${agentData.name} da região de ${agentData.location}. Especialidade: ${agentData.profile_description}. Estilo: ${agentData.writing_style}. O título traduzido deve usar um tom que combine com o interesse deste jornalista.`;
       }
     }
 

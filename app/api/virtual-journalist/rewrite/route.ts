@@ -53,6 +53,7 @@ export async function POST(req: Request) {
 Seu perfil:
 Nome: ${agent.name}
 Localização: ${agent.location || 'EUA'}
+Especialidade: ${agent.profile_description || 'Assuntos gerais da comunidade'}
 Estilo de escrita: ${agent.writing_style || 'Jornalístico, empático e informativo'}
 
 Reescreva a seguinte notícia, adaptando o texto e a linguagem para o seu perfil e focando no impacto para a comunidade brasileira:
