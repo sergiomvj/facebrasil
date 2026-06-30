@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import FirecrawlApp from '@mendable/firecrawl-js';
 
 const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
@@ -15,7 +14,7 @@ const QUERIES = [
 
 export async function POST(req: Request) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createClient();
     
     // Check auth
     const { data: { session } } = await supabase.auth.getSession();
@@ -29,22 +28,21 @@ export async function POST(req: Request) {
 
     const capturedResults: any[] = [];
 
-    // Run one query as a sample for the endpoint to avoid timeout
-    // In a real cron, this would process all queries or use background workers
     const query = QUERIES[Math.floor(Math.random() * QUERIES.length)];
 
     const response = await firecrawl.search(query, {
       limit: 5,
-      lang: 'en',
-      country: 'us',
       scrapeOptions: {
         formats: ['markdown'],
         onlyMainContent: true
       }
     });
 
-    if (response.success && response.data) {
-      for (const item of response.data) {
+    const responseData: any = response;
+    const items = responseData.data || responseData;
+
+    if (Array.isArray(items)) {
+      for (const item of items) {
         // Prepare data for DB
         const newsData = {
           original_title: item.title || 'Sem título',
