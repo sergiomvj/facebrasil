@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     let agentName = '';
     let agentProfileDescription = '';
 
-    if (agentId) {
+    if (agentId && agentId !== 'generic') {
       const { data: agentData } = await supabase
         .from('virtual_agents')
         .select('name, location, profile_description')
