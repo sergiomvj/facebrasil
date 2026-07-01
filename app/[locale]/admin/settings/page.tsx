@@ -267,7 +267,7 @@ export default function SettingsPage() {
                                                     <label className="cursor-pointer bg-white text-slate-950 px-4 py-2 rounded-full font-bold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
                                                         <Upload className="w-4 h-4" />
                                                         Alterar Imagem
-                                                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                                        <input type="file" className="hidden" accept="image/*,.jpg,.jpeg,.png,.gif,.webp" onChange={handleImageUpload} />
                                                     </label>
                                                 </div>
                                             </>
@@ -276,7 +276,7 @@ export default function SettingsPage() {
                                                 <ImageIcon className="w-12 h-12 text-slate-600 mb-2" />
                                                 <span className="text-sm font-bold text-slate-500">Clique para upload</span>
                                                 <span className="text-[10px] text-slate-600 mt-1 uppercase">Recomendado: 1200x630px</span>
-                                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                                <input type="file" className="hidden" accept="image/*,.jpg,.jpeg,.png,.gif,.webp" onChange={handleImageUpload} />
                                             </label>
                                         )}
                                     </div>

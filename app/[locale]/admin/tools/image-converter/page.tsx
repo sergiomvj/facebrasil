@@ -71,7 +71,7 @@ export default function ImageConverterPage() {
                     </div>
 
                     <label className="w-full">
-                        <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                        <input type="file" className="hidden" accept="image/*,.jpg,.jpeg,.png,.gif,.webp" onChange={handleFileChange} />
                         <div className="bg-slate-950 hover:bg-slate-800 border border-white/10 p-4 rounded-2xl cursor-pointer transition-all font-black text-[10px] uppercase tracking-[0.2em] text-white italic">
                             {file ? file.name : 'Selecionar Arquivo'}
                         </div>

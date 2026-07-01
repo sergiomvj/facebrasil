@@ -186,7 +186,7 @@ const EditorRichText: React.FC<EditorRichTextProps> = ({
                         ref={fileInputRef}
                         onChange={handleImageUpload}
                         className="hidden"
-                        accept="image/*"
+                        accept="image/*,.jpg,.jpeg,.png,.gif,.webp"
                     />
 
                     <div className="w-px h-6 bg-white/10 mx-1 self-center" />

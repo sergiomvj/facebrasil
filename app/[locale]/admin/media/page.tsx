@@ -187,7 +187,7 @@ export default function MediaLibraryPage() {
                     <input
                         type="file"
                         multiple
-                        accept="image/*,video/*"
+                        accept="image/*,.jpg,.jpeg,.png,.gif,.webp,video/*,.mp4,.mov"
                         onChange={handleUpload}
                         className="hidden"
                         disabled={uploading}

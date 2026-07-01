@@ -480,7 +480,7 @@ export default function AdManagerPage() {
                                                 ) : (
                                                     <ImageIcon className="w-4 h-4 text-accent-yellow" />
                                                 )}
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'desktop')} disabled={isUploading} />
+                                                <input type="file" className="hidden" accept="image/*,.jpg,.jpeg,.png,.gif,.webp" onChange={(e) => handleFileUpload(e, 'desktop')} disabled={isUploading} />
                                             </label>
                                         </div>
                                         <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner">
@@ -537,7 +537,7 @@ export default function AdManagerPage() {
                                                 ) : (
                                                     <ImageIcon className="w-4 h-4 text-accent-yellow" />
                                                 )}
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'mobile')} disabled={isUploading} />
+                                                <input type="file" className="hidden" accept="image/*,.jpg,.jpeg,.png,.gif,.webp" onChange={(e) => handleFileUpload(e, 'mobile')} disabled={isUploading} />
                                             </label>
                                         </div>
                                         <div className="bg-slate-950 border border-white/10 rounded-2xl flex items-center justify-center aspect-[16/6] border-dashed relative overflow-hidden shadow-inner bg-grid-slate-800/[0.05]">
