@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(req: Request) {
   try {
@@ -26,7 +27,26 @@ export async function POST(req: Request) {
 
     // Tenta buscar o primeiro blog_id (se necessário pelo schema)
     const { data: blogData } = await supabase.from('blogs').select('id').limit(1).single();
-    const blogId = blogData?.id || null; // O banco de dados pode permitir nulo, caso não exista a tabela ou registro
+    let finalAuthorId = session.user.id;
+
+    if (agentId !== 'me') {
+      // Garante que o Agente Virtual exista na tabela profiles como um autor
+      const { data: agentData } = await supabaseAdmin.from('virtual_agents').select('*').eq('id', agentId).single();
+      if (agentData) {
+        finalAuthorId = agentId;
+        const { data: profileData } = await supabaseAdmin.from('profiles').select('id').eq('id', agentId).single();
+        if (!profileData) {
+          await supabaseAdmin.from('profiles').insert({
+            id: agentId,
+            name: agentData.name,
+            role: 'EDITOR',
+            avatar_url: null,
+            email: null,
+            updated_at: new Date().toISOString()
+          });
+        }
+      }
+    }
 
     // Inserir artigo como DRAFT
     const { data: articleData, error: articleError } = await supabase
@@ -36,7 +56,7 @@ export async function POST(req: Request) {
         slug,
         content,
         status: 'DRAFT',
-        author_id: session.user.id, // Forçando o editor atual como autor temporariamente, ou o autor correto se existir
+        author_id: finalAuthorId, // Usa o agentId ou o editor atual
         blog_id: blogId, 
         seo_applied: false
       })

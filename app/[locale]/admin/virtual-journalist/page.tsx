@@ -132,7 +132,7 @@ export default function VirtualJournalistDashboard() {
 
     const openRewriteModal = (news: any) => {
         if (!selectedAgent || selectedAgent === 'generic' || selectedAgent === 'all') {
-            alert('Selecione um jornalista virtual específico para reescrever a notícia.');
+            alert('Selecione um jornalista virtual ou a opção "Eu Mesmo" para reescrever a notícia.');
             return;
         }
 
@@ -230,6 +230,7 @@ export default function VirtualJournalistDashboard() {
                                 className="p-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-white/10 rounded-lg outline-none focus:border-blue-500 w-full"
                             >
                                 <option value="">Selecione o Agente Virtual...</option>
+                                <option value="me">🙋‍♂️ Eu Mesmo (Assinar como Mim)</option>
                                 <option value="generic">🌍 Busca Genérica Aberta (Captura sem Filtro)</option>
                                 <option value="all">👁️ Visualizar Todas as Fontes (Apenas Leitura)</option>
                                 {agents.map((a: any) => (
@@ -364,7 +365,9 @@ export default function VirtualJournalistDashboard() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-medium text-gray-500 mb-1">Jornalista</label>
-                                        <div className="font-medium text-gray-900 dark:text-white">{agents.find(a => a.id === selectedAgent)?.name}</div>
+                                        <div className="font-medium text-gray-900 dark:text-white">
+                                            {selectedAgent === 'me' ? 'Eu Mesmo (Usuário Atual)' : agents.find(a => a.id === selectedAgent)?.name}
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-gray-500 mb-1">Tamanho do Artigo</label>

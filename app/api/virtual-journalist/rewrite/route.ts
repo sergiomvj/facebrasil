@@ -40,15 +40,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'News not found' }, { status: 404 });
     }
 
-    // Fetch the agent
-    const { data: agent, error: agentError } = await supabase
-      .from('virtual_agents')
-      .select('*')
-      .eq('id', agentId)
-      .single();
+    // Fetch the agent if not 'me'
+    let agent = null;
+    if (agentId !== 'me') {
+      const { data, error: agentError } = await supabase
+        .from('virtual_agents')
+        .select('*')
+        .eq('id', agentId)
+        .single();
 
-    if (agentError || !agent) {
-      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+      if (agentError || !data) {
+        return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+      }
+      agent = data;
     }
 
     // Attempt to scrape full content with Firecrawl
@@ -75,13 +79,24 @@ export async function POST(req: Request) {
 
     const sizePrompt = sizeInstructions[size as keyof typeof sizeInstructions] || sizeInstructions['medium'];
 
-    const prompt = `Você é um jornalista trabalhando para uma revista voltada para a comunidade brasileira nos EUA.
-    
+    let profileContext = '';
+    if (agent) {
+      profileContext = `
 Seu perfil:
 Nome: ${agent.name}
 Localização: ${agent.location || 'EUA'}
 Especialidade: ${agent.profile_description || 'Assuntos gerais da comunidade'}
 Estilo de escrita: ${agent.writing_style || 'Jornalístico, empático e informativo'}
+`;
+    } else {
+      profileContext = `
+Seu perfil: Você é um repórter sênior da revista, focado em trazer informações precisas e relevantes.
+Estilo de escrita: Jornalístico, profissional e objetivo.
+`;
+    }
+
+    const prompt = `Você é um jornalista trabalhando para uma revista voltada para a comunidade brasileira nos EUA.
+    ${profileContext}
 
 Reescreva a seguinte notícia, adaptando o texto e a linguagem para o seu perfil e focando no impacto para a comunidade brasileira:
 Manchete Original: ${news.original_title}
@@ -113,6 +128,11 @@ Forneça um JSON válido com a seguinte estrutura:
         const parsed = JSON.parse(responseContent);
         title = parsed.title;
         content = parsed.content;
+        
+        // Append signature if it's a virtual agent
+        if (agent) {
+          content += `\n\n<p><em>— Escrito por ${agent.name}, ${agent.profile_description || 'Especialista Facebrasil'}.</em></p>`;
+        }
       } catch (e) {
         console.error("Failed to parse JSON for rewrite", e);
       }
