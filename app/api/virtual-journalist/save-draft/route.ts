@@ -27,6 +27,7 @@ export async function POST(req: Request) {
 
     // Tenta buscar o primeiro blog_id (se necessário pelo schema)
     const { data: blogData } = await supabase.from('blogs').select('id').limit(1).single();
+    const blogId = blogData?.id || null;
     let finalAuthorId = session.user.id;
 
     if (agentId !== 'me') {
